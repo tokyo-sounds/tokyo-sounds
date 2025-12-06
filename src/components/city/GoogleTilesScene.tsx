@@ -97,7 +97,7 @@ function createECEFtoENUMatrix(
 /**
  * ENU axes debug helper (AxesHelper): X=red (east), Y=green (up), Z=blue (north after Y-up swap).
  */
-function ENUDebugAxes({ length = 500000 }: { length?: number }) {
+function ENUDebugAxes({ length = 500 }: { length?: number }) {
   const transformMatrix = useMemo(
     () => createECEFtoENUMatrix(TOKYO_CENTER.lat, TOKYO_CENTER.lng),
     []
