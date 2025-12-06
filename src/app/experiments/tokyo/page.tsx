@@ -362,6 +362,8 @@ interface DebugOptions {
   wireframe: boolean;
   showBounds: boolean;
   collision: boolean;
+  debugTiles: boolean;
+  showDebugAxes: boolean;
 }
 
 function DebugMenu({ 
@@ -444,6 +446,26 @@ function DebugMenu({
           />
           <span className="text-white/70">Collision</span>
         </label>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={options.debugTiles}
+            onChange={(e) => onOptionsChange("debugTiles", e.target.checked)}
+            className="w-3 h-3"
+          />
+          <span className="text-white/70">Debug Tiles (bounds)</span>
+        </label>
+
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={options.showDebugAxes}
+            onChange={(e) => onOptionsChange("showDebugAxes", e.target.checked)}
+            className="w-3 h-3"
+          />
+          <span className="text-white/70">Debug Axes</span>
+        </label>
       </div>
     </div>
   );
@@ -522,6 +544,8 @@ export default function TokyoPage() {
     wireframe: false,
     showBounds: false,
     collision: true,  // default
+    debugTiles: true,
+    showDebugAxes: false,
   });
   const [cameraY, setCameraY] = useState(200);
   const [heading, setHeading] = useState(0);
@@ -668,6 +692,8 @@ export default function TokyoPage() {
             showMeshes={debugOptions.showMeshes}
             wireframe={debugOptions.wireframe}
             collisionGroupRef={collisionGroupRef}
+            debugTiles={debugOptions.debugTiles}
+            showDebugAxes={debugOptions.showDebugAxes}
           />
 
           <FlightController

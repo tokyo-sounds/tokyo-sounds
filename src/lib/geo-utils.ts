@@ -77,7 +77,7 @@ export function ecefToLatLngAlt(ecef: THREE.Vector3): { lat: number; lng: number
  * @param originLat Origin latitude in degrees
  * @param originLng Origin longitude in degrees
  * @param originAlt Origin altitude in meters
- * @returns THREE.Vector3 in ENU coordinates (meters)
+ * @returns THREE.Vector3 in ENU coordinates (meters) with Three.js Y-up remap
  */
 export function latLngAltToENU(
   lat: number,
@@ -102,17 +102,18 @@ export function latLngAltToENU(
   const sinLng = Math.sin(lngRad);
   const cosLng = Math.cos(lngRad);
 
-  // ENU coordinates
+  // ENU coordinates (X=east, Y=north, Z=up)
   const east = -sinLng * diff.x + cosLng * diff.y;
   const north = -sinLat * cosLng * diff.x - sinLat * sinLng * diff.y + cosLat * diff.z;
   const up = cosLat * cosLng * diff.x + cosLat * sinLng * diff.y + sinLat * diff.z;
 
-  return new THREE.Vector3(east, up, -north); // three.js Y-up convention
+  // Remap to Three.js world (Y-up): X=east, Y=up, Z=north
+  return new THREE.Vector3(east, up, north);
 }
 
 /**
  * Convert ENU coordinates back to geodetic
- * @param enu THREE.Vector3 in ENU coordinates (meters), Y-up
+ * @param enu THREE.Vector3 in ENU coordinates (meters), Y-up remap (X=east, Y=up, Z=north)
  * @param originLat Origin latitude in degrees
  * @param originLng Origin longitude in degrees
  * @param originAlt Origin altitude in meters
@@ -125,8 +126,8 @@ export function enuToLatLngAlt(
   originAlt: number = 0
 ): { lat: number; lng: number; alt: number } {
   const east = enu.x;
-  const north = -enu.z; // three.js Y-up convention
   const up = enu.y;
+  const north = enu.z; // Y-up remap (Z=north)
 
   const latRad = THREE.MathUtils.degToRad(originLat);
   const lngRad = THREE.MathUtils.degToRad(originLng);

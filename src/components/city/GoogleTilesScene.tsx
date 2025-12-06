@@ -5,11 +5,16 @@
  * Renders Google 3D Tiles transformed to local ENU coordinates (flat Tokyo)
  */
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { TilesRenderer, TilesPlugin } from "3d-tiles-renderer/r3f";
-import { GoogleCloudAuthPlugin, GLTFExtensionsPlugin } from "3d-tiles-renderer/plugins";
+import { WGS84_ELLIPSOID } from "3d-tiles-renderer/three";
+import {
+  GoogleCloudAuthPlugin,
+  GLTFExtensionsPlugin,
+  DebugTilesPlugin,
+} from "3d-tiles-renderer/plugins";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import { TOKYO_CENTER } from "@/config/tokyo-config";
@@ -23,10 +28,12 @@ interface GoogleTilesSceneProps {
   showMeshes?: boolean;
   wireframe?: boolean;
   collisionGroupRef?: React.MutableRefObject<THREE.Group | null>;
+  showDebugAxes?: boolean;
+  debugTiles?: boolean;
 }
 
 /** getDRACOLoader
- * 
+ *
  * Singleton DRACO loader
  * @returns DRACO loader
  */
@@ -34,54 +41,100 @@ let dracoLoaderInstance: DRACOLoader | null = null;
 function getDRACOLoader() {
   if (!dracoLoaderInstance) {
     dracoLoaderInstance = new DRACOLoader();
-    dracoLoaderInstance.setDecoderPath("https://www.gstatic.com/draco/versioned/decoders/1.5.6/");
+    dracoLoaderInstance.setDecoderPath(
+      "https://www.gstatic.com/draco/versioned/decoders/1.5.6/"
+    );
   }
   return dracoLoaderInstance;
 }
 
-/** createECEFtoENUMatrix
- * 
- * Calculate the transformation matrix to convert ECEF to local ENU at Tokyo
- * @param centerLat - Center latitude
- * @param centerLng - Center longitude
- * @returns Transformation matrix
+/**
+ * Build an ECEF -> local frame matrix using library ENU and a Y-up remap.
+ *
+ * - getEastNorthUpFrame returns ENU->ECEF (X=east, Y=north, Z=up).
+ * - We invert it for ECEF->ENU.
+ * - Then apply a remap to match Three.js Y-up world: X=east, Y=up, Z=north.
  */
-function createECEFtoENUMatrix(centerLat: number, centerLng: number): THREE.Matrix4 {
-  const centerECEF = latLngAltToECEF(centerLat, centerLng, 0);
-  
-  const up = centerECEF.clone().normalize();
-  
-  const east = new THREE.Vector3(-Math.sin(THREE.MathUtils.degToRad(centerLng)), 
-                                  Math.cos(THREE.MathUtils.degToRad(centerLng)), 
-                                  0).normalize();
-  
-  const north = new THREE.Vector3().crossVectors(up, east).normalize();
-  
-  east.crossVectors(north, up).normalize();
-  
-  const rotationMatrix = new THREE.Matrix4();
-  rotationMatrix.makeBasis(east, up, north.negate());
-  
-  const translationMatrix = new THREE.Matrix4();
-  translationMatrix.makeTranslation(-centerECEF.x, -centerECEF.y, -centerECEF.z);
-  
-  const transformMatrix = new THREE.Matrix4();
-  transformMatrix.multiplyMatrices(rotationMatrix, translationMatrix);
-  
+function createECEFtoENUMatrix(
+  centerLat: number,
+  centerLng: number
+): THREE.Matrix4 {
+  const enuToECEF = new THREE.Matrix4();
+  const latRad = THREE.MathUtils.degToRad(centerLat);
+  const lngRad = THREE.MathUtils.degToRad(centerLng);
+  WGS84_ELLIPSOID.getEastNorthUpFrame(latRad, lngRad, 0, enuToECEF); // ENU -> ECEF (expects radians)
+
+  const ecefToENU = new THREE.Matrix4().copy(enuToECEF).invert(); // ECEF -> ENU (X=east, Y=north, Z=up)
+
+  // Remap ENU (X=east, Y=north, Z=up) to Three.js world (X=east, Y=up, Z=north).
+  // Matrix that swaps Y<->Z and keeps right-handed orientation.
+  const enuToYUp = new THREE.Matrix4().set(
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    0,
+    0,
+    1,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1
+  );
+
+  const transformMatrix = new THREE.Matrix4().multiplyMatrices(
+    enuToYUp,
+    ecefToENU
+  );
   return transformMatrix;
 }
 
+/**
+ * ENU axes debug helper (AxesHelper): X=red (east), Y=green (up), Z=blue (north after Y-up swap).
+ */
+function ENUDebugAxes({ length = 500000 }: { length?: number }) {
+  const transformMatrix = useMemo(
+    () => createECEFtoENUMatrix(TOKYO_CENTER.lat, TOKYO_CENTER.lng),
+    []
+  );
+
+  const helper = useMemo(() => {
+    const axes = new THREE.AxesHelper(length);
+    axes.renderOrder = 9999;
+    axes.traverse((obj: any) => {
+      if (obj.material) {
+        obj.material.depthTest = false;
+        obj.material.depthWrite = false;
+        obj.material.transparent = true;
+        obj.material.opacity = 0.9;
+      }
+    });
+    return axes;
+  }, [length]);
+
+  return (
+    <group matrix={transformMatrix} matrixAutoUpdate={false}>
+      <primitive object={helper} />
+    </group>
+  );
+}
+
 /** TilesTransformer
- * 
+ *
  * Component to transform the tiles group
  * @param children - Children
  * @param groupRef - Group reference
  * @returns null
  */
-function TilesTransformer({ 
-  children, 
-  groupRef 
-}: { 
+function TilesTransformer({
+  children,
+  groupRef,
+}: {
   children: React.ReactNode;
   groupRef?: React.RefObject<THREE.Group | null>;
 }) {
@@ -91,11 +144,16 @@ function TilesTransformer({
 
   useEffect(() => {
     if (ref.current && !transformAppliedRef.current) {
-      const transformMatrix = createECEFtoENUMatrix(TOKYO_CENTER.lat, TOKYO_CENTER.lng);
+      const transformMatrix = createECEFtoENUMatrix(
+        TOKYO_CENTER.lat,
+        TOKYO_CENTER.lng
+      );
       ref.current.matrix.copy(transformMatrix);
       ref.current.matrixAutoUpdate = false;
       transformAppliedRef.current = true;
-      console.log("[GoogleTiles] Applied ENU transform - Tokyo is now at origin");
+      console.log(
+        "[GoogleTiles] Applied ENU transform - Tokyo is now at origin"
+      );
     }
   }, [ref]);
 
@@ -103,8 +161,8 @@ function TilesTransformer({
 }
 
 /** SkyBox
- * 
- * Sky with sun shader 
+ *
+ * Sky with sun shader
  * @returns null
  */
 function SkyBox() {
@@ -118,7 +176,7 @@ function SkyBox() {
     skyRef.current = sky;
 
     const sun = new THREE.Vector3();
-    
+
     const uniforms = sky.material.uniforms;
     uniforms["turbidity"].value = 2; // atmospheric haze
     uniforms["rayleigh"].value = 1; // blue sky intensity
@@ -126,7 +184,7 @@ function SkyBox() {
     uniforms["mieDirectionalG"].value = 0.8;
 
     const phi = THREE.MathUtils.degToRad(90 - 45); // 45° above horizon
-    const theta = THREE.MathUtils.degToRad(220);    // SW direction
+    const theta = THREE.MathUtils.degToRad(220); // SW direction
     sun.setFromSphericalCoords(1, phi, theta);
     uniforms["sunPosition"].value.copy(sun);
 
@@ -148,6 +206,8 @@ export function GoogleTilesScene({
   showMeshes = true,
   wireframe = false,
   collisionGroupRef,
+  showDebugAxes = false,
+  debugTiles = true,
 }: GoogleTilesSceneProps) {
   const [modelCount, setModelCount] = useState(0);
   const tilesGroupRef = useRef<THREE.Group>(null);
@@ -165,12 +225,14 @@ export function GoogleTilesScene({
     onStatusChange?.("Tileset loaded");
   }, [onTilesLoaded, onStatusChange]);
 
-  const handleLoadError = useCallback((event: any) => {
-    const errorMsg = event?.error?.message || "Unknown error";
-    console.error("[GoogleTiles] Load error:", errorMsg);
-    onError?.(event);
-  }, [onError]);
-
+  const handleLoadError = useCallback(
+    (event: any) => {
+      const errorMsg = event?.error?.message || "Unknown error";
+      console.error("[GoogleTiles] Load error:", errorMsg);
+      onError?.(event);
+    },
+    [onError]
+  );
 
   useEffect(() => {
     if (modelCount > 0 && modelCount % 10 === 0) {
@@ -191,9 +253,14 @@ export function GoogleTilesScene({
     if (tilesGroupRef.current) {
       tilesGroupRef.current.traverse((obj) => {
         if (obj instanceof THREE.Mesh && obj.material) {
-          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+          const materials = Array.isArray(obj.material)
+            ? obj.material
+            : [obj.material];
           materials.forEach((mat) => {
-            if (mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial) {
+            if (
+              mat instanceof THREE.MeshStandardMaterial ||
+              mat instanceof THREE.MeshBasicMaterial
+            ) {
               mat.wireframe = wireframe;
             }
           });
@@ -203,7 +270,7 @@ export function GoogleTilesScene({
   }, [wireframe]);
 
   const handleLoadModelWithWireframe = useCallback(() => {
-    setModelCount(c => {
+    setModelCount((c) => {
       const newCount = c + 1;
       if (newCount <= 3 || newCount % 50 === 0) {
         console.log(`[GoogleTiles] Loaded ${newCount} models`);
@@ -214,9 +281,14 @@ export function GoogleTilesScene({
     if (wireframeRef.current && tilesGroupRef.current) {
       tilesGroupRef.current.traverse((obj) => {
         if (obj instanceof THREE.Mesh && obj.material) {
-          const materials = Array.isArray(obj.material) ? obj.material : [obj.material];
+          const materials = Array.isArray(obj.material)
+            ? obj.material
+            : [obj.material];
           materials.forEach((mat) => {
-            if (mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial) {
+            if (
+              mat instanceof THREE.MeshStandardMaterial ||
+              mat instanceof THREE.MeshBasicMaterial
+            ) {
               mat.wireframe = wireframeRef.current;
             }
           });
@@ -237,6 +309,17 @@ export function GoogleTilesScene({
           onLoadError={handleLoadError}
           onLoadModel={handleLoadModelWithWireframe}
         >
+          {debugTiles && (
+            <TilesPlugin
+              plugin={DebugTilesPlugin}
+              args={{
+                displayBoxBounds: true,
+                displayParentBounds: true,
+                displayRegionBounds: false,
+                displaySphereBounds: false,
+              }}
+            />
+          )}
           <TilesPlugin
             plugin={GLTFExtensionsPlugin}
             args={{ dracoLoader: getDRACOLoader() }}
@@ -248,11 +331,13 @@ export function GoogleTilesScene({
         </TilesRenderer>
       </TilesTransformer>
 
+      {showDebugAxes && <ENUDebugAxes length={500} />}
+
       {/* city-appropriate lighting matching sky */}
       <ambientLight intensity={0.6} />
-      <directionalLight 
+      <directionalLight
         position={[-100, 200, -150]}
-        intensity={2.0} 
+        intensity={2.0}
         color="#fff5e6"
         castShadow
       />
