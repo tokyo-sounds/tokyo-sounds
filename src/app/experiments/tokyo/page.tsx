@@ -544,7 +544,7 @@ export default function TokyoPage() {
     wireframe: false,
     showBounds: false,
     collision: true,  // default
-    debugTiles: true,
+    debugTiles: false,
     showDebugAxes: false,
   });
   const [cameraY, setCameraY] = useState(200);
