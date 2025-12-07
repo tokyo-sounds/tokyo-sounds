@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: false,
   experimental: {
     cacheComponents: true, // Cache Components を有効化
-    reactCompiler: true, // React Compiler を有効化
+    // reactCompiler: true, // React Compiler を有効化
   },
 };
 
