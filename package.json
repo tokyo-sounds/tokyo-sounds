@@ -16,7 +16,10 @@
   },
   "dependencies": {
     "3d-tiles-renderer": "^0.4.18",
+    "@ai-sdk/google": "^2.0.44",
+    "@ai-sdk/react": "^2.0.106",
     "@google/genai": "^1.30.0",
+    "@google/generative-ai": "^0.24.1",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "@radix-ui/react-avatar": "^1.1.11",
@@ -32,6 +35,7 @@
     "@react-three/rapier": "^2.2.0",
     "@stackframe/stack": "^2.8.54",
     "@vercel/analytics": "^1.6.1",
+    "ai": "^5.0.106",
     "better-auth": "^1.4.5",
     "camera-controls": "^3.1.2",
     "class-variance-authority": "^0.7.1",
@@ -48,6 +52,7 @@
     "three-stdlib": "^2.36.1",
     "tone": "^15.1.22",
     "use-error-boundary": "^2.0.6",
+    "zod": "^4.1.13",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
