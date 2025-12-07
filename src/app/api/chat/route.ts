@@ -1,8 +1,41 @@
 import { streamText, UIMessage, convertToModelMessages } from "ai";
 import { google, GoogleGenerativeAIProviderMetadata } from "@ai-sdk/google";
 import { GoogleGenAI } from "@google/genai";
+import path from "path";
 
-const ai = new GoogleGenAI({});
+const ai = new GoogleGenAI({
+  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
+});
+
+// TODO: vvv Cache Example vvv
+// const filePath = path.join(process.cwd(), "src", "TECHNICAL_SUMMARY_JA.md");
+// const document = await ai.files.upload({
+//   file: filePath,
+//   // config: { mimeType: "text/plain" },
+// });
+// console.log("Uploaded file name:", document.name);
+// const modelName = "gemini-1.5-flash-001";
+
+// const contents = [
+//   createUserContent(createPartFromUri(document.uri, document.mimeType)),
+// ];
+
+// const cache = await ai.caches.create({
+//   model: modelName,
+//   config: {
+//     contents: contents,
+//     systemInstruction: "You are an expert analyzing transcripts.",
+//   },
+// });
+// console.log("Cache created:", cache);
+
+// const response = await ai.models.generateContent({
+//   model: modelName,
+//   contents: "Please summarize this transcript",
+//   config: { cachedContent: cache.name },
+// });
+// console.log("Response text:", response.text);
+// TODO: ^^^ Cache Example ^^^
 
 export async function POST(req: Request) {
   const {
@@ -12,7 +45,7 @@ export async function POST(req: Request) {
   }: { messages: UIMessage[]; sources: string[]; providerMetadata: any } =
     await req.json();
 
-  // TODO: Use FileSearchStore to create a RAG chatbot
+  // TODO: vvv Use FileSearchStore to create a RAG chatbot vvv
   //  const sampleFile = await ai.files.upload({
   //    file: "sample.txt",
   //    config: { name: "file-name" },
@@ -31,6 +64,7 @@ export async function POST(req: Request) {
   //    await new Promise((resolve) => setTimeout(resolve, 5000));
   //    operation = await ai.operations.get({ operation: operation });
   //  }
+  // TODO: ^^^ Use FileSearchStore to create a RAG chatbot ^^^
 
   const result = streamText({
     model: google("gemini-pro-latest"),
@@ -40,20 +74,20 @@ export async function POST(req: Request) {
     messages: convertToModelMessages(messages),
     tools: {
       // TODO: Use File Search, URL Context, and Google Search tools to create a repo chatbot
-      file_search: google.tools.fileSearch({
-        fileSearchStoreNames: [fileSearchStore.name!],
-        topK: 8,
-      }),
+      // file_search: google.tools.fileSearch({
+      //   fileSearchStoreNames: [fileSearchStore.name!],
+      //   topK: 8,
+      // }),
       url_context: google.tools.urlContext({}),
       google_search: google.tools.googleSearch({}),
     },
   });
 
-  const metadata = providerMetadata?.google as
-    | GoogleGenerativeAIProviderMetadata
-    | undefined;
-  const groundingMetadata = metadata?.groundingMetadata;
-  const urlContextMetadata = metadata?.urlContextMetadata;
+  // const metadata = providerMetadata?.google as
+  //   | GoogleGenerativeAIProviderMetadata
+  //   | undefined;
+  // const groundingMetadata = metadata?.groundingMetadata;
+  // const urlContextMetadata = metadata?.urlContextMetadata;
 
   const reader = result.textStream.getReader();
 
@@ -65,7 +99,5 @@ export async function POST(req: Request) {
     process.stdout.write(value);
   }
 
-  console.log(result.toTextStreamResponse());
-  console.log(result.steps);
   return result.toUIMessageStreamResponse();
 }
