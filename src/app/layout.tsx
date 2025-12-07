@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackClientApp } from "../stack/client";
 import { Analytics } from "@vercel/analytics/next";
-import { Roboto, Roboto_Mono } from "next/font/google";
+import { Roboto, Roboto_Mono, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 
 const robotoSans = Roboto({
@@ -12,6 +12,11 @@ const robotoSans = Roboto({
 
 const robotoMono = Roboto_Mono({
   variable: "--font-roboto-mono",
+  subsets: ["latin"],
+});
+
+const notoSansJp = Noto_Sans_JP({
+  variable: "--font-noto-jp",
   subsets: ["latin"],
 });
 
@@ -29,7 +34,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${robotoSans.variable} ${robotoMono.variable} antialiased`}
+        className={`${robotoSans.variable} ${robotoMono.variable} ${notoSansJp.variable} antialiased`}
       >
         <StackProvider app={stackClientApp}>
           <StackTheme>{children}</StackTheme>

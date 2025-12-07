@@ -1,10 +1,10 @@
 import Link from "next/link";
-import BackToHomeButton from "@/components/common/BackToHomeButton";
 import { Button } from "@/components/ui/button";
+import CommonPageContainer from "@/components/layout/CommonPageContainer";
 
 export default function PatchPage() {
   return (
-    <section className="w-full h-full max-w-5xl mx-auto min-h-screen flex flex-col justify-center items-center gap-4">
+    <CommonPageContainer>
       <h1>Patch Page</h1>
       <div className="flex items-center justify-between gap-2">
         <Link href="/patch/v1">
@@ -14,7 +14,6 @@ export default function PatchPage() {
           <Button>V2</Button>
         </Link>
       </div>
-      <BackToHomeButton />
-    </section>
+    </CommonPageContainer>
   );
 }

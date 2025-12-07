@@ -1,7 +1,7 @@
 "use client";
 
-// Route segment config to ensure client-side rendering
-export const dynamic = "force-dynamic";
+// MIGRATED: Removed export const dynamic = "force-dynamic" (incompatible with Cache Components)
+// Cache Components では、client component はデフォルトで動的です
 
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";

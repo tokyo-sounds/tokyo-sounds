@@ -1,14 +1,10 @@
-import TiltShineCard from "@/components/common/TiltShineCard";
-import BackToHomeButton from "@/components/common/BackToHomeButton";
+import AboutContainer from "./components/AboutContainer";
+import CommonPageContainer from "@/components/layout/CommonPageContainer";
 
 export default function AboutPage() {
   return (
-    <main>
-      <h1>About Page</h1>
-      <div>
-        <TiltShineCard />
-      </div>
-      <BackToHomeButton />
-    </main>
+    <CommonPageContainer>
+      <AboutContainer />
+    </CommonPageContainer>
   );
 }

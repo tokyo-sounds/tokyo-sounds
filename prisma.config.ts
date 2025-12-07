@@ -10,5 +10,7 @@ export default defineConfig({
   },
   datasource: {
     url: env("DATABASE_URL"),
+    // Note: For Neon DB, ensure DATABASE_URL uses direct connection (without -pooler) for migrations
+    // Use pooler connection in application code (src/lib/prisma.ts)
   },
 });

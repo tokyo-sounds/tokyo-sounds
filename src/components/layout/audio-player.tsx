@@ -40,6 +40,7 @@ export default function AudioPlayer() {
       {/* Compact Controls */}
       <div className="flex items-center justify-center py-2 space-x-3">
         <button
+          title="Play Audio"
           onClick={() => {
             if (currentAudioUrl && !isPlaying) {
               resumeAudio();
@@ -53,6 +54,7 @@ export default function AudioPlayer() {
           <Play size={18} />
         </button>
         <button
+          title="Pause Audio"
           onClick={pauseAudio}
           className="p-2 bg-yellow-600/80 hover:bg-yellow-600 rounded-full transition-all duration-200 text-white disabled:bg-slate-700 disabled:cursor-not-allowed border border-yellow-500/30"
           disabled={!isPlaying}
@@ -60,6 +62,7 @@ export default function AudioPlayer() {
           <Pause size={18} />
         </button>
         <button
+          title="Stop Audio"
           onClick={stopAudio}
           className="p-2 bg-red-600/80 hover:bg-red-600 rounded-full transition-all duration-200 text-white disabled:bg-slate-700 disabled:cursor-not-allowed border border-red-500/30"
           disabled={!currentAudioUrl}
