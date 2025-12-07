@@ -5,7 +5,7 @@
  * Renders Google 3D Tiles transformed to local ENU coordinates (flat Tokyo)
  */
 
-import { useRef, useState, useCallback, useEffect, useMemo } from "react";
+import { useRef, useState, useCallback, useEffect } from "react";
 import { useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { TilesRenderer, TilesPlugin } from "3d-tiles-renderer/r3f";
@@ -13,12 +13,10 @@ import { WGS84_ELLIPSOID } from "3d-tiles-renderer/three";
 import {
   GoogleCloudAuthPlugin,
   GLTFExtensionsPlugin,
-  DebugTilesPlugin,
 } from "3d-tiles-renderer/plugins";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import { TOKYO_CENTER } from "@/config/tokyo-config";
-import { latLngAltToECEF } from "@/lib/geo-utils";
 
 interface GoogleTilesSceneProps {
   apiKey: string;
@@ -28,8 +26,6 @@ interface GoogleTilesSceneProps {
   showMeshes?: boolean;
   wireframe?: boolean;
   collisionGroupRef?: React.MutableRefObject<THREE.Group | null>;
-  showDebugAxes?: boolean;
-  debugTiles?: boolean;
 }
 
 /** getDRACOLoader
@@ -92,36 +88,6 @@ function createECEFtoENUMatrix(
     ecefToENU
   );
   return transformMatrix;
-}
-
-/**
- * ENU axes debug helper (AxesHelper): X=red (east), Y=green (up), Z=blue (north after Y-up swap).
- */
-function ENUDebugAxes({ length = 500 }: { length?: number }) {
-  const transformMatrix = useMemo(
-    () => createECEFtoENUMatrix(TOKYO_CENTER.lat, TOKYO_CENTER.lng),
-    []
-  );
-
-  const helper = useMemo(() => {
-    const axes = new THREE.AxesHelper(length);
-    axes.renderOrder = 9999;
-    axes.traverse((obj: any) => {
-      if (obj.material) {
-        obj.material.depthTest = false;
-        obj.material.depthWrite = false;
-        obj.material.transparent = true;
-        obj.material.opacity = 0.9;
-      }
-    });
-    return axes;
-  }, [length]);
-
-  return (
-    <group matrix={transformMatrix} matrixAutoUpdate={false}>
-      <primitive object={helper} />
-    </group>
-  );
 }
 
 /** TilesTransformer
@@ -206,8 +172,6 @@ export function GoogleTilesScene({
   showMeshes = true,
   wireframe = false,
   collisionGroupRef,
-  showDebugAxes = false,
-  debugTiles = true,
 }: GoogleTilesSceneProps) {
   const [modelCount, setModelCount] = useState(0);
   const tilesGroupRef = useRef<THREE.Group>(null);
@@ -309,17 +273,6 @@ export function GoogleTilesScene({
           onLoadError={handleLoadError}
           onLoadModel={handleLoadModelWithWireframe}
         >
-          {debugTiles && (
-            <TilesPlugin
-              plugin={DebugTilesPlugin}
-              args={{
-                displayBoxBounds: true,
-                displayParentBounds: true,
-                displayRegionBounds: false,
-                displaySphereBounds: false,
-              }}
-            />
-          )}
           <TilesPlugin
             plugin={GLTFExtensionsPlugin}
             args={{ dracoLoader: getDRACOLoader() }}
@@ -330,8 +283,6 @@ export function GoogleTilesScene({
           />
         </TilesRenderer>
       </TilesTransformer>
-
-      {showDebugAxes && <ENUDebugAxes length={500} />}
 
       {/* city-appropriate lighting matching sky */}
       <ambientLight intensity={0.6} />
