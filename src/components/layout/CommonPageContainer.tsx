@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import Footer from "@/components/layout/Footer";
+import Footer from "@/components/layout/footer";
 import BackToHomeButton from "@/components/widget/BackToHomeButton";
 
 export default function CommonPageContainer({
