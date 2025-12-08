@@ -5,15 +5,18 @@
  * Real-world Google 3D Tiles flight experience with Lyria audio
  */
 
-import { Suspense, useRef, useState, useCallback, useEffect } from "react";
+import { Suspense, useRef, useState, useCallback, useEffect, useMemo } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
+import { EffectComposer, HueSaturation, BrightnessContrast, Sepia, Vignette } from "@react-three/postprocessing";
+import { BlendFunction } from "postprocessing";
 
-import { TOKYO_DISTRICTS, type District } from "@/config/tokyo-config";
+import { TOKYO_DISTRICTS, TIME_OF_DAY_PRESETS, type District, type TimeOfDay } from "@/config/tokyo-config";
 import { GoogleTilesScene } from "@/components/city/GoogleTilesScene";
 import { DistrictLyriaAudio, type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import { useFlight } from "@/hooks/useFlight";
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
+import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
 import { type MovementMode } from "@/lib/flight";
 
 
@@ -346,6 +349,59 @@ function FlightBoundsHelper({
   );
 }
 
+/** TimeOfDayEffects
+ * 
+ * Post-processing effects that respond to time of day
+ * Applies color grading to create sunrise/sunset atmosphere
+ */
+function TimeOfDayEffects() {
+  const preset = useTimeOfDayStore((state) => state.preset);
+  
+  const effects = useMemo(() => {
+    const { r, g, b } = preset.colorMultiplier;
+    
+    const orangeIntensity = Math.max(0, (r - b) / 1.1); // ~0 for afternoon, ~0.95 for sunset
+    const sepiaIntensity = orangeIntensity * 0.6;
+    const hueShift = -orangeIntensity * 0.12;
+    const saturationBoost = orangeIntensity * 0.35;
+    const brightnessAdjust = -orangeIntensity * 0.12;
+    const contrastBoost = orangeIntensity * 0.2;
+    const vignetteIntensity = orangeIntensity * 0.4;
+    
+    return {
+      sepia: sepiaIntensity,
+      hue: hueShift,
+      saturation: saturationBoost,
+      brightness: brightnessAdjust,
+      contrast: contrastBoost,
+      vignette: vignetteIntensity,
+    };
+  }, [preset]);
+
+  return (
+    <EffectComposer multisampling={0}>
+      <Sepia
+        intensity={effects.sepia}
+        blendFunction={BlendFunction.NORMAL}
+      />
+      <HueSaturation
+        blendFunction={BlendFunction.NORMAL}
+        hue={effects.hue}
+        saturation={effects.saturation}
+      />
+      <BrightnessContrast
+        brightness={effects.brightness}
+        contrast={effects.contrast}
+      />
+      <Vignette
+        offset={0.3}
+        darkness={effects.vignette}
+        blendFunction={BlendFunction.NORMAL}
+      />
+    </EffectComposer>
+  );
+}
+
 /** DebugMenu
  * 
  * Debug menu
@@ -362,7 +418,6 @@ interface DebugOptions {
   wireframe: boolean;
   showBounds: boolean;
   collision: boolean;
-  debugTiles: boolean;
 }
 
 function DebugMenu({ 
@@ -380,6 +435,9 @@ function DebugMenu({
   cameraY: number;
   collisionDistance: number | null;
 }) {
+  const { currentTime, setTimeOfDay } = useTimeOfDayStore();
+  const timeOptions: TimeOfDay[] = ["morning", "afternoon", "evening"];
+
   if (collapsed) {
     return (
       <button
@@ -403,6 +461,25 @@ function DebugMenu({
         {options.collision && collisionDistance !== null && (
           <div>Hit: <span className="text-red-400">{collisionDistance.toFixed(1)}m</span></div>
         )}
+      </div>
+
+      <div className="mb-3 pb-2 border-b border-white/20">
+        <div className="text-white/50 mb-1">Time of Day</div>
+        <div className="flex gap-1">
+          {timeOptions.map((time) => (
+            <button
+              key={time}
+              onClick={() => setTimeOfDay(time)}
+              className={`flex-1 px-2 py-1 rounded text-[10px] transition-colors ${
+                currentTime === time
+                  ? "bg-cyan-500/80 text-white"
+                  : "bg-white/10 text-white/60 hover:bg-white/20"
+              }`}
+            >
+              {TIME_OF_DAY_PRESETS[time].nameJa}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="space-y-1">
@@ -444,16 +521,6 @@ function DebugMenu({
             className="w-3 h-3"
           />
           <span className="text-white/70">Collision</span>
-        </label>
-
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={options.debugTiles}
-            onChange={(e) => onOptionsChange("debugTiles", e.target.checked)}
-            className="w-3 h-3"
-          />
-          <span className="text-white/70">Debug Tiles (bounds)</span>
         </label>
       </div>
     </div>
@@ -533,7 +600,6 @@ export default function TokyoPage() {
     wireframe: false,
     showBounds: false,
     collision: true,  // default
-    debugTiles: false,
   });
   const [cameraY, setCameraY] = useState(200);
   const [heading, setHeading] = useState(0);
@@ -660,6 +726,7 @@ export default function TokyoPage() {
   return (
     <div className="w-full h-screen bg-black relative overflow-hidden">
       <Canvas
+        shadows="soft"
         camera={{
           position: initialCameraPosition,
           fov: 60,
@@ -680,7 +747,6 @@ export default function TokyoPage() {
             showMeshes={debugOptions.showMeshes}
             wireframe={debugOptions.wireframe}
             collisionGroupRef={collisionGroupRef}
-            debugTiles={debugOptions.debugTiles}
           />
 
           <FlightController
@@ -707,6 +773,8 @@ export default function TokyoPage() {
               onCurrentDistrictChange={setCurrentDistrict}
             />
           )}
+
+          <TimeOfDayEffects />
         </Suspense>
       </Canvas>
 

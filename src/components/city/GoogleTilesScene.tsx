@@ -16,7 +16,8 @@ import {
 } from "3d-tiles-renderer/plugins";
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
-import { TOKYO_CENTER } from "@/config/tokyo-config";
+import { TOKYO_CENTER, TimeOfDayPreset } from "@/config/tokyo-config";
+import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
 
 interface GoogleTilesSceneProps {
   apiKey: string;
@@ -126,10 +127,10 @@ function TilesTransformer({
 
 /** SkyBox
  *
- * Sky with sun shader
+ * Sky with sun shader - responds to time of day
  * @returns null
  */
-function SkyBox() {
+function SkyBox({ preset }: { preset: TimeOfDayPreset }) {
   const { scene } = useThree();
   const skyRef = useRef<Sky | null>(null);
 
@@ -139,25 +140,28 @@ function SkyBox() {
     scene.add(sky);
     skyRef.current = sky;
 
-    const sun = new THREE.Vector3();
-
-    const uniforms = sky.material.uniforms;
-    uniforms["turbidity"].value = 2; // atmospheric haze
-    uniforms["rayleigh"].value = 1; // blue sky intensity
-    uniforms["mieCoefficient"].value = 0.005;
-    uniforms["mieDirectionalG"].value = 0.8;
-
-    const phi = THREE.MathUtils.degToRad(90 - 45); // 45° above horizon
-    const theta = THREE.MathUtils.degToRad(220); // SW direction
-    sun.setFromSphericalCoords(1, phi, theta);
-    uniforms["sunPosition"].value.copy(sun);
-
     return () => {
       scene.remove(sky);
       sky.geometry.dispose();
       (sky.material as THREE.ShaderMaterial).dispose();
     };
   }, [scene]);
+
+  useEffect(() => {
+    if (!skyRef.current) return;
+
+    const uniforms = skyRef.current.material.uniforms;
+    uniforms["turbidity"].value = preset.sky.turbidity;
+    uniforms["rayleigh"].value = preset.sky.rayleigh;
+    uniforms["mieCoefficient"].value = preset.sky.mieCoefficient;
+    uniforms["mieDirectionalG"].value = preset.sky.mieDirectionalG;
+
+    const phi = THREE.MathUtils.degToRad(90 - preset.sunElevation);
+    const theta = THREE.MathUtils.degToRad(preset.sunAzimuth);
+    const sun = new THREE.Vector3();
+    sun.setFromSphericalCoords(1, phi, theta);
+    uniforms["sunPosition"].value.copy(sun);
+  }, [preset]);
 
   return null;
 }
@@ -174,6 +178,7 @@ export function GoogleTilesScene({
   const [modelCount, setModelCount] = useState(0);
   const tilesGroupRef = useRef<THREE.Group>(null);
   const wireframeRef = useRef(wireframe);
+  const preset = useTimeOfDayStore((state) => state.preset);
 
   useEffect(() => {
     if (collisionGroupRef) {
@@ -231,7 +236,7 @@ export function GoogleTilesScene({
     }
   }, [wireframe]);
 
-  const handleLoadModelWithWireframe = useCallback(() => {
+  const handleLoadModel = useCallback(() => {
     setModelCount((c) => {
       const newCount = c + 1;
       if (newCount <= 3 || newCount % 50 === 0) {
@@ -240,9 +245,12 @@ export function GoogleTilesScene({
       return newCount;
     });
 
-    if (wireframeRef.current && tilesGroupRef.current) {
+    if (tilesGroupRef.current) {
       tilesGroupRef.current.traverse((obj) => {
         if (obj instanceof THREE.Mesh && obj.material) {
+          obj.receiveShadow = true;
+          obj.castShadow = true;
+          
           const materials = Array.isArray(obj.material)
             ? obj.material
             : [obj.material];
@@ -251,7 +259,9 @@ export function GoogleTilesScene({
               mat instanceof THREE.MeshStandardMaterial ||
               mat instanceof THREE.MeshBasicMaterial
             ) {
-              mat.wireframe = wireframeRef.current;
+              if (wireframeRef.current) {
+                mat.wireframe = true;
+              }
             }
           });
         }
@@ -261,15 +271,22 @@ export function GoogleTilesScene({
 
   if (!apiKey) return null;
 
+  const sunPhi = THREE.MathUtils.degToRad(90 - preset.sunElevation);
+  const sunTheta = THREE.MathUtils.degToRad(preset.sunAzimuth);
+  const lightDistance = 200;
+  const lightX = lightDistance * Math.sin(sunPhi) * Math.sin(sunTheta);
+  const lightY = lightDistance * Math.cos(sunPhi);
+  const lightZ = lightDistance * Math.sin(sunPhi) * Math.cos(sunTheta);
+
   return (
     <>
-      <SkyBox />
+      <SkyBox preset={preset} />
 
       <TilesTransformer groupRef={tilesGroupRef}>
         <TilesRenderer
           onLoadTileSet={handleLoadTileset}
           onLoadError={handleLoadError}
-          onLoadModel={handleLoadModelWithWireframe}
+          onLoadModel={handleLoadModel}
         >
           <TilesPlugin
             plugin={GLTFExtensionsPlugin}
@@ -282,15 +299,32 @@ export function GoogleTilesScene({
         </TilesRenderer>
       </TilesTransformer>
 
-      {/* city-appropriate lighting matching sky */}
-      <ambientLight intensity={0.6} />
-      <directionalLight
-        position={[-100, 200, -150]}
-        intensity={2.0}
-        color="#fff5e6"
-        castShadow
+      <ambientLight
+        intensity={preset.ambient.intensity}
+        color={preset.ambient.color}
       />
-      <hemisphereLight args={["#87CEEB", "#8b7355", 0.5]} />
+      <directionalLight
+        position={[lightX, lightY, lightZ]}
+        intensity={preset.directional.intensity}
+        color={preset.directional.color}
+        castShadow
+        shadow-mapSize-width={2048}
+        shadow-mapSize-height={2048}
+        shadow-camera-near={1}
+        shadow-camera-far={1000}
+        shadow-camera-left={-500}
+        shadow-camera-right={500}
+        shadow-camera-top={500}
+        shadow-camera-bottom={-500}
+        shadow-bias={-0.0001}
+      />
+      <hemisphereLight
+        args={[
+          preset.hemisphere.skyColor,
+          preset.hemisphere.groundColor,
+          preset.hemisphere.intensity,
+        ]}
+      />
     </>
   );
 }
