@@ -107,13 +107,15 @@ export function latLngAltToENU(
   const north = -sinLat * cosLng * diff.x - sinLat * sinLng * diff.y + cosLat * diff.z;
   const up = cosLat * cosLng * diff.x + cosLat * sinLng * diff.y + sinLat * diff.z;
 
-  // Remap to Three.js world (Y-up): X=east, Y=up, Z=north
-  return new THREE.Vector3(east, up, north);
+  // Remap to Three.js world (Y-up): X=east, Y=up, Z=-north
+  // Note: Z is negated to match the enuToYUp matrix in GoogleTilesScene.tsx
+  // which maps ECEF tiles such that +Z points south (geographic north is -Z)
+  return new THREE.Vector3(east, up, -north);
 }
 
 /**
  * Convert ENU coordinates back to geodetic
- * @param enu THREE.Vector3 in ENU coordinates (meters), Y-up remap (X=east, Y=up, Z=north)
+ * @param enu THREE.Vector3 in ENU coordinates (meters), Y-up remap (X=east, Y=up, Z=-north)
  * @param originLat Origin latitude in degrees
  * @param originLng Origin longitude in degrees
  * @param originAlt Origin altitude in meters
@@ -127,7 +129,7 @@ export function enuToLatLngAlt(
 ): { lat: number; lng: number; alt: number } {
   const east = enu.x;
   const up = enu.y;
-  const north = enu.z; // Y-up remap (Z=north)
+  const north = -enu.z; // Y-up remap: Z=-north, so north = -Z
 
   const latRad = THREE.MathUtils.degToRad(originLat);
   const lngRad = THREE.MathUtils.degToRad(originLng);

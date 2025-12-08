@@ -11,9 +11,9 @@ export const TOKYO_CENTER = {
 
 // camera initial position (in ECEF coordinates, will be calculated from lat/lng)
 export const INITIAL_CAMERA = {
-  lat: 35.6895, // Shinjuku area
-  lng: 139.6917,
-  alt: 300,
+  lat: 35.6915849, // Shinjuku area
+  lng: 139.6943858,
+  alt: 700,
 };
 
 // altitude bounds (meters)
