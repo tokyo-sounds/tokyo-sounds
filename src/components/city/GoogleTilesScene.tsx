@@ -62,8 +62,6 @@ function createECEFtoENUMatrix(
 
   const ecefToENU = new THREE.Matrix4().copy(enuToECEF).invert(); // ECEF -> ENU (X=east, Y=north, Z=up)
 
-  // Remap ENU (X=east, Y=north, Z=up) to Three.js world (X=east, Y=up, Z=north).
-  // Matrix that swaps Y<->Z and keeps right-handed orientation.
   const enuToYUp = new THREE.Matrix4().set(
     1,
     0,
@@ -74,7 +72,7 @@ function createECEFtoENUMatrix(
     1,
     0,
     0,
-    1,
+    -1,
     0,
     0,
     0,
