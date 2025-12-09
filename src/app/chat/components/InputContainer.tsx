@@ -11,7 +11,6 @@ import {
   PromptInputAttachment,
   PromptInputAttachments,
   PromptInputBody,
-  PromptInputButton,
   PromptInputFooter,
   type PromptInputMessage,
   PromptInputProvider,
@@ -19,7 +18,7 @@ import {
   PromptInputTextarea,
   PromptInputTools,
 } from "@/components/ai-elements/prompt-input";
-import { GlobeIcon } from "lucide-react";
+import { chatbot } from "@/lib/constraint";
 
 export default function InputContainer({
   handleSubmit,
@@ -37,7 +36,10 @@ export default function InputContainer({
           {(attachment) => <PromptInputAttachment data={attachment} />}
         </PromptInputAttachments>
         <PromptInputBody>
-          <PromptInputTextarea ref={textareaRef} />
+          <PromptInputTextarea
+            ref={textareaRef}
+            placeholder={chatbot.placeholder}
+          />
         </PromptInputBody>
         <PromptInputFooter>
           <PromptInputTools>

@@ -11,10 +11,7 @@ export type ConversationProps = ComponentProps<typeof StickToBottom>;
 
 export const Conversation = ({ className, ...props }: ConversationProps) => (
   <StickToBottom
-    className={cn(
-      "relative flex-1 overflow-y-hidden",
-      className
-    )}
+    className={cn("relative flex-1 overflow-y-hidden", className)}
     initial="smooth"
     resize="smooth"
     role="log"
@@ -38,6 +35,7 @@ export const ConversationContent = ({
 
 export type ConversationEmptyStateProps = ComponentProps<"div"> & {
   title?: string;
+  subtitle?: string;
   description?: string;
   icon?: React.ReactNode;
 };
@@ -45,6 +43,7 @@ export type ConversationEmptyStateProps = ComponentProps<"div"> & {
 export const ConversationEmptyState = ({
   className,
   title = "No messages yet",
+  subtitle = "Enter your message to start the conversation",
   description = "Start a conversation to see messages here",
   icon,
   children,
@@ -61,7 +60,8 @@ export const ConversationEmptyState = ({
       <>
         {icon && <div className="text-muted-foreground">{icon}</div>}
         <div className="space-y-1">
-          <h3 className="text-2xl">{title}</h3>
+          <h3 className="text-5xl font-bold tracking-wider uppercase">{title}</h3>
+          <h4 className="mb-4 text-lg">{subtitle}</h4>
           {description && (
             <p className="text-muted-foreground text-sm">{description}</p>
           )}

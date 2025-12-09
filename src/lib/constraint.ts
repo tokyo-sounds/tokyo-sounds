@@ -263,6 +263,16 @@ export const pages = {
   },
 };
 
+export const chatbot = {
+  initial: {
+    title: "Tokyo Sounds",
+    subtitle: "AI チャットボット",
+    description:
+      "ようこそ。私はTokyo Soundsに関する疑問にお答えする、少し気の利くチャットボットです。ご質問があれば、どうぞお書きください。",
+  },
+  placeholder: "ご用件は何でしょうか？どうぞご遠慮なく。",
+};
+
 export const dataLabels = {
   name: "Name",
   email: "Email",
