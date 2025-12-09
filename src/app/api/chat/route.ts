@@ -1,11 +1,6 @@
 import { streamText, UIMessage, convertToModelMessages } from "ai";
-import { google, GoogleGenerativeAIProviderMetadata } from "@ai-sdk/google";
-import { GoogleGenAI } from "@google/genai";
-import path from "path";
-
-const ai = new GoogleGenAI({
-  apiKey: process.env.GOOGLE_GENERATIVE_AI_API_KEY,
-});
+import { google } from "@ai-sdk/google";
+import { ProjectBriefTool } from "@/lib/ai-tools";
 
 // TODO: vvv Cache Example vvv
 // const filePath = path.join(process.cwd(), "src", "TECHNICAL_SUMMARY_JA.md");
@@ -67,17 +62,11 @@ export async function POST(req: Request) {
   // TODO: ^^^ Use FileSearchStore to create a RAG chatbot ^^^
 
   const result = streamText({
-    model: google("gemini-pro-latest"),
-    system: `You are a helpful assistant that can answer questions about the following sources: ${sources.join(
-      ", "
-    )}`,
+    model: google("gemini-2.5-pro"),
+    system: `You are a helpful assistant that can answer questions about the Tokyo Sounds project." + "use ProjectBriefTool to get the brief of Tokyo Sounds" + "Do NOT answer any questions that are not related to the Tokyo Sounds project" + "use URL Context Tool to get the latest code information from the GitHub repository" + "use Google Search Tool to search the web for technical information about the API and libraries used in Tokyo Sounds"`,
     messages: convertToModelMessages(messages),
     tools: {
-      // TODO: Use File Search, URL Context, and Google Search tools to create a repo chatbot
-      // file_search: google.tools.fileSearch({
-      //   fileSearchStoreNames: [fileSearchStore.name!],
-      //   topK: 8,
-      // }),
+      project_brief: ProjectBriefTool,
       url_context: google.tools.urlContext({}),
       google_search: google.tools.googleSearch({}),
     },
@@ -88,16 +77,6 @@ export async function POST(req: Request) {
   //   | undefined;
   // const groundingMetadata = metadata?.groundingMetadata;
   // const urlContextMetadata = metadata?.urlContextMetadata;
-
-  const reader = result.textStream.getReader();
-
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) {
-      break;
-    }
-    process.stdout.write(value);
-  }
 
   return result.toUIMessageStreamResponse();
 }

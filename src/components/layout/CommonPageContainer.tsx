@@ -12,7 +12,7 @@ export default function CommonPageContainer({
   return (
     <div
       className={cn(
-        "w-full h-full min-h-screen flex flex-col items-center justify-between gap-4",
+        "w-full h-full min-h-dvh flex flex-col items-center justify-between gap-4",
         className
       )}
     >
