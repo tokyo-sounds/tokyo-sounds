@@ -1,3 +1,5 @@
+import { HomeIcon, InfoIcon, PlayIcon, MessageCircleQuestion, History } from "lucide-react";
+
 export const App_Info = {
   title: "Tokyo Sounds",
   subtitle: "Tokyo Sounds is a platform for creating and sharing sounds.",
@@ -162,28 +164,33 @@ export const common = {
 };
 
 // Navigation text
-export const navigation = {
-  home: "Home",
-  about: "About",
-  contact: "Contact",
-  profile: "Profile",
-  settings: "Settings",
-  dashboard: "Dashboard",
-  admin: "Admin",
-  help: "Help",
-  support: "Support",
-  faq: "FAQ",
-  terms: "Terms",
-  privacy: "Privacy",
-  blog: "Blog",
-  news: "News",
-  products: "Products",
-  services: "Services",
-  portfolio: "Portfolio",
-  gallery: "Gallery",
-  menu: "Menu",
-  more: "More",
-};
+export const navigationLinks = [
+  {
+    label: {ja: "ホーム", en: "Home"},
+    slug: "",
+    icon: HomeIcon,
+  },
+  {
+    label: {ja: "コンセプト", en: "About"},
+    slug: "about",
+    icon: InfoIcon,
+  },
+  {
+    label: {ja: "プレイ", en: "Play"},
+    slug: "play",
+    icon: PlayIcon,
+  },
+  {
+    label: {ja: "ヘルプ", en: "Help"},
+    slug: "chat",
+    icon: MessageCircleQuestion,
+  },
+  {
+    label: {ja: "過去バージョン", en: "Past Versions"},
+    slug: "patch",
+    icon: History,
+  },
+];
 
 // Common error messages
 export const errors = {
