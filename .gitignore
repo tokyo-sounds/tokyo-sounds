@@ -41,9 +41,10 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# markdown files (ignore all except README.md)
+# markdown files (ignore all except README.md and /docs)
 *.md
 !README.md
+!docs/**/*.md
 
 .playwright-mcp/
 .cursor/

@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+import { Roboto, Roboto_Mono, Noto_Sans_JP } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackClientApp } from "../stack/client";
 import { Analytics } from "@vercel/analytics/next";
-import { Roboto, Roboto_Mono, Noto_Sans_JP } from "next/font/google";
-import "./globals.css";
 
 const robotoSans = Roboto({
   variable: "--font-roboto-sans",
@@ -38,6 +39,7 @@ export default function RootLayout({
       >
         <StackProvider app={stackClientApp}>
           <StackTheme>{children}</StackTheme>
+          <Toaster />
         </StackProvider>
         <Analytics />
       </body>
