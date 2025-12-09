@@ -16,7 +16,7 @@ export default function CommonPageContainer({
         className
       )}
     >
-      <main className="w-full max-w-4xl h-full mx-auto p-4">
+      <main className="w-full max-w-4xl h-full min-h-0 flex-1 mx-auto p-4">
         {children}
       </main>
       <BackToHomeButton />

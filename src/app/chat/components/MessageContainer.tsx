@@ -19,28 +19,31 @@ export default function MessagesContainer({
   messages: UIMessage[];
 }) {
   return (
-    <Conversation className="size-full min-h-0">
+    <Conversation className="size-full h-full min-h-0">
       <ConversationContent>
         {messages.length === 0 ? (
           <ConversationEmptyState
-            description="Messages will appear here as the conversation progresses."
-            icon={<MessageSquareIcon className="size-6" />}
+            icon={<MessageSquareIcon className="size-12" />}
             title="Start a conversation"
+            description="Type your questions below to start the conversation."
           />
         ) : (
           messages.map((message: UIMessage) => (
             <Message from={message.role} key={message.id}>
-              {message.parts.map((part, index) =>
-                part.type === "text" ? (
-                  message.role === "user" ? (
-                    <MessageContent key={index}>{part.text}</MessageContent>
-                  ) : part.state === "streaming" ? (
-                    <Shimmer key={index}>{part.text}</Shimmer>
-                  ) : (
-                    <MessageResponse key={index}>{part.text}</MessageResponse>
-                  )
-                ) : null
-              )}
+              <MessageContent>
+                {message.parts.map((part, index) => {
+                  switch (part.type) {
+                    case "text":
+                      return part.state === "streaming" ? (
+                        <Shimmer key={index}>{part.text}</Shimmer>
+                      ) : (
+                        <MessageResponse key={index}>{part.text}</MessageResponse>
+                      );
+                    default:
+                      return null;
+                  }
+                })}
+              </MessageContent>
             </Message>
           ))
         )}

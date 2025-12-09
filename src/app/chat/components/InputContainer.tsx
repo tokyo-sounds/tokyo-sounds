@@ -47,12 +47,8 @@ export default function InputContainer({
                 <PromptInputActionAddAttachments />
               </PromptInputActionMenuContent>
             </PromptInputActionMenu>
-            <PromptInputButton>
-              <GlobeIcon size={16} />
-              <span>Search</span>
-            </PromptInputButton>
           </PromptInputTools>
-          <PromptInputSubmit status={status} />
+          <PromptInputSubmit status={status} className="rounded-full size-10" />
         </PromptInputFooter>
       </PromptInput>
     </PromptInputProvider>

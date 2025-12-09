@@ -7,6 +7,7 @@ import CommonPageContainer from "@/components/layout/CommonPageContainer";
 import MessageContainer from "./components/MessageContainer";
 import { PromptInputMessage } from "@/components/ai-elements/prompt-input";
 import InputContainer from "./components/InputContainer";
+import { ConversationScrollButton } from "@/components/ai-elements/conversation";
 
 export default function Page() {
   const { messages, sendMessage, status } = useChat({
