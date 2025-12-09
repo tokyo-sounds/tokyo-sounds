@@ -1,6 +1,5 @@
 import { streamText, UIMessage, convertToModelMessages } from "ai";
-import { google } from "@ai-sdk/google";
-import { ProjectBriefTool } from "@/lib/ai-tools";
+import { google, GoogleGenerativeAIProviderMetadata } from "@ai-sdk/google";
 
 // TODO: vvv Cache Example vvv
 // const filePath = path.join(process.cwd(), "src", "TECHNICAL_SUMMARY_JA.md");
@@ -35,7 +34,7 @@ import { ProjectBriefTool } from "@/lib/ai-tools";
 export async function POST(req: Request) {
   const {
     messages,
-    sources,
+    sources=["https://github.com/tokyo-sounds/tokyo-sounds"],
     providerMetadata,
   }: { messages: UIMessage[]; sources: string[]; providerMetadata: any } =
     await req.json();
@@ -63,20 +62,19 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: google("gemini-2.5-pro"),
-    system: `You are a helpful assistant that can answer questions about the Tokyo Sounds project." + "use ProjectBriefTool to get the brief of Tokyo Sounds" + "Do NOT answer any questions that are not related to the Tokyo Sounds project" + "use URL Context Tool to get the latest code information from the GitHub repository" + "use Google Search Tool to search the web for technical information about the API and libraries used in Tokyo Sounds"`,
+    system: `You are a helpful assistant that can answer questions about the Tokyo Sounds project, a website that allows you to experience Tokyo's atmosphere by simulating paper plane flying over Tokyo via Google Maps Photorealistic 3D Tiles and Google Lyria to generate area's background music over Tokyo." + "Do NOT answer any questions that are not related to the Tokyo Sounds project" + "Based on this context: https://github.com/tokyo-sounds/tokyo-sounds/blob/master/README.md, answer the questions."`,
     messages: convertToModelMessages(messages),
     tools: {
-      project_brief: ProjectBriefTool,
-      url_context: google.tools.urlContext({}),
       google_search: google.tools.googleSearch({}),
+      url_context: google.tools.urlContext({}),
     },
   });
 
-  // const metadata = providerMetadata?.google as
-  //   | GoogleGenerativeAIProviderMetadata
-  //   | undefined;
-  // const groundingMetadata = metadata?.groundingMetadata;
-  // const urlContextMetadata = metadata?.urlContextMetadata;
+  const metadata = providerMetadata?.google as
+    | GoogleGenerativeAIProviderMetadata
+    | undefined;
+  const groundingMetadata = metadata?.groundingMetadata;
+  const urlContextMetadata = metadata?.urlContextMetadata;
 
   return result.toUIMessageStreamResponse();
 }
