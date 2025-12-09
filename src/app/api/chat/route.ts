@@ -32,12 +32,7 @@ import { google, GoogleGenerativeAIProviderMetadata } from "@ai-sdk/google";
 // TODO: ^^^ Cache Example ^^^
 
 export async function POST(req: Request) {
-  const {
-    messages,
-    sources=["https://github.com/tokyo-sounds/tokyo-sounds"],
-    providerMetadata,
-  }: { messages: UIMessage[]; sources: string[]; providerMetadata: any } =
-    await req.json();
+  const { messages }: { messages: UIMessage[] } = await req.json();
 
   // TODO: vvv Use FileSearchStore to create a RAG chatbot vvv
   //  const sampleFile = await ai.files.upload({
@@ -62,19 +57,13 @@ export async function POST(req: Request) {
 
   const result = streamText({
     model: google("gemini-2.5-pro"),
-    system: `You are a helpful assistant that can answer questions about the Tokyo Sounds project, a website that allows you to experience Tokyo's atmosphere by simulating paper plane flying over Tokyo via Google Maps Photorealistic 3D Tiles and Google Lyria to generate area's background music over Tokyo." + "Do NOT answer any questions that are not related to the Tokyo Sounds project" + "Based on this context: https://github.com/tokyo-sounds/tokyo-sounds/blob/master/README.md, answer the questions."`,
+    system: `You are a helpful assistant that can answer questions about the Tokyo Sounds project, a website that allows you to experience Tokyo's atmosphere by simulating paper plane flying over Tokyo via Google Maps Photorealistic 3D Tiles and Google Lyria to generate area's background music over Tokyo." + "Do NOT answer any questions that are not related to the Tokyo Sounds project" + "Based on this context: https://github.com/tokyo-sounds/tokyo-sounds/blob/master/README.md, answer user's questions."`,
     messages: convertToModelMessages(messages),
     tools: {
       google_search: google.tools.googleSearch({}),
       url_context: google.tools.urlContext({}),
     },
   });
-
-  const metadata = providerMetadata?.google as
-    | GoogleGenerativeAIProviderMetadata
-    | undefined;
-  const groundingMetadata = metadata?.groundingMetadata;
-  const urlContextMetadata = metadata?.urlContextMetadata;
 
   return result.toUIMessageStreamResponse();
 }

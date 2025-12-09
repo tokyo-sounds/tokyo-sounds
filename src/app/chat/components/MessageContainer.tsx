@@ -1,7 +1,6 @@
 import { UIMessage } from "ai";
 import {
   Message,
-  MessageAction,
   MessageContent,
   MessageResponse,
 } from "@/components/ai-elements/message";
@@ -11,6 +10,7 @@ import {
   ConversationScrollButton,
   ConversationEmptyState,
 } from "@/components/ai-elements/conversation";
+import { Shimmer } from "@/components/ai-elements/shimmer";
 import { MessageSquareIcon } from "lucide-react";
 
 export default function MessagesContainer({
@@ -34,6 +34,8 @@ export default function MessagesContainer({
                 part.type === "text" ? (
                   message.role === "user" ? (
                     <MessageContent key={index}>{part.text}</MessageContent>
+                  ) : part.state === "streaming" ? (
+                    <Shimmer key={index}>{part.text}</Shimmer>
                   ) : (
                     <MessageResponse key={index}>{part.text}</MessageResponse>
                   )
