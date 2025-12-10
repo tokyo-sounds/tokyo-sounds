@@ -12,12 +12,34 @@ import { EffectComposer, HueSaturation, BrightnessContrast, Sepia, Vignette } fr
 import { BlendFunction } from "postprocessing";
 
 import { TIME_OF_DAY_PRESETS, DEMO_WAYPOINTS, TOKYO_CENTER, type District, type TimeOfDay } from "@/config/tokyo-config";
+
+// Pastel color options for plane customization
+const PASTEL_COLORS = [
+  { name: "Rose", hex: "#FFB3BA" },
+  { name: "Peach", hex: "#FFDFBA" },
+  { name: "Lemon", hex: "#FFFFBA" },
+  { name: "Mint", hex: "#BAFFC9" },
+  { name: "Sky", hex: "#BAE1FF" },
+  { name: "Lavender", hex: "#E0BBE4" },
+  { name: "Coral", hex: "#FFB3A7" },
+  { name: "Butter", hex: "#FFF5BA" },
+  { name: "Seafoam", hex: "#B5EAD7" },
+  { name: "Periwinkle", hex: "#C4C3E0" },
+  { name: "Blush", hex: "#FFC8DD" },
+  { name: "Honey", hex: "#FFE5A0" },
+  { name: "Sage", hex: "#C9E4C5" },
+  { name: "Lilac", hex: "#DCD0FF" },
+  { name: "Aqua", hex: "#B8F3FF" },
+  { name: "Apricot", hex: "#FFDAB3" },
+];
 import { GoogleTilesScene } from "@/components/city/GoogleTilesScene";
 import { DistrictLyriaAudio, type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
 import { PlaneController, type PlaneControllerHandle, type GyroState } from "@/components/city/PlaneController";
 import { LocationSearch } from "@/components/city/LocationSearch";
+import { OtherPlayers } from "@/components/city/OtherPlayers";
 import { clearVisitedFlag, type DemoState } from "@/hooks/useDemoFlythrough";
+import { useMultiplayer } from "@/hooks/useMultiplayer";
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
 import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
 import { type MovementMode } from "@/lib/flight";
@@ -505,9 +527,47 @@ function DistrictDebugPanel({ districts, collapsed, onToggle }: {
 const ENV_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 const ENV_LYRIA_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || "";
 
+function getMultiplayerUrl(): string {
+  if (typeof window === "undefined") return "ws://localhost:3001";
+  
+  const configuredUrl = process.env.NEXT_PUBLIC_MULTIPLAYER_URL || "";
+  const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const isHttps = window.location.protocol === "https:";
+  const wsProtocol = isHttps ? "wss:" : "ws:";
+  
+  if (isLocalhost) {
+    return `${wsProtocol}//localhost:3001`;
+  }
+  
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+  
+  return `${wsProtocol}//${window.location.hostname}:3001`;
+}
+
+const ENV_MULTIPLAYER_URL = getMultiplayerUrl();
+
+const STORAGE_KEYS = {
+  playerName: "tokyo-sounds-player-name",
+  planeColor: "tokyo-sounds-plane-color",
+} as const;
+
 export default function TokyoPage() {
   const [started, setStarted] = useState(false);
   const [mapsApiKey, setMapsApiKey] = useState(ENV_MAPS_API_KEY);
+  const [playerName, setPlayerName] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(STORAGE_KEYS.playerName) || "";
+    }
+    return "";
+  });
+  const [planeColor, setPlaneColor] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem(STORAGE_KEYS.planeColor) || PASTEL_COLORS[4].hex;
+    }
+    return PASTEL_COLORS[4].hex;
+  });
   const [status, setStatus] = useState("Ready");
   const [flightSpeed, setFlightSpeed] = useState(0);
   const [movementMode, setMovementMode] = useState<MovementMode>("elytra");
@@ -542,6 +602,8 @@ export default function TokyoPage() {
   
   const collisionGroupRef = useRef<THREE.Group | null>(null);
   const planeControllerRef = useRef<PlaneControllerHandle | null>(null);
+  const localPlayerPositionRef = useRef(new THREE.Vector3(0, 200, 100));
+  const localPlayerQuaternionRef = useRef(new THREE.Quaternion());
 
   const {
     enabled: generativeEnabled,
@@ -550,6 +612,27 @@ export default function TokyoPage() {
   } = useGenerativeAudioStore();
   
   const lyriaApiKey = storeApiKey || ENV_LYRIA_API_KEY;
+
+  const {
+    isConnected: multiplayerConnected,
+    connectionStatus: multiplayerStatus,
+    nearbyPlayers,
+    sendUpdate: sendMultiplayerUpdate,
+    playerCount,
+  } = useMultiplayer({
+    serverUrl: ENV_MULTIPLAYER_URL,
+    playerName: playerName || "Anonymous",
+    planeColor,
+    enabled: started,
+  });
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.playerName, playerName);
+  }, [playerName]);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEYS.planeColor, planeColor);
+  }, [planeColor]);
 
   const handleStart = useCallback(async () => {
     if (!mapsApiKey) {
@@ -629,6 +712,20 @@ export default function TokyoPage() {
     }
   }, [collisionDistance]);
 
+  const handlePlanePositionChange = useCallback((position: THREE.Vector3, quaternion: THREE.Quaternion) => {
+    localPlayerPositionRef.current.copy(position);
+    localPlayerQuaternionRef.current.copy(quaternion);
+    
+    sendMultiplayerUpdate({
+      position: { x: position.x, y: position.y, z: position.z },
+      quaternion: { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w },
+      heading,
+      pitch,
+      roll,
+      speed: flightSpeed,
+    });
+  }, [sendMultiplayerUpdate, heading, pitch, roll, flightSpeed]);
+
   const initialCameraPosition: [number, number, number] = [0, 200, 100];
 
   if (!started) {
@@ -656,7 +753,41 @@ export default function TokyoPage() {
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="border-t border-slate-700/50 pt-4">
+              <label className="block text-slate-400 text-sm mb-2">Player Name</label>
+              <input
+                type="text"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                placeholder="Enter your name (optional)"
+                maxLength={20}
+                className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-fuchsia-500 focus:outline-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-slate-400 text-sm mb-2">Plane Color</label>
+              <div className="grid grid-cols-8 gap-2">
+                {PASTEL_COLORS.map((color) => (
+                  <button
+                    key={color.hex}
+                    onClick={() => setPlaneColor(color.hex)}
+                    className={`w-8 h-8 rounded-lg transition-all hover:scale-110 ${
+                      planeColor === color.hex
+                        ? "ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-110"
+                        : "hover:ring-1 hover:ring-white/50"
+                    }`}
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                  />
+                ))}
+              </div>
+              <p className="text-slate-500 text-xs mt-2">
+                Selected: <span className="text-white">{PASTEL_COLORS.find(c => c.hex === planeColor)?.name}</span>
+              </p>
+            </div>
+
+            <div className="border-t border-slate-700/50 pt-4 flex items-center gap-3">
               <input
                 type="checkbox"
                 id="lyria"
@@ -749,9 +880,11 @@ export default function TokyoPage() {
             collisionGroup={collisionGroupRef.current}
             collisionEnabled={debugOptions.collision}
             onCollision={(dist: number) => setCollisionDistance(dist)}
+            onPlanePositionChange={handlePlanePositionChange}
             demoEnabled={debugOptions.demoEnabled}
             onDemoStateChange={setDemoState}
             onGyroStateChange={setGyroState}
+            planeColor={planeColor}
           />
 
           <FlightBoundsHelper visible={debugOptions.showBounds} />
@@ -773,6 +906,11 @@ export default function TokyoPage() {
             enabled={spatialAudioEnabled}
             showDebug={debugOptions.showBounds}
             onStatsUpdate={setSpatialAudioStats}
+          />
+
+          <OtherPlayers
+            players={nearbyPlayers}
+            localPlayerPosition={localPlayerPositionRef.current}
           />
         </Suspense>
       </Canvas>
@@ -811,6 +949,10 @@ export default function TokyoPage() {
               </span>
             </>
           )}
+          <span className="text-white/30">|</span>
+          <span className={multiplayerConnected ? "text-green-400/70" : "text-yellow-400/70"}>
+            {multiplayerConnected ? `● ${playerCount}` : "○"}
+          </span>
         </div>
         <div className="text-white/50 text-[10px] space-x-3">
           <span>W/S pitch</span>

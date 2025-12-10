@@ -7,7 +7,7 @@
  * Supports demo flythrough mode for first-time visitors
  */
 
-import { useRef, useEffect, useState, useImperativeHandle, forwardRef } from "react";
+import { useRef, useEffect, useState, useImperativeHandle, forwardRef, useMemo } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -51,12 +51,13 @@ interface PlaneControllerProps {
   collisionGroup?: THREE.Group | null;
   collisionEnabled?: boolean;
   onCollision?: (distance: number) => void;
-  onPlanePositionChange?: (position: THREE.Vector3) => void;
+  onPlanePositionChange?: (position: THREE.Vector3, quaternion: THREE.Quaternion) => void;
   demoEnabled?: boolean;
   onDemoStateChange?: (state: DemoState) => void;
   onDemoWaypointReached?: (waypoint: DemoWaypoint) => void;
   onDemoComplete?: () => void;
   onGyroStateChange?: (state: GyroState) => void;
+  planeColor?: string;
 }
 
 const COLLISION_DISTANCE = 2;
@@ -79,6 +80,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   onDemoWaypointReached,
   onDemoComplete,
   onGyroStateChange,
+  planeColor,
 }, ref) {
   const { camera } = useThree();
   const planeRef = useRef<THREE.Group>(null);
@@ -264,7 +266,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     planeRef.current.position.copy(virtualCam.position);
     planeRef.current.quaternion.copy(virtualCam.quaternion);
 
-    onPlanePositionChange?.(virtualCam.position);
+    onPlanePositionChange?.(virtualCam.position, virtualCam.quaternion);
 
     const isSimpleMode = currentMode === "simple";
 
@@ -405,7 +407,34 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     recalibrateGyro,
   }), [camera, syncFromCamera, recalibrateGyro]);
 
-  const activeScene = isBoosting ? speedScene : defaultScene;
+  const coloredScene = useMemo(() => {
+    const activeScene = isBoosting ? speedScene : defaultScene;
+    const clone = activeScene.clone();
+    
+    if (planeColor) {
+      clone.traverse((child) => {
+        if (child instanceof THREE.Mesh && child.material) {
+          if (Array.isArray(child.material)) {
+            child.material = child.material.map((mat) => {
+              const newMat = mat.clone();
+              if ('color' in newMat) {
+                newMat.color = new THREE.Color(planeColor);
+              }
+              return newMat;
+            });
+          } else {
+            const newMat = child.material.clone();
+            if ('color' in newMat) {
+              newMat.color = new THREE.Color(planeColor);
+            }
+            child.material = newMat;
+          }
+        }
+      });
+    }
+    
+    return clone;
+  }, [isBoosting, speedScene, defaultScene, planeColor]);
 
   const isDemoActive = demoState.active;
   const showPlane = !isDemoActive && currentMode === "elytra";
@@ -414,7 +443,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     <group ref={planeRef}>
       {showPlane && (
         <primitive
-          object={activeScene.clone()}
+          object={coloredScene}
           scale={[PLANE_SCALE, PLANE_SCALE, PLANE_SCALE]}
           rotation={[0, -Math.PI / 2, 0]}
         />

@@ -14,3 +14,5 @@ export type { DistrictDebugInfo } from "./DistrictLyriaAudio";
 export { TokyoSpatialAudio } from "./TokyoSpatialAudio";
 export type { TokyoSpatialAudioProps } from "./TokyoSpatialAudio";
 
+export { OtherPlayers } from "./OtherPlayers";
+

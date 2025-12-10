@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "server": "npx tsx multiplayer-server.ts"
   },
   "dependencies": {
     "3d-tiles-renderer": "^0.4.18",
@@ -38,6 +39,7 @@
     "three-stdlib": "^2.36.1",
     "tone": "^15.1.22",
     "use-error-boundary": "^2.0.6",
+    "ws": "^8.18.3",
     "zustand": "^5.0.8"
   },
   "devDependencies": {
@@ -50,6 +52,7 @@
     "@types/react": "^19.2.6",
     "@types/react-dom": "^19.2.3",
     "@types/three": "^0.180.0",
+    "@types/ws": "^8.18.1",
     "eslint": "^9.39.1",
     "eslint-config-next": "15.5.3",
     "happy-dom": "^12.10.3",
