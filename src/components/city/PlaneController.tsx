@@ -19,6 +19,15 @@ import { type DemoWaypoint } from "@/config/tokyo-config";
 export interface PlaneControllerHandle {
   teleportTo: (position: THREE.Vector3, lookAt: THREE.Vector3) => void;
   flyTo: (position: THREE.Vector3, lookAt: THREE.Vector3, duration?: number) => void;
+  recalibrateGyro: () => void;
+}
+
+export interface GyroState {
+  isActive: boolean;
+  isAvailable: boolean;
+  isEnabled: boolean;
+  needsPermission: boolean;
+  isMobile: boolean;
 }
 
 const CAMERA_DISTANCE = 0.6; // distance behind plane
@@ -47,6 +56,7 @@ interface PlaneControllerProps {
   onDemoStateChange?: (state: DemoState) => void;
   onDemoWaypointReached?: (waypoint: DemoWaypoint) => void;
   onDemoComplete?: () => void;
+  onGyroStateChange?: (state: GyroState) => void;
 }
 
 const COLLISION_DISTANCE = 2;
@@ -68,6 +78,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   onDemoStateChange,
   onDemoWaypointReached,
   onDemoComplete,
+  onGyroStateChange,
 }, ref) {
   const { camera } = useThree();
   const planeRef = useRef<THREE.Group>(null);
@@ -113,13 +124,29 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   }, [demoState, onDemoStateChange]);
 
   useEffect(() => {
+    const initialYaw = -69 * (Math.PI / 180);
+    const initialEuler = new THREE.Euler(0, initialYaw, 0, "YXZ");
+    
     virtualCameraRef.current.position.copy(camera.position);
-    virtualCameraRef.current.quaternion.copy(camera.quaternion);
+    virtualCameraRef.current.quaternion.setFromEuler(initialEuler);
     smoothCameraPos.current.copy(camera.position);
-    smoothCameraQuat.current.copy(camera.quaternion);
+    smoothCameraQuat.current.copy(virtualCameraRef.current.quaternion);
+    
+    camera.quaternion.copy(virtualCameraRef.current.quaternion);
   }, [camera]);
 
-  const { update: updateFlight, keysRef, currentMode, syncFromCamera } = useFlight({
+  const { 
+    update: updateFlight, 
+    keysRef, 
+    currentMode, 
+    syncFromCamera,
+    isMobile,
+    isGyroActive,
+    isGyroAvailable,
+    isGyroEnabled,
+    needsGyroPermission,
+    recalibrateGyro,
+  } = useFlight({
     camera: virtualCameraRef.current as unknown as THREE.Camera,
     config: {
       mode: "elytra",
@@ -136,10 +163,24 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       bankSpeedMax: 2.5 * PLANE_RESPONSIVENESS,
       pitchSpeedMin: 0.6 * PLANE_RESPONSIVENESS,
       pitchSpeedMax: 2.0 * PLANE_RESPONSIVENESS,
+      enableGyroscope: true,
+      invertGyroPitch: false, // phone down → plane pitches down (natural)
+      gyroSensitivity: 0.4, // reduced for subtle control
+      gyroDeadZone: 8, // ignore small tilts (degrees)
     },
     onSpeedChange,
     onModeChange,
   });
+
+  useEffect(() => {
+    onGyroStateChange?.({
+      isActive: isGyroActive,
+      isAvailable: isGyroAvailable,
+      isEnabled: isGyroEnabled,
+      needsPermission: needsGyroPermission,
+      isMobile,
+    });
+  }, [isGyroActive, isGyroAvailable, isGyroEnabled, needsGyroPermission, isMobile, onGyroStateChange]);
 
   useEffect(() => {
     if (!demoState.active) return;
@@ -361,7 +402,8 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       };
       animate();
     },
-  }), [camera, syncFromCamera]);
+    recalibrateGyro,
+  }), [camera, syncFromCamera, recalibrateGyro]);
 
   const activeScene = isBoosting ? speedScene : defaultScene;
 

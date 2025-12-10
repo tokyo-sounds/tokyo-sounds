@@ -15,7 +15,7 @@ import { TIME_OF_DAY_PRESETS, DEMO_WAYPOINTS, TOKYO_CENTER, type District, type 
 import { GoogleTilesScene } from "@/components/city/GoogleTilesScene";
 import { DistrictLyriaAudio, type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
-import { PlaneController, type PlaneControllerHandle } from "@/components/city/PlaneController";
+import { PlaneController, type PlaneControllerHandle, type GyroState } from "@/components/city/PlaneController";
 import { LocationSearch } from "@/components/city/LocationSearch";
 import { clearVisitedFlag, type DemoState } from "@/hooks/useDemoFlythrough";
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
@@ -47,9 +47,14 @@ interface CompassBarProps {
   apiKey: string;
   onTeleport: (lat: number, lng: number, alt: number) => void;
   searchDisabled?: boolean;
+  isGyroActive?: boolean;
+  isGyroEnabled?: boolean;
+  isGyroAvailable?: boolean;
+  isMobile?: boolean;
+  onRecalibrateGyro?: () => void;
 }
 
-function CompassBar({ heading, pitch, roll, apiKey, onTeleport, searchDisabled }: CompassBarProps) {
+function CompassBar({ heading, pitch, roll, apiKey, onTeleport, searchDisabled, isGyroActive, isGyroEnabled, isGyroAvailable, isMobile, onRecalibrateGyro }: CompassBarProps) {
   const directions = [
     { label: "N", bearing: 0 },
     { label: "NE", bearing: 45 },
@@ -85,6 +90,31 @@ function CompassBar({ heading, pitch, roll, apiKey, onTeleport, searchDisabled }
   return (
     <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/70 rounded px-4 py-2 text-white text-xs font-mono">
       <div className="flex items-center justify-center gap-4 mb-1">
+        {isMobile &&(isGyroActive || isGyroEnabled || isGyroAvailable) && onRecalibrateGyro && (
+          <button
+            onClick={onRecalibrateGyro}
+            className="p-1.5 hover:bg-white/10 rounded transition-colors"
+            title="Recalibrate gyroscope"
+          >
+            <svg 
+              width="16" 
+              height="16" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              strokeWidth="2" 
+              strokeLinecap="round" 
+              strokeLinejoin="round"
+              className="text-gray-400"
+            >
+              <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
+              <path d="M2 12c0-3 2-5 5-5" />
+              <path d="M22 12c0 3-2 5-5 5" />
+              <polyline points="5 4 2 7 5 10" />
+              <polyline points="19 20 22 17 19 14" />
+            </svg>
+          </button>
+        )}
         <div className="flex items-center gap-1 w-16">
           <span className="text-white/50">R</span>
           <span className={`w-10 text-right ${Math.abs(roll) > 30 ? "text-amber-400" : "text-white/70"}`}>
@@ -502,6 +532,13 @@ export default function TokyoPage() {
   const [roll, setRoll] = useState(0);
   const [collisionDistance, setCollisionDistance] = useState<number | null>(null);
   const [demoState, setDemoState] = useState<DemoState | null>(null);
+  const [gyroState, setGyroState] = useState<GyroState>({
+    isActive: false,
+    isAvailable: false,
+    isEnabled: false,
+    needsPermission: false,
+    isMobile: false,
+  });
   
   const collisionGroupRef = useRef<THREE.Group | null>(null);
   const planeControllerRef = useRef<PlaneControllerHandle | null>(null);
@@ -514,11 +551,38 @@ export default function TokyoPage() {
   
   const lyriaApiKey = storeApiKey || ENV_LYRIA_API_KEY;
 
-  const handleStart = useCallback(() => {
+  const handleStart = useCallback(async () => {
     if (!mapsApiKey) {
       alert("Please enter your Google Maps API key");
       return;
     }
+    
+    try {
+      const DOE = window.DeviceOrientationEvent as any;
+      const DME = window.DeviceMotionEvent as any;
+      
+      if (typeof DOE?.requestPermission === "function") {
+        try {
+          const permission = await DOE.requestPermission();
+          if (permission === "granted") {
+            setGyroState(prev => ({ ...prev, isEnabled: true, needsPermission: false }));
+          }
+        } catch (e) {
+          console.error("[TokyoPage] Failed to request gyroscope permission:", e);
+        }
+      }
+      
+      if (typeof DME?.requestPermission === "function") {
+        try {
+          await DME.requestPermission();
+        } catch (e) {
+          console.error("[TokyoPage] Failed to request motion permission:", e);
+        }
+      }
+    } catch (e) {
+      console.error("[TokyoPage] Error requesting device permissions:", e);
+    }
+    
     setStatus("Loading...");
     setStarted(true);
   }, [mapsApiKey]);
@@ -687,6 +751,7 @@ export default function TokyoPage() {
             onCollision={(dist: number) => setCollisionDistance(dist)}
             demoEnabled={debugOptions.demoEnabled}
             onDemoStateChange={setDemoState}
+            onGyroStateChange={setGyroState}
           />
 
           <FlightBoundsHelper visible={debugOptions.showBounds} />
@@ -719,6 +784,11 @@ export default function TokyoPage() {
         apiKey={mapsApiKey}
         onTeleport={handleTeleport}
         searchDisabled={demoState?.active}
+        isGyroActive={gyroState.isActive}
+        isGyroEnabled={gyroState.isEnabled}
+        isGyroAvailable={gyroState.isAvailable}
+        isMobile={gyroState.isMobile}
+        onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
       />
 
       <div className="absolute top-4 left-4 bg-black/70 rounded p-3 text-white text-xs font-mono">

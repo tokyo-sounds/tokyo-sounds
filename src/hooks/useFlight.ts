@@ -143,6 +143,7 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
   const rollAxis = useRef(new THREE.Vector3(0, 0, 1));
 
   const [isPointerLocked, setIsPointerLocked] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const mouseDeltaRef = useRef({ x: 0, y: 0 });
 
   const [isGyroAvailable, setIsGyroAvailable] = useState(false);
@@ -338,10 +339,13 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
   }, []);
 
   useEffect(() => {
-    if (!config.enableGyroscope || !isGyroAvailable) return;
+    if (!config.enableGyroscope) return;
+    
+    const available = isGyroscopeAvailable();
+    if (!available) return;
 
     const handleDeviceOrientation = (e: DeviceOrientationEvent) => {
-      if (e.alpha === null || e.beta === null || e.gamma === null) return;
+      if (e.beta === null || e.gamma === null) return;
 
       if (!gyroActiveRef.current) {
         gyroActiveRef.current = true;
@@ -350,7 +354,7 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
         setIsGyroActive(true);
       }
 
-      if (gyroRef.current.initialAlpha === null) {
+      if (gyroRef.current.initialBeta === null) {
         gyroRef.current.initialAlpha = e.alpha;
         gyroRef.current.initialBeta = e.beta;
       }
@@ -367,7 +371,55 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
       gyroActiveRef.current = false;
       setIsGyroActive(false);
     };
-  }, [config.enableGyroscope, isGyroAvailable]);
+  }, [config.enableGyroscope]);
+
+  useEffect(() => {
+    const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+    setIsMobile(isTouchDevice);
+    if (!isTouchDevice) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "BUTTON" || target.tagName === "INPUT" || target.closest("button") || target.closest("input")) {
+        return;
+      }
+
+      const touch = e.touches[0];
+      if (!touch) return;
+
+      const screenHeight = window.innerHeight;
+      const touchY = touch.clientY;
+      const isTopHalf = touchY < screenHeight / 2;
+
+      if (isTopHalf) {
+        keysRef.current.boost = true;
+      } else {
+        keysRef.current.freeze = !keysRef.current.freeze;
+      }
+    };
+
+    const handleTouchEnd = (e: TouchEvent) => {
+      let hasTopTouch = false;
+      for (let i = 0; i < e.touches.length; i++) {
+        const touch = e.touches[i];
+        if (touch.clientY < window.innerHeight / 2) {
+          hasTopTouch = true;
+          break;
+        }
+      }
+      if (!hasTopTouch) {
+        keysRef.current.boost = false;
+      }
+    };
+
+    window.addEventListener("touchstart", handleTouchStart, { passive: true });
+    window.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, []);
 
   const requestGyroPermission = useCallback(async () => {
     const granted = await requestGyroscopePermission();
@@ -405,20 +457,22 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
         const deadZone = config.gyroDeadZone;
 
         const betaNeutral = 50; // degrees typical holding angle
-        const betaRange = 35; // degrees for full input
+        const betaRange = 50; // degrees beyond dead zone for full input
         const betaDelta = (gyro.beta ?? betaNeutral) - betaNeutral;
         
         if (Math.abs(betaDelta) > deadZone) {
-          const normalizedBeta = Math.max(-1, Math.min(1, betaDelta / betaRange));
+          const effectiveDelta = Math.sign(betaDelta) * (Math.abs(betaDelta) - deadZone);
+          const normalizedBeta = Math.max(-1, Math.min(1, effectiveDelta / betaRange));
           const pitchMultiplier = config.invertGyroPitch ? -1 : 1;
           rawPitchInput += normalizedBeta * config.gyroSensitivity * pitchMultiplier;
         }
 
-        const gammaRange = 35; // degrees for full input
+        const gammaRange = 70; // degrees beyond dead zone for full input
         const gammaDelta = gyro.gamma ?? 0;
         
         if (Math.abs(gammaDelta) > deadZone) {
-          const normalizedGamma = Math.max(-1, Math.min(1, gammaDelta / gammaRange));
+          const effectiveDelta = Math.sign(gammaDelta) * (Math.abs(gammaDelta) - deadZone);
+          const normalizedGamma = Math.max(-1, Math.min(1, effectiveDelta / gammaRange));
           const bankMultiplier = config.invertGyroYaw ? -1 : 1;
           rawBankInput += normalizedGamma * config.gyroSensitivity * bankMultiplier;
         }
@@ -754,6 +808,7 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
     keysRef,
     currentMode,
     isPointerLocked,
+    isMobile,
     isGyroActive,
     isGyroAvailable,
     isGyroEnabled,
