@@ -189,6 +189,11 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.repeat) return;
+      
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+        return;
+      }
 
       if (e.code === config.toggleModeKey) {
         handleToggleMode();
@@ -233,6 +238,11 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
     };
 
     const handleKeyUp = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) {
+        return;
+      }
+      
       switch (e.code) {
         case "KeyW":
           keysRef.current.pitchUp = false;
@@ -702,6 +712,18 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
     setMode(modeRef.current === "elytra" ? "simple" : "elytra");
   }, [setMode]);
 
+  const syncFromCamera = useCallback(() => {
+    if (!camera) return;
+    
+    tempEuler.current.setFromQuaternion(camera.quaternion, "YXZ");
+    targetPitchRef.current = tempEuler.current.x;
+    smoothPitchRef.current = tempEuler.current.x;
+    targetYawRef.current = tempEuler.current.y;
+    smoothYawRef.current = tempEuler.current.y;
+    targetBankRef.current = 0;
+    smoothBankRef.current = 0;
+  }, [camera]);
+
   const getState = useCallback((): FlightState => {
     return {
       speed: currentSpeedRef.current,
@@ -726,6 +748,7 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
     toggleMode,
     flyTo,
     cancelFlyTo,
+    syncFromCamera,
     requestGyroPermission,
     recalibrateGyro,
     keysRef,

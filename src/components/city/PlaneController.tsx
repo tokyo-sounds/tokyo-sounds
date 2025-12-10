@@ -7,7 +7,7 @@
  * Supports demo flythrough mode for first-time visitors
  */
 
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useImperativeHandle, forwardRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -15,6 +15,11 @@ import { useFlight } from "@/hooks/useFlight";
 import { useDemoFlythrough, type DemoState } from "@/hooks/useDemoFlythrough";
 import { type MovementMode } from "@/lib/flight";
 import { type DemoWaypoint } from "@/config/tokyo-config";
+
+export interface PlaneControllerHandle {
+  teleportTo: (position: THREE.Vector3, lookAt: THREE.Vector3) => void;
+  flyTo: (position: THREE.Vector3, lookAt: THREE.Vector3, duration?: number) => void;
+}
 
 const CAMERA_DISTANCE = 0.6; // distance behind plane
 const CAMERA_HEIGHT = 0.2; // height above plane
@@ -48,7 +53,7 @@ const COLLISION_DISTANCE = 2;
 const COLLISION_PUSH_STRENGTH = 1;
 const NUM_COLLISION_RAYS = 8;
 
-export function PlaneController({
+export const PlaneController = forwardRef<PlaneControllerHandle, PlaneControllerProps>(function PlaneController({
   onSpeedChange,
   onModeChange,
   onCameraYChange,
@@ -63,7 +68,7 @@ export function PlaneController({
   onDemoStateChange,
   onDemoWaypointReached,
   onDemoComplete,
-}: PlaneControllerProps) {
+}, ref) {
   const { camera } = useThree();
   const planeRef = useRef<THREE.Group>(null);
   const frameCountRef = useRef(0);
@@ -90,6 +95,8 @@ export function PlaneController({
 
   const smoothRoll = useRef(0);
   const smoothLag = useRef(CAMERA_LAG);
+  
+  const flyToActiveRef = useRef(false);
 
   const {
     state: demoState,
@@ -112,7 +119,7 @@ export function PlaneController({
     smoothCameraQuat.current.copy(camera.quaternion);
   }, [camera]);
 
-  const { update: updateFlight, keysRef, currentMode } = useFlight({
+  const { update: updateFlight, keysRef, currentMode, syncFromCamera } = useFlight({
     camera: virtualCameraRef.current as unknown as THREE.Camera,
     config: {
       mode: "elytra",
@@ -152,19 +159,20 @@ export function PlaneController({
 
     const virtualCam = virtualCameraRef.current;
     const isDemoActive = demoState.active;
+    const isFlyToActive = flyToActiveRef.current;
 
     if (isDemoActive) {
       updateDemo(virtualCam, delta);
-    } else {
+    } else if (!isFlyToActive) {
       updateFlight(delta);
     }
 
-    const boosting = !isDemoActive && keysRef.current.boost;
+    const boosting = !isDemoActive && !isFlyToActive && keysRef.current.boost;
     if (boosting !== isBoosting) {
       setIsBoosting(boosting);
     }
 
-    if (!isDemoActive && collisionEnabled && collisionGroup) {
+    if (!isDemoActive && !isFlyToActive && collisionEnabled && collisionGroup) {
       _forward.set(0, 0, -1).applyQuaternion(virtualCam.quaternion);
       _right.set(1, 0, 0).applyQuaternion(virtualCam.quaternion);
       _up.set(0, 1, 0).applyQuaternion(virtualCam.quaternion);
@@ -219,7 +227,8 @@ export function PlaneController({
 
     const isSimpleMode = currentMode === "simple";
 
-    if (isDemoActive) {
+    if (isFlyToActive) {
+    } else if (isDemoActive) {
       smoothCameraPos.current.lerp(virtualCam.position, 1 - DEMO_CAMERA_LAG);
       camera.position.copy(smoothCameraPos.current);
 
@@ -272,6 +281,88 @@ export function PlaneController({
     }
   });
 
+  useImperativeHandle(ref, () => ({
+    teleportTo: (position: THREE.Vector3, lookAt: THREE.Vector3) => {
+      const virtualCam = virtualCameraRef.current;
+      virtualCam.position.copy(position);
+      virtualCam.lookAt(lookAt);
+      smoothCameraPos.current.copy(position);
+      smoothCameraQuat.current.copy(virtualCam.quaternion);
+      camera.position.copy(position);
+      camera.lookAt(lookAt);
+    },
+    flyTo: (position: THREE.Vector3, lookAt: THREE.Vector3, duration?: number) => {
+      const virtualCam = virtualCameraRef.current;
+      const startPos = virtualCam.position.clone();
+      const startQuat = virtualCam.quaternion.clone();
+      
+      flyToActiveRef.current = true;
+      
+      const distance = startPos.distanceTo(position);
+      const adaptiveDuration = duration ?? Math.max(1.5, Math.min(4, distance / 500));
+      
+      const horizontalDistance = Math.sqrt(
+        (position.x - startPos.x) ** 2 + (position.z - startPos.z) ** 2
+      );
+      
+      const arcHeight = Math.min(150, horizontalDistance * 0.1);
+      
+      const travelQuat = new THREE.Quaternion();
+      const up = new THREE.Vector3(0, 1, 0);
+      const lookMatrix = new THREE.Matrix4();
+      lookMatrix.lookAt(startPos, position, up);
+      travelQuat.setFromRotationMatrix(lookMatrix);
+      
+      const finalQuat = new THREE.Quaternion();
+      const finalLookMatrix = new THREE.Matrix4();
+      finalLookMatrix.lookAt(position, lookAt, up);
+      finalQuat.setFromRotationMatrix(finalLookMatrix);
+      
+      const TURN_PHASE = 0.15; // 15% turning, 85% flying with gradual orientation blend
+      
+      const startTime = performance.now();
+      
+      const animate = () => {
+        const now = performance.now();
+        const elapsed = (now - startTime) / 1000;
+        const t = Math.min(elapsed / adaptiveDuration, 1);
+        
+        const smooth = (x: number) => x * x * (3 - 2 * x);
+        
+        if (t < TURN_PHASE) {
+          const turnT = smooth(t / TURN_PHASE);
+          
+          virtualCam.position.copy(startPos);
+          virtualCam.quaternion.slerpQuaternions(startQuat, travelQuat, turnT);
+        } else {
+          const flyT = (t - TURN_PHASE) / (1 - TURN_PHASE);
+          const smoothFlyT = smooth(flyT);
+          
+          virtualCam.position.lerpVectors(startPos, position, smoothFlyT);
+          
+          const arcT = Math.sin(smoothFlyT * Math.PI);
+          virtualCam.position.y += arcHeight * arcT;
+          
+          const orientT = smoothFlyT * smoothFlyT;
+          virtualCam.quaternion.slerpQuaternions(travelQuat, finalQuat, orientT);
+        }
+        smoothCameraPos.current.copy(virtualCam.position);
+        smoothCameraQuat.current.copy(virtualCam.quaternion);
+        camera.position.copy(virtualCam.position);
+        camera.quaternion.copy(virtualCam.quaternion);
+        
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          flyToActiveRef.current = false;
+          smoothRoll.current = 0;
+          syncFromCamera();
+        }
+      };
+      animate();
+    },
+  }), [camera, syncFromCamera]);
+
   const activeScene = isBoosting ? speedScene : defaultScene;
 
   const isDemoActive = demoState.active;
@@ -288,7 +379,7 @@ export function PlaneController({
       )}
     </group>
   );
-}
+});
 
 useGLTF.preload(DEFAULT_MODEL_PATH);
 useGLTF.preload(SPEED_MODEL_PATH);

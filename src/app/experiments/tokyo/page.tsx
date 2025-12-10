@@ -11,15 +11,17 @@ import * as THREE from "three";
 import { EffectComposer, HueSaturation, BrightnessContrast, Sepia, Vignette } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 
-import { TIME_OF_DAY_PRESETS, DEMO_WAYPOINTS, type District, type TimeOfDay } from "@/config/tokyo-config";
+import { TIME_OF_DAY_PRESETS, DEMO_WAYPOINTS, TOKYO_CENTER, type District, type TimeOfDay } from "@/config/tokyo-config";
 import { GoogleTilesScene } from "@/components/city/GoogleTilesScene";
 import { DistrictLyriaAudio, type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
-import { PlaneController } from "@/components/city/PlaneController";
+import { PlaneController, type PlaneControllerHandle } from "@/components/city/PlaneController";
+import { LocationSearch } from "@/components/city/LocationSearch";
 import { clearVisitedFlag, type DemoState } from "@/hooks/useDemoFlythrough";
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
 import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
 import { type MovementMode } from "@/lib/flight";
+import { latLngAltToENU } from "@/lib/geo-utils";
 
 function Loader() {
   return (
@@ -38,7 +40,16 @@ function Loader() {
  * @param roll - Roll
  * @returns null
  */
-function CompassBar({ heading, pitch, roll }: { heading: number; pitch: number; roll: number }) {
+interface CompassBarProps {
+  heading: number;
+  pitch: number;
+  roll: number;
+  apiKey: string;
+  onTeleport: (lat: number, lng: number, alt: number) => void;
+  searchDisabled?: boolean;
+}
+
+function CompassBar({ heading, pitch, roll, apiKey, onTeleport, searchDisabled }: CompassBarProps) {
   const directions = [
     { label: "N", bearing: 0 },
     { label: "NE", bearing: 45 },
@@ -92,6 +103,15 @@ function CompassBar({ heading, pitch, roll }: { heading: number; pitch: number; 
             {pitch > 0 ? "+" : ""}{Math.round(pitch)}°
           </span>
         </div>
+
+        <LocationSearch
+          apiKey={apiKey}
+          onTeleport={onTeleport}
+          disabled={searchDisabled}
+          minimal
+          dropdownPosition="below"
+          dropdownClassName="fixed top-24 left-1/2 -translate-x-1/2"
+        />
       </div>
       
       <div className="relative w-48 h-4 overflow-hidden mx-auto">
@@ -484,6 +504,7 @@ export default function TokyoPage() {
   const [demoState, setDemoState] = useState<DemoState | null>(null);
   
   const collisionGroupRef = useRef<THREE.Group | null>(null);
+  const planeControllerRef = useRef<PlaneControllerHandle | null>(null);
 
   const {
     enabled: generativeEnabled,
@@ -502,7 +523,36 @@ export default function TokyoPage() {
     setStarted(true);
   }, [mapsApiKey]);
 
-
+  /**
+   * Teleport to a location given lat/lng/alt
+   * Positions camera behind the target (relative to current position) and above it
+   */
+  const handleTeleport = useCallback((lat: number, lng: number, alt: number) => {
+    if (!planeControllerRef.current) return;
+    
+    const targetPosition = latLngAltToENU(
+      lat, 
+      lng, 
+      alt,
+      TOKYO_CENTER.lat,
+      TOKYO_CENTER.lng,
+      0
+    );
+    
+    const CAMERA_OFFSET_DISTANCE = 150; // meters behind target
+    const CAMERA_HEIGHT = 80; // meters above target altitude
+    
+    const cameraPosition = latLngAltToENU(
+      lat - 0.0012,  // ~133m south
+      lng, 
+      alt + CAMERA_HEIGHT,
+      TOKYO_CENTER.lat,
+      TOKYO_CENTER.lng,
+      0
+    );
+    
+    planeControllerRef.current.flyTo(cameraPosition, targetPosition);
+  }, []);
 
   const handleTilesLoaded = useCallback(() => {
     setStatus("Tiles loaded");
@@ -625,6 +675,7 @@ export default function TokyoPage() {
           />
 
           <PlaneController
+            ref={planeControllerRef}
             onSpeedChange={setFlightSpeed}
             onModeChange={setMovementMode}
             onCameraYChange={setCameraY}
@@ -661,7 +712,14 @@ export default function TokyoPage() {
         </Suspense>
       </Canvas>
 
-      <CompassBar heading={heading} pitch={pitch} roll={roll} />
+      <CompassBar 
+        heading={heading} 
+        pitch={pitch} 
+        roll={roll}
+        apiKey={mapsApiKey}
+        onTeleport={handleTeleport}
+        searchDisabled={demoState?.active}
+      />
 
       <div className="absolute top-4 left-4 bg-black/70 rounded p-3 text-white text-xs font-mono">
         <div className="flex items-center gap-3 mb-2">
