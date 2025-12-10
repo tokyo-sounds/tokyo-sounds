@@ -242,6 +242,81 @@ export const GOOGLE_TILES_CONFIG = {
   maxDepth: 20,
 };
 
+export interface DemoWaypoint {
+  id: string;
+  name: string;
+  nameJa: string;
+  lat: number;
+  lng: number;
+  orbitAltitude: number; // meters above ground
+  orbitRadius: number; // meters from center
+  dwellTime: number; // seconds to orbit before moving on
+  lookAtAltitude: number; // altitude of point to look at (ground level of landmark)
+}
+
+export const DEMO_WAYPOINTS: DemoWaypoint[] = [
+  {
+    id: "shinjuku",
+    name: "Shinjuku Station",
+    nameJa: "新宿駅",
+    lat: 35.6896,
+    lng: 139.7006,
+    orbitAltitude: 150,
+    orbitRadius: 200,
+    dwellTime: 10,
+    lookAtAltitude: 50,
+  },
+  {
+    id: "shibuya",
+    name: "Shibuya Station",
+    nameJa: "渋谷駅",
+    lat: 35.6580,
+    lng: 139.7016,
+    orbitAltitude: 150,
+    orbitRadius: 200,
+    dwellTime: 10,
+    lookAtAltitude: 50,
+  },
+  {
+    id: "tokyo-tower",
+    name: "Tokyo Tower",
+    nameJa: "東京タワー",
+    lat: 35.6586,
+    lng: 139.7454,
+    orbitAltitude: 250, // Higher for the tower
+    orbitRadius: 300,
+    dwellTime: 10,
+    lookAtAltitude: 150, // Look at mid-tower height
+  },
+  {
+    id: "tokyo-station",
+    name: "Tokyo Station",
+    nameJa: "東京駅",
+    lat: 35.6812,
+    lng: 139.7671,
+    orbitAltitude: 150,
+    orbitRadius: 200,
+    dwellTime: 10,
+    lookAtAltitude: 50,
+  },
+  {
+    id: "asakusa",
+    name: "Asakusa",
+    nameJa: "浅草",
+    lat: 35.7148,
+    lng: 139.7967,
+    orbitAltitude: 150,
+    orbitRadius: 200,
+    dwellTime: 10,
+    lookAtAltitude: 50,
+  },
+];
+
+// Transition time between waypoints (seconds)
+export const DEMO_TRANSITION_TIME = 5;
+
+export const DEMO_VISITED_KEY = "tokyo-sounds-visited";
+
 // Places API configuration
 export const PLACES_API_CONFIG = {
   radius: 1000, // Search radius in meters

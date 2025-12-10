@@ -6,161 +6,19 @@
  */
 
 import { Suspense, useRef, useState, useCallback, useEffect, useMemo } from "react";
-import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 import { EffectComposer, HueSaturation, BrightnessContrast, Sepia, Vignette } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 
-import { TOKYO_DISTRICTS, TIME_OF_DAY_PRESETS, type District, type TimeOfDay } from "@/config/tokyo-config";
+import { TIME_OF_DAY_PRESETS, type District, type TimeOfDay, type DemoWaypoint } from "@/config/tokyo-config";
 import { GoogleTilesScene } from "@/components/city/GoogleTilesScene";
 import { DistrictLyriaAudio, type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
-import { useFlight } from "@/hooks/useFlight";
+import { PlaneController } from "@/components/city/PlaneController";
+import { clearVisitedFlag, type DemoState } from "@/hooks/useDemoFlythrough";
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
 import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
 import { type MovementMode } from "@/lib/flight";
-
-
-// collision detection configuration
-const COLLISION_DISTANCE = 2;
-const COLLISION_PUSH_STRENGTH = 1;
-const NUM_COLLISION_RAYS = 8;
-
-/** FlightController
- * 
- * Flight controller using the standard useFlight hook (flat world)
- * @param onSpeedChange - Callback function to handle speed change
- * @param onModeChange - Callback function to handle mode change
- * @param onCameraYChange - Callback function to handle camera Y position change
- * @param onHeadingChange - Callback function to handle heading change
- * @param onPitchChange - Callback function to handle pitch change
- * @param onRollChange - Callback function to handle roll change
- * @param collisionGroup - Collision group object
- * @param collisionEnabled - Flag to enable collision detection
- * @param onCollision - Callback function to handle collision
- * @returns null
- */
-function FlightController({
-  onSpeedChange,
-  onModeChange,
-  onCameraYChange,
-  onHeadingChange,
-  onPitchChange,
-  onRollChange,
-  collisionGroup,
-  collisionEnabled,
-  onCollision,
-}: {
-  onSpeedChange?: (speed: number) => void;
-  onModeChange?: (mode: MovementMode) => void;
-  onCameraYChange?: (y: number) => void;
-  onHeadingChange?: (heading: number) => void;
-  onPitchChange?: (pitch: number) => void;
-  onRollChange?: (roll: number) => void;
-  collisionGroup?: THREE.Group | null;
-  collisionEnabled?: boolean;
-  onCollision?: (distance: number) => void;
-}) {
-  const { camera } = useThree();
-  const frameCountRef = useRef(0);
-
-  // cached obj
-  const _forward = useRef(new THREE.Vector3()).current;
-  const _right = useRef(new THREE.Vector3()).current;
-  const _up = useRef(new THREE.Vector3()).current;
-  const _rayDir = useRef(new THREE.Vector3()).current;
-  const _pushBack = useRef(new THREE.Vector3()).current;
-  const _raycaster = useRef(new THREE.Raycaster()).current;
-  const _prevPosition = useRef(new THREE.Vector3()).current;
-  const _euler = useRef(new THREE.Euler()).current;
-
-  const { update } = useFlight({
-    camera,
-    config: {
-      mode: "elytra",
-      baseSpeed: 60,
-      minSpeed: 20,
-      maxSpeed: 300,
-      boostImpulse: 80,
-      gravityAccel: 50,
-      gravityDecel: 35,
-      drag: 0.985,
-      enableBounds: false,
-    },
-    onSpeedChange,
-    onModeChange,
-  });
-
-  useFrame((_, delta) => {
-    _prevPosition.copy(camera.position);
-    update(delta);
-    
-    if (collisionEnabled && collisionGroup) {
-      _forward.set(0, 0, -1).applyQuaternion(camera.quaternion);
-      _right.set(1, 0, 0).applyQuaternion(camera.quaternion);
-      _up.set(0, 1, 0).applyQuaternion(camera.quaternion);
-      
-      let closestHit = Infinity;
-      _pushBack.set(0, 0, 0);
-      
-      for (let i = 0; i < NUM_COLLISION_RAYS; i++) {
-        const angle = (i / NUM_COLLISION_RAYS) * Math.PI * 2;
-        const coneAngle = 0.3; // cone spread in radians
-        
-        _rayDir.copy(_forward);
-        _rayDir.addScaledVector(_right, Math.cos(angle) * coneAngle);
-        _rayDir.addScaledVector(_up, Math.sin(angle) * coneAngle);
-        _rayDir.normalize();
-        
-        _raycaster.set(camera.position, _rayDir);
-        _raycaster.far = COLLISION_DISTANCE * 3;
-        
-        const intersects = _raycaster.intersectObject(collisionGroup, true);
-        
-        if (intersects.length > 0) {
-          const hit = intersects[0];
-          if (hit.distance < COLLISION_DISTANCE) {
-            closestHit = Math.min(closestHit, hit.distance);
-            
-            const pushStrength = (COLLISION_DISTANCE - hit.distance) / COLLISION_DISTANCE;
-            _pushBack.addScaledVector(_rayDir, -pushStrength * COLLISION_PUSH_STRENGTH);
-          }
-        }
-      }
-      
-      _raycaster.set(camera.position, _forward);
-      _raycaster.far = COLLISION_DISTANCE * 5;
-      const forwardHits = _raycaster.intersectObject(collisionGroup, true);
-      
-      if (forwardHits.length > 0 && forwardHits[0].distance < COLLISION_DISTANCE) {
-        closestHit = Math.min(closestHit, forwardHits[0].distance);
-        const pushStrength = (COLLISION_DISTANCE - forwardHits[0].distance) / COLLISION_DISTANCE;
-        _pushBack.addScaledVector(_forward, -pushStrength * COLLISION_PUSH_STRENGTH * 2);
-      }
-      
-      if (_pushBack.lengthSq() > 0.001) {
-        camera.position.add(_pushBack);
-        onCollision?.(closestHit);
-      }
-    }
-    
-    frameCountRef.current++;
-    if (frameCountRef.current % 10 === 0) {
-      onCameraYChange?.(camera.position.y);
-      
-      _forward.set(0, 0, -1).applyQuaternion(camera.quaternion);
-      const heading = Math.atan2(_forward.x, -_forward.z) * (180 / Math.PI);
-      onHeadingChange?.((heading + 360) % 360);
-      
-      _euler.setFromQuaternion(camera.quaternion, "YXZ");
-      const pitch = _euler.x * (180 / Math.PI);
-      const roll = _euler.z * (180 / Math.PI);
-      onPitchChange?.(pitch);
-      onRollChange?.(roll);
-    }
-  });
-
-  return null;
-}
 
 function Loader() {
   return (
@@ -418,6 +276,7 @@ interface DebugOptions {
   wireframe: boolean;
   showBounds: boolean;
   collision: boolean;
+  demoEnabled: boolean;
 }
 
 function DebugMenu({ 
@@ -522,6 +381,18 @@ function DebugMenu({
           />
           <span className="text-white/70">Collision</span>
         </label>
+
+        <div className="mt-2 pt-2 border-t border-white/20">
+          <button
+            onClick={() => {
+              clearVisitedFlag();
+              window.location.reload();
+            }}
+            className="w-full px-2 py-1 bg-fuchsia-500/30 hover:bg-fuchsia-500/50 rounded text-[10px] text-fuchsia-300 transition-colors"
+          >
+            Restart Demo Tour
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -599,13 +470,15 @@ export default function TokyoPage() {
     showMeshes: true,
     wireframe: false,
     showBounds: false,
-    collision: true,  // default
+    collision: true,
+    demoEnabled: true,
   });
   const [cameraY, setCameraY] = useState(200);
   const [heading, setHeading] = useState(0);
   const [pitch, setPitch] = useState(0);
   const [roll, setRoll] = useState(0);
   const [collisionDistance, setCollisionDistance] = useState<number | null>(null);
+  const [demoState, setDemoState] = useState<DemoState | null>(null);
   
   const collisionGroupRef = useRef<THREE.Group | null>(null);
 
@@ -749,7 +622,7 @@ export default function TokyoPage() {
             collisionGroupRef={collisionGroupRef}
           />
 
-          <FlightController
+          <PlaneController
             onSpeedChange={setFlightSpeed}
             onModeChange={setMovementMode}
             onCameraYChange={setCameraY}
@@ -758,7 +631,9 @@ export default function TokyoPage() {
             onRollChange={setRoll}
             collisionGroup={collisionGroupRef.current}
             collisionEnabled={debugOptions.collision}
-            onCollision={(dist) => setCollisionDistance(dist)}
+            onCollision={(dist: number) => setCollisionDistance(dist)}
+            demoEnabled={debugOptions.demoEnabled}
+            onDemoStateChange={setDemoState}
           />
 
           <FlightBoundsHelper visible={debugOptions.showBounds} />
@@ -802,6 +677,28 @@ export default function TokyoPage() {
       </div>
 
       {currentDistrict && <DistrictIndicator district={currentDistrict} />}
+
+      {demoState?.active && (
+        <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 bg-black/80 rounded-lg px-6 py-4 text-white text-center">
+          <div className="text-fuchsia-400 text-lg font-bold mb-1">
+            {demoState.currentWaypoint?.nameJa || "Tour"}
+          </div>
+          <div className="text-white/70 text-sm mb-2">
+            {demoState.currentWaypoint?.name || ""}
+          </div>
+          <div className="flex items-center justify-center gap-2 text-xs text-white/50">
+            <span>{demoState.phase === "transitioning" ? "Flying to..." : demoState.phase === "orbiting" ? "Orbiting" : "Returning..."}</span>
+            <span className="text-white/30">|</span>
+            <span>Press ESC or SPACE to skip</span>
+          </div>
+          <div className="mt-2 w-full bg-white/20 rounded-full h-1">
+            <div 
+              className="bg-fuchsia-500 h-1 rounded-full transition-all duration-200"
+              style={{ width: `${(demoState.currentWaypointIndex / 5) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {generativeEnabled && districtDebug.length > 0 && (
         <DistrictDebugPanel
