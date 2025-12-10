@@ -226,14 +226,320 @@ export const AUDIO_POI_TYPES = [
 
 // audio file mappings for POI types
 export const POI_AUDIO_MAPPINGS: Record<string, string[]> = {
-  train_station: ["/audio/train-apraoching-ikebukuro.mp3", "/audio/bilingual-train-annoucement.mp3"],
-  subway_station: ["/audio/train-apraoching-ikebukuro.mp3"],
+  train_station: ["/audio/池袋/train-apraoching-ikebukuro.mp3", "/audio/池袋/bilingual-train-annoucement.mp3"],
+  subway_station: ["/audio/池袋/train-apraoching-ikebukuro.mp3"],
   // temple: ["/audio/tokyo-street.mp3"], // TODO: Add temple audio
   // shrine: ["/audio/tokyo-street.mp3"], // TODO: Add shrine audio
   shopping_mall: ["/audio/tokyo-street.mp3"],
   default: ["/audio/tokyo-street.mp3"],
-  // TODO: add the rest of the audio files
 };
+
+/**
+ * Spatial audio source definition
+ * Each source has a location (lat/lng) and an audio file to play
+ */
+export interface SpatialAudioSource {
+  id: string;
+  name: string;
+  nameJa: string;
+  lat: number;
+  lng: number;
+  alt: number;
+  src: string;
+  volume: number;
+  refDistance: number;
+  maxDistance: number;
+  loop: boolean;
+}
+
+/**
+ * All spatial audio sources for Tokyo
+ * Placed at their corresponding real-world locations
+ */
+export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
+  // === 池袋 (Ikebukuro) ===
+  {
+    id: "ikebukuro_station",
+    name: "Ikebukuro Station",
+    nameJa: "池袋駅",
+    lat: 35.7295,
+    lng: 139.7109,
+    alt: 30,
+    src: "/audio/池袋/ikebukuro_station.mp3",
+    volume: 0.8,
+    refDistance: 30,
+    maxDistance: 400,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_train_announcement",
+    name: "Train Announcement",
+    nameJa: "電車アナウンス",
+    lat: 35.7298,
+    lng: 139.7105,
+    alt: 25,
+    src: "/audio/池袋/bilingual-train-annoucement.mp3",
+    volume: 0.7,
+    refDistance: 20,
+    maxDistance: 300,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_train_approaching",
+    name: "Train Approaching",
+    nameJa: "電車接近",
+    lat: 35.7292,
+    lng: 139.7112,
+    alt: 25,
+    src: "/audio/池袋/train-apraoching-ikebukuro.mp3",
+    volume: 0.7,
+    refDistance: 25,
+    maxDistance: 350,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_gacha",
+    name: "Gacha Machine",
+    nameJa: "ガチャ",
+    lat: 35.7288,
+    lng: 139.7095,
+    alt: 20,
+    src: "/audio/池袋/ガチャ.m4a",
+    volume: 0.6,
+    refDistance: 15,
+    maxDistance: 150,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_game_center",
+    name: "Game Center",
+    nameJa: "ゲームセンター",
+    lat: 35.7301,
+    lng: 139.7098,
+    alt: 25,
+    src: "/audio/池袋/ゲームセンター.m4a",
+    volume: 0.7,
+    refDistance: 20,
+    maxDistance: 200,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_pachinko",
+    name: "Pachinko",
+    nameJa: "パチンコ",
+    lat: 35.7305,
+    lng: 139.7115,
+    alt: 20,
+    src: "/audio/池袋/パチンコ.m4a",
+    volume: 0.7,
+    refDistance: 20,
+    maxDistance: 180,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_bic_camera_1",
+    name: "Bic Camera",
+    nameJa: "ビックカメラ",
+    lat: 35.7290,
+    lng: 139.7120,
+    alt: 30,
+    src: "/audio/池袋/ビックカメラ 池袋カメラ・パソコン館.m4a",
+    volume: 0.6,
+    refDistance: 25,
+    maxDistance: 250,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_bic_camera_2",
+    name: "Bic Camera 2",
+    nameJa: "ビックカメラ２",
+    lat: 35.7283,
+    lng: 139.7102,
+    alt: 30,
+    src: "/audio/池袋/ビックカメラ 池袋カメラ・パソコン館 2.m4a",
+    volume: 0.6,
+    refDistance: 25,
+    maxDistance: 250,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_famima_1",
+    name: "FamilyMart",
+    nameJa: "ファミマ",
+    lat: 35.7278,
+    lng: 139.7108,
+    alt: 15,
+    src: "/audio/池袋/ファミマ.m4a",
+    volume: 0.5,
+    refDistance: 10,
+    maxDistance: 100,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_famima_2",
+    name: "FamilyMart 2",
+    nameJa: "ファミマ２",
+    lat: 35.7310,
+    lng: 139.7095,
+    alt: 15,
+    src: "/audio/池袋/ファミマ２.m4a",
+    volume: 0.5,
+    refDistance: 10,
+    maxDistance: 100,
+    loop: true,
+  },
+  {
+    id: "ikebukuro_money_exchange",
+    name: "Money Exchange",
+    nameJa: "両替",
+    lat: 35.7296,
+    lng: 139.7118,
+    alt: 20,
+    src: "/audio/池袋/両替.m4a",
+    volume: 0.5,
+    refDistance: 12,
+    maxDistance: 120,
+    loop: true,
+  },
+
+  // === 秋葉原 (Akihabara) ===
+  {
+    id: "akihabara_train_departing",
+    name: "Train Departing",
+    nameJa: "電車発車",
+    lat: 35.6984,
+    lng: 139.7731,
+    alt: 25,
+    src: "/audio/秋葉原/akihabara_train_departing.mp3",
+    volume: 0.7,
+    refDistance: 25,
+    maxDistance: 350,
+    loop: true,
+  },
+  {
+    id: "akihabara_train_entering_1",
+    name: "Train Entering 1",
+    nameJa: "電車到着１",
+    lat: 35.6988,
+    lng: 139.7735,
+    alt: 25,
+    src: "/audio/秋葉原/akihabara_train_entering.mp3",
+    volume: 0.7,
+    refDistance: 25,
+    maxDistance: 350,
+    loop: true,
+  },
+  {
+    id: "akihabara_train_entering_2",
+    name: "Train Entering 2",
+    nameJa: "電車到着２",
+    lat: 35.6980,
+    lng: 139.7728,
+    alt: 25,
+    src: "/audio/秋葉原/akihabara_train_entering2.mp3",
+    volume: 0.7,
+    refDistance: 25,
+    maxDistance: 350,
+    loop: true,
+  },
+  {
+    id: "akihabara_train_entering_3",
+    name: "Train Entering 3",
+    nameJa: "電車到着３",
+    lat: 35.6992,
+    lng: 139.7725,
+    alt: 25,
+    src: "/audio/秋葉原/akihabara_train_entering3.mp3",
+    volume: 0.7,
+    refDistance: 25,
+    maxDistance: 350,
+    loop: true,
+  },
+  {
+    id: "akihabara_gacha",
+    name: "Gacha Machine",
+    nameJa: "ガチャ",
+    lat: 35.6978,
+    lng: 139.7740,
+    alt: 20,
+    src: "/audio/秋葉原/gacha.mp3",
+    volume: 0.6,
+    refDistance: 15,
+    maxDistance: 150,
+    loop: true,
+  },
+
+  // === 原宿 (Harajuku) ===
+  {
+    id: "harajuku_station",
+    name: "Harajuku Station",
+    nameJa: "原宿駅",
+    lat: 35.6702,
+    lng: 139.7027,
+    alt: 25,
+    src: "/audio/原宿/harajuku_station.mp3",
+    volume: 0.7,
+    refDistance: 25,
+    maxDistance: 350,
+    loop: true,
+  },
+
+  // === 中野 (Nakano) ===
+  {
+    id: "nakano_station",
+    name: "Nakano Station",
+    nameJa: "中野駅",
+    lat: 35.7056,
+    lng: 139.6656,
+    alt: 25,
+    src: "/audio/中野/中野站 东京 _ 中野站 北口前 90stereo_Freesound_[cut_12sec].mp3",
+    volume: 0.7,
+    refDistance: 25,
+    maxDistance: 350,
+    loop: true,
+  },
+  {
+    id: "nakano_ramen",
+    name: "Ramen Shop",
+    nameJa: "ラーメン屋",
+    lat: 35.7060,
+    lng: 139.6662,
+    alt: 15,
+    src: "/audio/中野/ramenya_slurping.mp3",
+    volume: 0.5,
+    refDistance: 10,
+    maxDistance: 100,
+    loop: true,
+  },
+
+  // === General Tokyo (ambient) ===
+  {
+    id: "tokyo_street_shinjuku",
+    name: "Tokyo Street (Shinjuku)",
+    nameJa: "東京の街（新宿）",
+    lat: 35.6896,
+    lng: 139.7006,
+    alt: 20,
+    src: "/audio/tokyo-street.mp3",
+    volume: 0.4,
+    refDistance: 50,
+    maxDistance: 500,
+    loop: true,
+  },
+  {
+    id: "tokyo_street_shibuya",
+    name: "Tokyo Street (Shibuya)",
+    nameJa: "東京の街（渋谷）",
+    lat: 35.6580,
+    lng: 139.7016,
+    alt: 20,
+    src: "/audio/tokyo-street.mp3",
+    volume: 0.4,
+    refDistance: 50,
+    maxDistance: 500,
+    loop: true,
+  },
+];
 
 // Google Tiles API configuration
 export const GOOGLE_TILES_CONFIG = {

@@ -11,9 +11,10 @@ import * as THREE from "three";
 import { EffectComposer, HueSaturation, BrightnessContrast, Sepia, Vignette } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 
-import { TIME_OF_DAY_PRESETS, DEMO_WAYPOINTS, type District, type TimeOfDay, type DemoWaypoint } from "@/config/tokyo-config";
+import { TIME_OF_DAY_PRESETS, DEMO_WAYPOINTS, type District, type TimeOfDay } from "@/config/tokyo-config";
 import { GoogleTilesScene } from "@/components/city/GoogleTilesScene";
 import { DistrictLyriaAudio, type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
+import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
 import { PlaneController } from "@/components/city/PlaneController";
 import { clearVisitedFlag, type DemoState } from "@/hooks/useDemoFlythrough";
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
@@ -464,6 +465,8 @@ export default function TokyoPage() {
   const [districtDebug, setDistrictDebug] = useState<DistrictDebugInfo[]>([]);
   const [districtDebugCollapsed, setDistrictDebugCollapsed] = useState(true);
   const [lyriaStatus, setLyriaStatus] = useState("Idle");
+  const [spatialAudioEnabled, setSpatialAudioEnabled] = useState(true);
+  const [spatialAudioStats, setSpatialAudioStats] = useState({ total: 0, active: 0, culled: 0 });
   
   const [debugMenuCollapsed, setDebugMenuCollapsed] = useState(true);
   const [debugOptions, setDebugOptions] = useState<DebugOptions>({
@@ -499,21 +502,7 @@ export default function TokyoPage() {
     setStarted(true);
   }, [mapsApiKey]);
 
-  // auto-start if Maps API key is set via env var
-  useEffect(() => {
-    if (ENV_MAPS_API_KEY && !started) {
-      setStarted(true);
-      setStatus("Loading...");
-    }
-  }, [started]);
 
-  // auto-enable Lyria if API key is available via env var
-  useEffect(() => {
-    if (ENV_LYRIA_API_KEY && !generativeEnabled) {
-      setGenerativeEnabled(true);
-      console.log("[Tokyo] Auto-enabled Lyria (API key found in env)");
-    }
-  }, [generativeEnabled, setGenerativeEnabled]);
 
   const handleTilesLoaded = useCallback(() => {
     setStatus("Tiles loaded");
@@ -563,6 +552,19 @@ export default function TokyoPage() {
               />
               <label htmlFor="lyria" className="text-slate-300 text-sm">
                 Enable Lyria Generative Audio
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="spatial"
+                checked={spatialAudioEnabled}
+                onChange={(e) => setSpatialAudioEnabled(e.target.checked)}
+                className="w-4 h-4 rounded bg-slate-800 border-slate-600 text-cyan-500"
+              />
+              <label htmlFor="spatial" className="text-slate-300 text-sm">
+                Enable Spatial Audio (ambient sounds)
               </label>
             </div>
 
@@ -650,6 +652,12 @@ export default function TokyoPage() {
           )}
 
           <TimeOfDayEffects />
+
+          <TokyoSpatialAudio
+            enabled={spatialAudioEnabled}
+            showDebug={debugOptions.showBounds}
+            onStatsUpdate={setSpatialAudioStats}
+          />
         </Suspense>
       </Canvas>
 
@@ -665,6 +673,14 @@ export default function TokyoPage() {
             <>
               <span className="text-white/30">|</span>
               <span className="text-white/70">♪ {lyriaStatus}</span>
+            </>
+          )}
+          {spatialAudioEnabled && spatialAudioStats.total > 0 && (
+            <>
+              <span className="text-white/30">|</span>
+              <span className="text-cyan-400/70">
+                SFX {spatialAudioStats.active}/{spatialAudioStats.total}
+              </span>
             </>
           )}
         </div>

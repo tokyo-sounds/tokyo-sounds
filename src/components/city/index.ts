@@ -11,3 +11,6 @@ export { GoogleTilesScene } from "./GoogleTilesScene";
 export { DistrictLyriaAudio } from "./DistrictLyriaAudio";
 export type { DistrictDebugInfo } from "./DistrictLyriaAudio";
 
+export { TokyoSpatialAudio } from "./TokyoSpatialAudio";
+export type { TokyoSpatialAudioProps } from "./TokyoSpatialAudio";
+
