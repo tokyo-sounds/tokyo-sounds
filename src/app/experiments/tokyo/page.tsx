@@ -531,18 +531,13 @@ function getMultiplayerUrl(): string {
   if (typeof window === "undefined") return "ws://localhost:3001";
   
   const configuredUrl = process.env.NEXT_PUBLIC_MULTIPLAYER_URL || "";
-  const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-  const isHttps = window.location.protocol === "https:";
-  const wsProtocol = isHttps ? "wss:" : "ws:";
-  
-  if (isLocalhost) {
-    return `${wsProtocol}//localhost:3001`;
-  }
   
   if (configuredUrl) {
     return configuredUrl;
   }
   
+  const isHttps = window.location.protocol === "https:";
+  const wsProtocol = isHttps ? "wss:" : "ws:";
   return `${wsProtocol}//${window.location.hostname}:3001`;
 }
 
