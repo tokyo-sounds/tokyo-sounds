@@ -11,7 +11,7 @@ import * as THREE from "three";
 import { EffectComposer, HueSaturation, BrightnessContrast, Sepia, Vignette } from "@react-three/postprocessing";
 import { BlendFunction } from "postprocessing";
 
-import { TIME_OF_DAY_PRESETS, type District, type TimeOfDay, type DemoWaypoint } from "@/config/tokyo-config";
+import { TIME_OF_DAY_PRESETS, DEMO_WAYPOINTS, type District, type TimeOfDay, type DemoWaypoint } from "@/config/tokyo-config";
 import { GoogleTilesScene } from "@/components/city/GoogleTilesScene";
 import { DistrictLyriaAudio, type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import { PlaneController } from "@/components/city/PlaneController";
@@ -694,7 +694,7 @@ export default function TokyoPage() {
           <div className="mt-2 w-full bg-white/20 rounded-full h-1">
             <div 
               className="bg-fuchsia-500 h-1 rounded-full transition-all duration-200"
-              style={{ width: `${(demoState.currentWaypointIndex / 5) * 100}%` }}
+              style={{ width: `${(demoState.currentWaypointIndex / DEMO_WAYPOINTS.length) * 100}%` }}
             />
           </div>
         </div>
