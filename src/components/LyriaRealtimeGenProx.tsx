@@ -321,7 +321,6 @@ export function LyriaRealtimeGenProx({
 
     const rawBuildingWeights = calculateBuildingWeights(cameraWorldPos);
 
-    // let isStable = true;
     for (const bw of rawBuildingWeights) {
         const prev = rawWeightsRef.current.get(bw.id);
         if (prev !== undefined && Math.abs(prev - bw.weight) > 0.5) {
