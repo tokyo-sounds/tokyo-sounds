@@ -166,7 +166,6 @@ export default function TokyoPage() {
     culled: 0,
   });
 
-  const [debugMenuCollapsed, setDebugMenuCollapsed] = useState(true);
   const [debugOptions, setDebugOptions] = useState<DebugOptions>({
     showMeshes: true,
     wireframe: false,
@@ -190,7 +189,7 @@ export default function TokyoPage() {
     isMobile: false,
   });
   const [dashboardVisible, setDashboardVisible] = useState(true);
-
+  
   const collisionGroupRef = useRef<THREE.Group | null>(null);
   const planeControllerRef = useRef<PlaneControllerHandle | null>(null);
   const localPlayerPositionRef = useRef(new THREE.Vector3(0, 200, 100));
@@ -485,10 +484,12 @@ export default function TokyoPage() {
         />
       )}
 
-      <DashboardToggleButton
-        dashboardVisible={dashboardVisible}
-        setDashboardVisible={setDashboardVisible}
-      />
+      <div className="absolute top-4 right-4 z-50">
+        <DashboardToggleButton
+          dashboardVisible={dashboardVisible}
+          setDashboardVisible={setDashboardVisible}
+        />
+      </div>
 
       {currentDistrict && <DistrictIndicator district={currentDistrict} />}
 
@@ -507,18 +508,14 @@ export default function TokyoPage() {
         onOptionsChange={(key, value) =>
           setDebugOptions((prev) => ({ ...prev, [key]: value }))
         }
-        collapsed={debugMenuCollapsed}
-        onToggle={() => setDebugMenuCollapsed(!debugMenuCollapsed)}
+        status={status}
+        movementMode={movementMode}
         cameraY={cameraY}
         collisionDistance={collisionDistance}
         apiKey={mapsApiKey}
         onTeleport={handleTeleport}
         searchDisabled={demoState?.active || false}
       />
-
-      <div className="absolute top-4 right-20 bg-black/70 text-white px-3 py-2 rounded text-xs font-mono z-50">
-        {status} | {movementMode.toUpperCase()}
-      </div>
     </div>
   );
 }

@@ -20,7 +20,7 @@ export default function DashboardToggleButton({
           variant="ghost"
           size="icon"
           onClick={() => setDashboardVisible(!dashboardVisible)}
-          className="absolute top-4 right-4 z-50 flight-dashboard-card hover:text-white"
+          className="flight-dashboard-card hover:text-white"
           aria-label={dashboardVisible ? "Hide dashboard" : "Show dashboard"}
         >
           {dashboardVisible ? (
