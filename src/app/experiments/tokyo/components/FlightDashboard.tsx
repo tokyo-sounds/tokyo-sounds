@@ -1,3 +1,5 @@
+import SpeedoMeter from "./SpeedoMeter";
+
 interface FlightDashboardProps {
   flightSpeed: number;
   generativeEnabled: boolean;
@@ -23,6 +25,7 @@ export default function FlightDashboard({
 }: FlightDashboardProps) {
   return (
     <div className="absolute top-4 left-4 bg-black/70 rounded p-3 text-white text-xs font-mono">
+      <SpeedoMeter flightSpeed={flightSpeed} />
       <div className="flex items-center gap-3 mb-2">
         <span className="text-white/70">SPD</span>
         <span
@@ -67,4 +70,4 @@ export default function FlightDashboard({
       </div>
     </div>
   );
-};
+}

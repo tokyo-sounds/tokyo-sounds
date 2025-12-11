@@ -39,6 +39,9 @@ import LandingPage from "./components/LandingPage";
 import DemoTourGuide from "./components/DemoTourGuide";
 import FlightDashboard from "./components/FlightDashboard";
 import FlightBoundsHelper from "./components/FlightBoundsHelper";
+import DistrictIndicator from "./components/DistrictIndicator";
+import DistrictDebugPanel from "./components/DistrictDebugPanel";
+import TimeOfDayEffects from "./components/TimeOfDayEffects";
 import DebugMenu from "./components/DebugMenu";
 import { GoogleTilesScene } from "@/components/city/GoogleTilesScene";
 import {
@@ -95,140 +98,6 @@ function Loader() {
   );
 }
 
-/** DistrictIndicator
- *
- * District indicator overlay
- * @param district - District
- * @returns null
- */
-function DistrictIndicator({ district }: { district: District | null }) {
-  if (!district) return null;
-
-  return (
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-      <div className="bg-black/70 px-4 py-2 rounded text-white text-center font-mono">
-        <div className="text-2xl font-bold" style={{ color: district.color }}>
-          {district.nameJa}
-        </div>
-        <div className="text-xs text-white/70">{district.name}</div>
-      </div>
-    </div>
-  );
-}
-
-/** TimeOfDayEffects
- *
- * Post-processing effects that respond to time of day
- * Applies color grading to create sunrise/sunset atmosphere
- */
-function TimeOfDayEffects() {
-  const preset = useTimeOfDayStore((state) => state.preset);
-
-  const effects = useMemo(() => {
-    const { r, g, b } = preset.colorMultiplier;
-
-    const orangeIntensity = Math.max(0, (r - b) / 1.1); // ~0 for afternoon, ~0.95 for sunset
-    const sepiaIntensity = orangeIntensity * 0.6;
-    const hueShift = -orangeIntensity * 0.12;
-    const saturationBoost = orangeIntensity * 0.35;
-    const brightnessAdjust = -orangeIntensity * 0.12;
-    const contrastBoost = orangeIntensity * 0.2;
-    const vignetteIntensity = orangeIntensity * 0.4;
-
-    return {
-      sepia: sepiaIntensity,
-      hue: hueShift,
-      saturation: saturationBoost,
-      brightness: brightnessAdjust,
-      contrast: contrastBoost,
-      vignette: vignetteIntensity,
-    };
-  }, [preset]);
-
-  return (
-    <EffectComposer multisampling={0}>
-      <Sepia intensity={effects.sepia} blendFunction={BlendFunction.NORMAL} />
-      <HueSaturation
-        blendFunction={BlendFunction.NORMAL}
-        hue={effects.hue}
-        saturation={effects.saturation}
-      />
-      <BrightnessContrast
-        brightness={effects.brightness}
-        contrast={effects.contrast}
-      />
-      <Vignette
-        offset={0.3}
-        darkness={effects.vignette}
-        blendFunction={BlendFunction.NORMAL}
-      />
-    </EffectComposer>
-  );
-}
-
-/** DistrictDebugPanel
- *
- * District debug panel
- * @param districts - Districts
- * @param collapsed - Collapsed state
- * @param onToggle - Callback function to handle toggle
- * @returns null
- */
-function DistrictDebugPanel({
-  districts,
-  collapsed,
-  onToggle,
-}: {
-  districts: DistrictDebugInfo[];
-  collapsed: boolean;
-  onToggle: () => void;
-}) {
-  if (collapsed) {
-    return (
-      <button
-        onClick={onToggle}
-        className="absolute bottom-4 left-4 bg-black/70 px-3 py-2 rounded text-white/70 hover:text-white text-xs font-mono"
-      >
-        DISTRICTS
-      </button>
-    );
-  }
-
-  const cameraLat = districts[0]?.cameraLat;
-  const cameraLng = districts[0]?.cameraLng;
-
-  return (
-    <div className="absolute bottom-4 left-4 bg-black/70 rounded p-3 text-white text-xs font-mono min-w-[220px] max-h-[350px] overflow-y-auto">
-      <div className="flex justify-between items-center mb-2">
-        <span className="text-white/70">DISTRICTS</span>
-        <button onClick={onToggle} className="text-white/50 hover:text-white">
-          ×
-        </button>
-      </div>
-
-      {cameraLat !== undefined && cameraLng !== undefined && (
-        <div className="mb-2 pb-2 border-b border-white/20 text-[10px]">
-          <span className="text-white/50">GPS: </span>
-          <span className="text-cyan-400">
-            {cameraLat.toFixed(4)}, {cameraLng.toFixed(4)}
-          </span>
-        </div>
-      )}
-
-      <div className="space-y-1">
-        {districts.slice(0, 8).map((d) => (
-          <div key={d.name} className="flex justify-between items-center">
-            <span style={{ color: d.color }}>{d.nameJa}</span>
-            <span className="text-white/50">
-              {(d.weight * 100).toFixed(0)}% ({Math.round(d.distance)}m)
-            </span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 const ENV_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 const ENV_LYRIA_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || "";
 
@@ -253,8 +122,8 @@ function getMultiplayerUrl(): string {
   return `${wsProtocol}//${window.location.hostname}:3001`;
 }
 
+// Multiplayer
 const ENV_MULTIPLAYER_URL = getMultiplayerUrl();
-
 const STORAGE_KEYS = {
   playerName: "tokyo-sounds-player-name",
   planeColor: "tokyo-sounds-plane-color",
@@ -481,7 +350,7 @@ export default function TokyoPage() {
   }
 
   return (
-    <div className="w-full h-screen bg-black relative overflow-hidden">
+    <div className="w-full h-dvh bg-black relative overflow-hidden">
       <Canvas
         shadows="soft"
         camera={{
@@ -578,9 +447,7 @@ export default function TokyoPage() {
 
       {currentDistrict && <DistrictIndicator district={currentDistrict} />}
 
-      {demoState?.active && (
-        <DemoTourGuide demoState={demoState} />
-      )}
+      {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
       {generativeEnabled && districtDebug.length > 0 && (
         <DistrictDebugPanel
