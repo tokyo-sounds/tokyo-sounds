@@ -86,7 +86,7 @@ export default function FlightDashboard({
           playerCount={playerCount}
         />
       </div>
-      <div className="absolute top-1/4 left-6 md:left-10">
+      <div className="absolute top-1/4 right-6 md:right-10">
         <OperationManual />
       </div>
       <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
