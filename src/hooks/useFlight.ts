@@ -202,11 +202,11 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
       }
 
       switch (e.code) {
-        case "KeyW":
+        case "KeyS":
           keysRef.current.pitchUp = true;
           keysRef.current.forward = true;
           break;
-        case "KeyS":
+        case "KeyW":
           keysRef.current.pitchDown = true;
           keysRef.current.backward = true;
           break;

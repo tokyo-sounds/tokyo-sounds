@@ -38,7 +38,7 @@ const LAG_TRANSITION_SPEED = 3.0; // how fast to transition between lag values
 const PLANE_RESPONSIVENESS = 1.1; // plane turns slightly faster than camera follows
 const PLANE_SCALE = 0.1; // 10% of original size (90% reduction)
 const DEMO_CAMERA_LAG = 0.95; // slower, more cinematic movement
-const DEFAULT_MODEL_PATH = "/models/plane_blence.glb";
+const DEFAULT_MODEL_PATH = "/models/plane_balance.glb";
 const SPEED_MODEL_PATH = "/models/plane_speed.glb";
 
 interface PlaneControllerProps {

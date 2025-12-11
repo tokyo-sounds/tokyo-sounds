@@ -281,7 +281,7 @@ export default function TokyoPage() {
         0
       );
 
-      const CAMERA_OFFSET_DISTANCE = 150; // meters behind target
+      const CAMERA_OFFSET_DISTANCE = 100; // meters behind target
       const CAMERA_HEIGHT = 80; // meters above target altitude
 
       const cameraPosition = latLngAltToENU(
@@ -424,22 +424,16 @@ export default function TokyoPage() {
         </Suspense>
       </Canvas>
 
-      <CompassBar
-        heading={heading}
-        pitch={pitch}
-        roll={roll}
-        apiKey={mapsApiKey}
-        onTeleport={handleTeleport}
-        searchDisabled={demoState?.active}
-        isGyroActive={gyroState.isActive}
-        isGyroEnabled={gyroState.isEnabled}
-        isGyroAvailable={gyroState.isAvailable}
-        isMobile={gyroState.isMobile}
-        onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
-      />
-
       <FlightDashboard
         flightSpeed={flightSpeed}
+        pitch={pitch}
+        roll={roll}
+        mapsApiKey={mapsApiKey}
+        handleTeleport={handleTeleport}
+        gyroState={gyroState}
+        planeControllerRef={
+          planeControllerRef as React.RefObject<PlaneControllerHandle>
+        }
         generativeEnabled={generativeEnabled}
         lyriaStatus={lyriaStatus}
         spatialAudioEnabled={spatialAudioEnabled}

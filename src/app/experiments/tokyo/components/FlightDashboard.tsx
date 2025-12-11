@@ -1,8 +1,12 @@
+"use client";
+
 import StatusBar from "./StatusBar";
 import SpeedoMeter from "./SpeedoMeter";
 import Compass from "./Compass";
 import OperationManual from "./OperationManual";
-
+import CompassBar from "./CompassBar";
+import { type DemoState } from "@/hooks/useDemoFlythrough";
+import { type PlaneControllerHandle } from "@/components/city/PlaneController";
 interface FlightDashboardProps {
   flightSpeed: number;
   heading: number;
@@ -17,6 +21,19 @@ interface FlightDashboardProps {
   };
   multiplayerConnected?: boolean;
   playerCount?: number;
+  pitch: number;
+  roll: number;
+  mapsApiKey: string;
+  handleTeleport: (lat: number, lng: number, alt: number) => void;
+  demoState?: DemoState;
+  gyroState: {
+    isActive: boolean;
+    isAvailable: boolean;
+    isEnabled: boolean;
+    needsPermission: boolean;
+    isMobile: boolean;
+  };
+  planeControllerRef: React.RefObject<PlaneControllerHandle>;
 }
 
 export default function FlightDashboard({
@@ -27,14 +44,31 @@ export default function FlightDashboard({
   lyriaStatus,
   spatialAudioEnabled,
   spatialAudioStats,
+  pitch,
+  roll,
+  mapsApiKey,
+  handleTeleport,
+  demoState,
+  gyroState,
+  planeControllerRef,
   playerCount,
   multiplayerConnected,
 }: FlightDashboardProps) {
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
-      <div className="absolute top-6 md:top-10 left-6 md:left-10">
-        <OperationManual />
-      </div>
+      <CompassBar
+        heading={heading}
+        pitch={pitch}
+        roll={roll}
+        apiKey={mapsApiKey}
+        onTeleport={handleTeleport}
+        searchDisabled={demoState?.active}
+        isGyroActive={gyroState.isActive}
+        isGyroEnabled={gyroState.isEnabled}
+        isGyroAvailable={gyroState.isAvailable}
+        isMobile={gyroState.isMobile}
+        onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
+      />
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
         <StatusBar
           generativeEnabled={generativeEnabled}
@@ -44,6 +78,9 @@ export default function FlightDashboard({
           multiplayerConnected={multiplayerConnected}
           playerCount={playerCount}
         />
+      </div>
+      <div className="absolute top-6 md:top-10 left-6 md:left-10">
+        <OperationManual />
       </div>
       <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
         <SpeedoMeter flightSpeed={flightSpeed} size={speedoMeterSize} />
