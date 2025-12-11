@@ -29,7 +29,7 @@ export const INPUT_SMOOTHING = 6.0;
 export const ROTATION_SMOOTHING = 5.0;
 export const BANK_RECOVERY_SMOOTHING = 3.0;
 
-export const MAX_PITCH = Math.PI / 2.5;
+export const MAX_PITCH = Math.PI / 4;
 export const MAX_BANK = Math.PI / 3.5;
 
 export const SIMPLE_MOVE_SPEED = 100;

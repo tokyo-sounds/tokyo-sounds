@@ -12,7 +12,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "server": "npx tsx multiplayer-server.ts"
   },
   "dependencies": {
     "3d-tiles-renderer": "^0.4.18",
@@ -22,6 +23,7 @@
     "@google/generative-ai": "^0.24.1",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
+    "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -69,6 +71,7 @@
     "tone": "^15.1.22",
     "use-error-boundary": "^2.0.6",
     "use-stick-to-bottom": "^1.1.1",
+    "ws": "^8.18.3",
     "zod": "^4.1.13",
     "zustand": "^5.0.8"
   },
@@ -82,6 +85,7 @@
     "@types/react": "19.2.7",
     "@types/react-dom": "19.2.3",
     "@types/three": "^0.180.0",
+    "@types/ws": "^8.18.1",
     "dotenv": "^17.2.3",
     "eslint": "^9.39.1",
     "eslint-config-next": "16.0.7",
