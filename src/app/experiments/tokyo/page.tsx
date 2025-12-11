@@ -39,6 +39,7 @@ import LandingPage from "./components/LandingPage";
 import DemoTourGuide from "./components/DemoTourGuide";
 import FlightDashboard from "./components/FlightDashboard";
 import SpeedoMeter from "./components/SpeedoMeter";
+import Compass from "./components/Compass";
 import FlightBoundsHelper from "./components/FlightBoundsHelper";
 import DistrictIndicator from "./components/DistrictIndicator";
 import DistrictDebugPanel from "./components/DistrictDebugPanel";
@@ -149,7 +150,7 @@ export default function TokyoPage() {
     return PASTEL_COLORS[4].hex;
   });
   const isMobile = useIsMobile();
-  const speedoMeterSize = isMobile ? 150 : 240;
+  const speedoMeterSize = isMobile ? 120 : 200;
   const [status, setStatus] = useState("Ready");
   const [flightSpeed, setFlightSpeed] = useState(0);
   const [movementMode, setMovementMode] = useState<MovementMode>("elytra");
@@ -451,6 +452,10 @@ export default function TokyoPage() {
 
       <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
         <SpeedoMeter flightSpeed={flightSpeed} size={speedoMeterSize} />
+      </div>
+
+      <div className="absolute bottom-6 md:bottom-10 right-6 md:right-10">
+        <Compass heading={heading} size={speedoMeterSize} />
       </div>
 
       {currentDistrict && <DistrictIndicator district={currentDistrict} />}

@@ -66,7 +66,7 @@ export default function SpeedoMeter({
 
   return (
     <div
-      className="relative rounded-full bg-black/[0.1] backdrop-blur-xs   text-white text-xs font-mono **:drop-shadow-lg **:drop-shadow-black/50"
+      className="relative rounded-full bg-black/[0.25] border border-border/50 backdrop-blur-xs   text-white text-xs font-mono **:drop-shadow-lg **:drop-shadow-black/50"
       style={{ width: size, height: size }}
     >
       <svg
@@ -126,10 +126,10 @@ export default function SpeedoMeter({
                   x={labelX}
                   y={labelY}
                   fill="rgba(255, 255, 255, 0.8)"
-                  fontSize="10"
+                  fontSize="8"
                   textAnchor="middle"
                   dominantBaseline="middle"
-                  className="font-mono"
+                  className="font-mono font-light"
                 >
                   {speed}
                 </text>
