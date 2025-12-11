@@ -1,5 +1,12 @@
+import StatusBar from "./StatusBar";
+import SpeedoMeter from "./SpeedoMeter";
+import Compass from "./Compass";
+import OperationManual from "./OperationManual";
+
 interface FlightDashboardProps {
   flightSpeed: number;
+  heading: number;
+  speedoMeterSize: number;
   generativeEnabled: boolean;
   lyriaStatus: string;
   spatialAudioEnabled: boolean;
@@ -14,6 +21,8 @@ interface FlightDashboardProps {
 
 export default function FlightDashboard({
   flightSpeed,
+  heading,
+  speedoMeterSize,
   generativeEnabled,
   lyriaStatus,
   spatialAudioEnabled,
@@ -22,35 +31,26 @@ export default function FlightDashboard({
   multiplayerConnected,
 }: FlightDashboardProps) {
   return (
-    <div className="flex flex-col items-center justify-center gap-2 absolute top-4 left-4 p-6 bg-black/[0.1]  backdrop-blur-sm rounded-lg text-white text-xs font-mono">
-      <div className="w-full flex items-center justify-between gap-2">
-        {generativeEnabled && (
-          <>
-            <span className="text-white/70">♪ {lyriaStatus}</span>
-          </>
-        )}
-        {spatialAudioEnabled && spatialAudioStats.total > 0 && (
-          <>
-            <span className="text-white/30">|</span>
-            <span className="text-cyan-400/70">
-              SFX {spatialAudioStats.active}/{spatialAudioStats.total}
-            </span>
-          </>
-        )}
-        <span className="text-white/30">|</span>
-        <span
-          className={
-            multiplayerConnected ? "text-green-400/70" : "text-yellow-400/70"
-          }
-        >
-          {multiplayerConnected ? `● ${playerCount}` : "○"}
-        </span>
+    <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
+      <div className="absolute top-6 md:top-10 left-6 md:left-10">
+        <OperationManual />
       </div>
-      <div className="text-white/50 text-[10px] space-x-3">
-        <span>W/S pitch</span>
-        <span>A/D bank</span>
-        <span>SHIFT boost</span>
-        <span>SPACE freeze</span>
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+        <StatusBar
+          generativeEnabled={generativeEnabled}
+          lyriaStatus={lyriaStatus}
+          spatialAudioEnabled={spatialAudioEnabled}
+          spatialAudioStats={spatialAudioStats}
+          multiplayerConnected={multiplayerConnected}
+          playerCount={playerCount}
+        />
+      </div>
+      <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
+        <SpeedoMeter flightSpeed={flightSpeed} size={speedoMeterSize} />
+      </div>
+
+      <div className="absolute bottom-6 md:bottom-10 right-6 md:right-10">
+        <Compass heading={heading} size={speedoMeterSize} />
       </div>
     </div>
   );

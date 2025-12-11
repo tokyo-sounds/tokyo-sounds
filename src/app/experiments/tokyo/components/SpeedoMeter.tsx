@@ -176,7 +176,9 @@ export default function SpeedoMeter({
           transform: "translate(-50%, 0)",
         }}
       >
-        <div className={`text-2xl font-mono font-bold ${speedColor}`}>
+        <div
+          className={`text-xl md:text-2xl font-sans font-semibold ${speedColor}`}
+        >
           {Math.round(flightSpeed)}
         </div>
         <div className="text-xs text-muted font-mono">km/h</div>
