@@ -34,7 +34,7 @@ import {
 } from "@/config/tokyo-config";
 import { DebugOptions } from "./type/FlightPageTypes";
 // Components
-import CompassBar from "./components/CompassBar";
+import DashboardToggleButton from "./components/DashboardToggleButton";
 import LandingPage from "./components/LandingPage";
 import DemoTourGuide from "./components/DemoTourGuide";
 import FlightDashboard from "./components/FlightDashboard";
@@ -55,6 +55,9 @@ import {
   type GyroState,
 } from "@/components/city/PlaneController";
 import { OtherPlayers } from "@/components/city/OtherPlayers";
+// UI Components
+import { Button } from "@/components/ui/button";
+import { Eye, EyeClosed } from "lucide-react";
 // Hooks
 import { clearVisitedFlag, type DemoState } from "@/hooks/useDemoFlythrough";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
@@ -186,6 +189,7 @@ export default function TokyoPage() {
     needsPermission: false,
     isMobile: false,
   });
+  const [dashboardVisible, setDashboardVisible] = useState(false);
 
   const collisionGroupRef = useRef<THREE.Group | null>(null);
   const planeControllerRef = useRef<PlaneControllerHandle | null>(null);
@@ -424,25 +428,32 @@ export default function TokyoPage() {
         </Suspense>
       </Canvas>
 
-      <FlightDashboard
-        flightSpeed={flightSpeed}
-        pitch={pitch}
-        roll={roll}
-        mapsApiKey={mapsApiKey}
-        handleTeleport={handleTeleport}
-        gyroState={gyroState}
-        planeControllerRef={
-          planeControllerRef as React.RefObject<PlaneControllerHandle>
-        }
-        generativeEnabled={generativeEnabled}
-        lyriaStatus={lyriaStatus}
-        spatialAudioEnabled={spatialAudioEnabled}
-        spatialAudioStats={spatialAudioStats}
-        multiplayerConnected={multiplayerConnected}
-        playerCount={playerCount}
-        heading={heading}
-        speedoMeterSize={speedoMeterSize}
-        isMobile={isMobile}
+      {dashboardVisible && (
+        <FlightDashboard
+          flightSpeed={flightSpeed}
+          pitch={pitch}
+          roll={roll}
+          mapsApiKey={mapsApiKey}
+          handleTeleport={handleTeleport}
+          gyroState={gyroState}
+          planeControllerRef={
+            planeControllerRef as React.RefObject<PlaneControllerHandle>
+          }
+          generativeEnabled={generativeEnabled}
+          lyriaStatus={lyriaStatus}
+          spatialAudioEnabled={spatialAudioEnabled}
+          spatialAudioStats={spatialAudioStats}
+          multiplayerConnected={multiplayerConnected}
+          playerCount={playerCount}
+          heading={heading}
+          speedoMeterSize={speedoMeterSize}
+          isMobile={isMobile}
+        />
+      )}
+
+      <DashboardToggleButton
+        dashboardVisible={dashboardVisible}
+        setDashboardVisible={setDashboardVisible}
       />
 
       {currentDistrict && <DistrictIndicator district={currentDistrict} />}
@@ -468,7 +479,7 @@ export default function TokyoPage() {
         collisionDistance={collisionDistance}
       />
 
-      <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-2 rounded text-xs font-mono">
+      <div className="absolute top-4 right-20 bg-black/70 text-white px-3 py-2 rounded text-xs font-mono z-50">
         {status} | {movementMode.toUpperCase()}
       </div>
     </div>
