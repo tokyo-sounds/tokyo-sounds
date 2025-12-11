@@ -1604,7 +1604,8 @@ class AudioSessionImpl implements AudioSession {
         binding.audio.setBuffer(result.buffer);
         binding.audio.setLoop(true);
         
-        binding.audio.connect();
+        // Note: don't call connect() before play() - THREE.Audio.play() handles connection internally
+        // The gain node exists but trying to connect before source is created can fail
         binding.audio.play();
 
         binding.startedAt = Date.now();

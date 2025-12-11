@@ -136,6 +136,7 @@
   will-change: transform, opacity;
 }
 .tag {
+  @apply backdrop-blur-xs select-none pointer-events-auto;
   padding: 10px 12px;
   border-radius: 10px;
   background: rgba(0, 0, 0, 0.75);
@@ -143,13 +144,15 @@
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
   width: 200px;
   max-width: none;
-  backdrop-filter: blur(4px);
   transition: opacity 0.25s ease;
-  user-select: none;
   pointer-events: auto; /* allow clicking inside the panel if you add buttons/links */
 }
 .tag button {
   margin-top: 8px;
+}
+
+.flight-dashboard-card {
+  @apply bg-black/[0.15] border border-border/50 backdrop-blur-xs text-white text-xs;
 }
 
 @keyframes fade-in {

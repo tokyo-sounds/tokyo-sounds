@@ -8,12 +8,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { TOKYO_DISTRICTS, TOKYO_CENTER, type District } from "@/config/tokyo-config";
+import { TOKYO_DISTRICTS, TOKYO_CENTER, type District, getDistrictPrompt } from "@/config/tokyo-config";
 import {
   calculateDistrictWeights,
   enuToLatLngAlt,
   getDistrictAtPosition,
 } from "@/lib/geo-utils";
+import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
 
 const CROSSFADE_MS = 5;
 
@@ -57,6 +58,7 @@ export function DistrictLyriaAudio({
 }: DistrictLyriaAudioProps) {
   const { camera } = useThree();
   const [status, setStatus] = useState<string>("Initializing...");
+  const currentTime = useTimeOfDayStore((state) => state.currentTime);
 
   const updateStatus = (newStatus: string) => {
     setStatus(newStatus);
@@ -91,6 +93,29 @@ export function DistrictLyriaAudio({
   const isFirstSessionRef = useRef(true);
 
   const currentDistrictRef = useRef<District | null>(null);
+  const currentTimeRef = useRef(currentTime);
+  
+  useEffect(() => {
+    const previousTime = currentTimeRef.current;
+    currentTimeRef.current = currentTime;
+    
+    if (previousTime !== currentTime && sessionRef.current) {
+      console.log(`[DistrictLyria] Time of day changed: ${previousTime} -> ${currentTime}, updating prompts`);
+      
+      const weightedPrompts = TOKYO_DISTRICTS.map((district) => ({
+        text: getDistrictPrompt(district, currentTime),
+        weight: Math.max(0.01, smoothedWeightsRef.current.get(district.id) || 0.01),
+      }));
+      
+      try {
+        sessionRef.current.setWeightedPrompts({
+          weightedPrompts,
+        });
+      } catch (err) {
+        console.warn("[DistrictLyria] Failed to update prompts on time change:", err);
+      }
+    }
+  }, [currentTime]);
 
   useEffect(() => {
     TOKYO_DISTRICTS.forEach((d) => {
@@ -415,8 +440,9 @@ export function DistrictLyriaAudio({
       });
 
       const weightsToUse = savedWeightsRef.current || smoothedWeightsRef.current;
+      const timeOfDay = currentTimeRef.current;
       const initialPrompts = TOKYO_DISTRICTS.map((district) => ({
-        text: district.prompt,
+        text: getDistrictPrompt(district, timeOfDay),
         weight: weightsToUse.get(district.id) || 1 / TOKYO_DISTRICTS.length,
       }));
 
@@ -588,8 +614,9 @@ export function DistrictLyriaAudio({
     if (hasSignificantChange(previousWeightsRef.current, smoothedWeightsRef.current, 0.03)) {
       previousWeightsRef.current = new Map(smoothedWeightsRef.current);
 
+      const timeOfDay = currentTimeRef.current;
       const weightedPrompts = TOKYO_DISTRICTS.map((district) => ({
-        text: district.prompt,
+        text: getDistrictPrompt(district, timeOfDay),
         weight: Math.max(0.01, smoothedWeightsRef.current.get(district.id) || 0.01),
       }));
 
