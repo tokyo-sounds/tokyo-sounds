@@ -511,6 +511,9 @@ export default function TokyoPage() {
         onToggle={() => setDebugMenuCollapsed(!debugMenuCollapsed)}
         cameraY={cameraY}
         collisionDistance={collisionDistance}
+        apiKey={mapsApiKey}
+        onTeleport={handleTeleport}
+        searchDisabled={demoState?.active || false}
       />
 
       <div className="absolute top-4 right-20 bg-black/70 text-white px-3 py-2 rounded text-xs font-mono z-50">

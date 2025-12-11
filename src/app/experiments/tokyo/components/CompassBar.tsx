@@ -130,15 +130,6 @@ export default function CompassBar({
             {Math.round(pitch)}°
           </span>
         </div>
-
-        <LocationSearch
-          apiKey={apiKey}
-          onTeleport={onTeleport}
-          disabled={searchDisabled}
-          minimal
-          dropdownPosition="below"
-          dropdownClassName="fixed top-24 left-1/2 -translate-x-1/2"
-        />
       </div>
 
       <div className="relative w-48 h-4 overflow-hidden mx-auto">

@@ -8,6 +8,7 @@ import CompassBar from "./CompassBar";
 import AttitudeIndicator from "./AttitudeIndicator";
 import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { type PlaneControllerHandle } from "@/components/city/PlaneController";
+
 interface FlightDashboardProps {
   flightSpeed: number;
   heading: number;
@@ -92,7 +93,7 @@ export default function FlightDashboard({
           playerCount={playerCount}
         />
       </div>
-      <div className="absolute top-1/4 right-6 md:right-10">
+      <div className="absolute top-1/4 right-4">
         <OperationManual operationManualOpen={operationManualOpen} setOperationManualOpen={setOperationManualOpen} />
       </div>
       <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
