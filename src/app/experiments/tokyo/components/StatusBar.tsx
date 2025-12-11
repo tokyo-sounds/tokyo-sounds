@@ -7,6 +7,8 @@ interface StatusBarProps {
     active: number;
     culled: number;
   };
+  pitch: number;
+  roll: number;
   multiplayerConnected?: boolean;
   playerCount?: number;
 }
@@ -16,6 +18,8 @@ export default function StatusBar({
   lyriaStatus,
   spatialAudioEnabled,
   spatialAudioStats,
+  pitch,
+  roll,
   multiplayerConnected,
   playerCount,
 }: StatusBarProps) {

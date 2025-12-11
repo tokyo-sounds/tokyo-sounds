@@ -5,6 +5,7 @@ import SpeedoMeter from "./SpeedoMeter";
 import Compass from "./Compass";
 import OperationManual from "./OperationManual";
 import CompassBar from "./CompassBar";
+import AttitudeIndicator from "./AttitudeIndicator";
 import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { type PlaneControllerHandle } from "@/components/city/PlaneController";
 interface FlightDashboardProps {
@@ -70,17 +71,22 @@ export default function FlightDashboard({
         isMobile={isMobile}
         onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
       />
+      <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+        <AttitudeIndicator pitch={pitch} roll={roll} />
+      </div>
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
         <StatusBar
           generativeEnabled={generativeEnabled}
           lyriaStatus={lyriaStatus}
           spatialAudioEnabled={spatialAudioEnabled}
           spatialAudioStats={spatialAudioStats}
+          pitch={pitch}
+          roll={roll}
           multiplayerConnected={multiplayerConnected}
           playerCount={playerCount}
         />
       </div>
-      <div className="absolute top-6 md:top-10 left-6 md:left-10">
+      <div className="absolute top-1/4 left-6 md:left-10">
         <OperationManual />
       </div>
       <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">

@@ -162,7 +162,7 @@ export default function SpeedoMeter({
                 L ${centerX - needleWidth / 2} ${centerY - needleBaseOffset} 
                 L ${centerX + needleWidth / 2} ${centerY - needleBaseOffset} 
                 Z`}
-            fill="orange"
+            className="fill-primary"
           />
         </svg>
       </div>

@@ -152,7 +152,7 @@
 }
 
 .flight-dashboard-card {
-  @apply bg-black/[0.25] border border-border/50 backdrop-blur-xs text-white text-xs;
+  @apply bg-black/[0.15] border border-border/50 backdrop-blur-xs text-white text-xs;
 }
 
 @keyframes fade-in {

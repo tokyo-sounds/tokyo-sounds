@@ -14,10 +14,7 @@ interface CompassProps {
   size?: number; // Diameter of the compass in pixels
 }
 
-export default function Compass({
-  heading,
-  size = 240,
-}: CompassProps) {
+export default function Compass({ heading, size = 240 }: CompassProps) {
   // Track cumulative rotation to handle 0°/360° boundary crossing
   // This allows the rotation to take the shortest path instead of the long way
   const [displayAngle, setDisplayAngle] = useState(heading);
@@ -158,12 +155,13 @@ export default function Compass({
               key={dir.label}
               x={labelX}
               y={labelY}
-              fill={dir.label === "N" ? "orange" : "rgba(255, 255, 255, 0.8)"}
+              className={`${
+                dir.label === "N" ? "fill-primary" : "fill-muted/80"
+              } font-mono font-light`}
               fontSize="10"
               fontWeight={dir.label === "N" ? "bold" : "normal"}
               textAnchor="middle"
               dominantBaseline="middle"
-              className="font-mono font-light"
             >
               {dir.label}
             </text>
@@ -183,7 +181,7 @@ export default function Compass({
       >
         <SendHorizontal
           strokeWidth={1}
-          className="size-8 md:size-12 text-white -rotate-90"
+          className="size-8 md:size-12 text-primary -rotate-90"
         />
       </div>
     </div>

@@ -188,35 +188,7 @@ export default function CompassBar({
         })}
       </div>
 
-      <div className="mt-1 flex items-center justify-center gap-1">
-        <div
-          className="w-24 h-1 bg-white/20 rounded-full relative overflow-hidden"
-          title="Roll"
-        >
-          <div
-            className="absolute top-0 h-full bg-primary transition-all"
-            style={{
-              left: roll < 0 ? `${50 + (roll / 90) * 50}%` : "50%",
-              width: `${Math.min(50, Math.abs(roll / 90) * 50)}%`,
-            }}
-          />
-          <div className="absolute left-1/2 top-0 w-px h-full bg-white/50" />
-        </div>
 
-        <div
-          className="w-1 h-6 bg-white/20 rounded-full relative overflow-hidden"
-          title="Pitch"
-        >
-          <div
-            className="absolute left-0 w-full bg-primary transition-all"
-            style={{
-              bottom: pitch > 0 ? "50%" : `${50 + (pitch / 90) * 50}%`,
-              height: `${Math.min(50, Math.abs(pitch / 90) * 50)}%`,
-            }}
-          />
-          <div className="absolute top-1/2 left-0 w-full h-px bg-white/50" />
-        </div>
-      </div>
     </div>
   );
 }
