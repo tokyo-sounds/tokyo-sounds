@@ -3,32 +3,29 @@
 /**
  * AmbientBackgroundAudio Component
  * Lightweight background ambient audio system
- * - Random infinite playback of audio files from /audio root directory
+ * - Random infinite playback of audio files from /audio/ambient-sounds/ directory
  * - Volume adjusts linearly based on camera height (CameraY)
  * - Lazy loading for optimal initial load performance
  */
 
-import { useRef, useEffect, useMemo, useCallback } from "react";
+import { useRef, useEffect, useMemo, useCallback, useState } from "react";
 
 interface AmbientBackgroundAudioProps {
   cameraY: number;
   enabled?: boolean;
   minHeight?: number; // Minimum height for maximum volume (default: 0)
   maxHeight?: number; // Maximum height for minimum volume/silence (default: 1000)
-  baseVolume?: number; // Base volume multiplier (0-1, default: 0.5)
+  baseVolume?: number; // Base volume multiplier (0-1, default: 0.2)
 }
 
-// Known audio files in /audio root directory
-// Only root directory files, not subdirectories
-const AUDIO_FILES: readonly string[] = ["/audio/tokyo-street.mp3"];
-
 const VOLUME_UPDATE_THROTTLE_MS = 100; // Throttle volume updates to avoid excessive updates
+const AMBIENT_SOUNDS_DIR = "/audio/ambient-sounds/";
 
 /**
  * Get random audio file from the list
  */
-function getRandomAudioFile(): string {
-  const files = AUDIO_FILES;
+function getRandomAudioFile(files: readonly string[]): string {
+  if (files.length === 0) return "";
   return files[Math.floor(Math.random() * files.length)];
 }
 
@@ -58,7 +55,7 @@ export function AmbientBackgroundAudio({
   enabled = true,
   minHeight = 0,
   maxHeight = 1000,
-  baseVolume = 0.5,
+  baseVolume = 0.2,
 }: AmbientBackgroundAudioProps) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
@@ -73,6 +70,8 @@ export function AmbientBackgroundAudio({
   const cameraYRef = useRef(cameraY);
   const userInteractedRef = useRef(false);
   const isSwitchingRef = useRef(false); // Prevent concurrent calls to playNextAudio
+  const [audioFiles, setAudioFiles] = useState<readonly string[]>([]);
+  const audioFilesRef = useRef<readonly string[]>([]);
 
   // Update refs when props change
   useEffect(() => {
@@ -83,8 +82,43 @@ export function AmbientBackgroundAudio({
     cameraYRef.current = cameraY;
   }, [enabled, minHeight, maxHeight, baseVolume, cameraY]);
 
-  // Memoize audio file list
-  const audioFiles = useMemo(() => AUDIO_FILES, []);
+  // Load audio files from API
+  useEffect(() => {
+    const loadAudioFiles = async () => {
+      try {
+        const response = await fetch("/api/audio-files");
+        if (!response.ok) {
+          console.warn("[AmbientBackgroundAudio] Failed to fetch audio files");
+          return;
+        }
+        const data = await response.json();
+        if (data.files && Array.isArray(data.files) && data.files.length > 0) {
+          setAudioFiles(data.files);
+          audioFilesRef.current = data.files;
+          console.log(
+            `[AmbientBackgroundAudio] Loaded ${data.files.length} audio files from ${AMBIENT_SOUNDS_DIR}`
+          );
+        } else {
+          console.warn(
+            `[AmbientBackgroundAudio] No audio files found in ${AMBIENT_SOUNDS_DIR}`
+          );
+          // Set empty array to prevent retries
+          setAudioFiles([]);
+          audioFilesRef.current = [];
+        }
+      } catch (error) {
+        console.error(
+          "[AmbientBackgroundAudio] Error loading audio files:",
+          error
+        );
+        // Set empty array on error
+        setAudioFiles([]);
+        audioFilesRef.current = [];
+      }
+    };
+
+    loadAudioFiles();
+  }, []);
 
   /**
    * Clean up audio element and remove event handlers
@@ -105,7 +139,15 @@ export function AmbientBackgroundAudio({
    * Load and play next random audio file
    */
   const playNextAudio = useCallback(() => {
-    if (!enabledRef.current || audioFiles.length === 0) return;
+    const files = audioFilesRef.current;
+    if (!enabledRef.current || files.length === 0) {
+      if (files.length === 0) {
+        console.log(
+          "[AmbientBackgroundAudio] No audio files available, waiting..."
+        );
+      }
+      return;
+    }
 
     // Prevent concurrent calls
     if (isSwitchingRef.current) {
@@ -115,10 +157,10 @@ export function AmbientBackgroundAudio({
     isSwitchingRef.current = true;
 
     // Get random file (avoid same file if possible)
-    let nextFile = getRandomAudioFile();
-    if (audioFiles.length > 1 && nextFile === currentFileRef.current) {
+    let nextFile = getRandomAudioFile(files);
+    if (files.length > 1 && nextFile === currentFileRef.current) {
       // If same file, try to get a different one
-      const otherFiles = audioFiles.filter((f) => f !== currentFileRef.current);
+      const otherFiles = files.filter((f) => f !== currentFileRef.current);
       if (otherFiles.length > 0) {
         nextFile = otherFiles[Math.floor(Math.random() * otherFiles.length)];
       }
@@ -181,12 +223,14 @@ export function AmbientBackgroundAudio({
 
     // Preload next audio when current is 80% complete
     audio.ontimeupdate = () => {
+      const files = audioFilesRef.current;
       if (
         audio.duration &&
         audio.currentTime / audio.duration > 0.8 &&
-        !nextAudioRef.current
+        !nextAudioRef.current &&
+        files.length > 0
       ) {
-        const nextFile = getRandomAudioFile();
+        const nextFile = getRandomAudioFile(files);
         const nextAudio = new Audio(nextFile);
         nextAudio.preload = "auto";
         nextAudioRef.current = nextAudio;
@@ -224,7 +268,33 @@ export function AmbientBackgroundAudio({
           }, 1000);
         }
       });
-  }, [audioFiles, cleanupAudio]);
+  }, [cleanupAudio]);
+
+  // Try to start playback when files are loaded and conditions are met
+  useEffect(() => {
+    if (audioFiles.length === 0) return; // Wait for files to load
+
+    console.log(
+      `[AmbientBackgroundAudio] Files state updated: ${audioFiles.length} files, enabled: ${enabledRef.current}, interacted: ${userInteractedRef.current}, playing: ${isPlayingRef.current}, switching: ${isSwitchingRef.current}`
+    );
+
+    if (
+      enabledRef.current &&
+      audioFiles.length > 0 &&
+      userInteractedRef.current &&
+      !isPlayingRef.current &&
+      !isSwitchingRef.current
+    ) {
+      console.log(
+        `[AmbientBackgroundAudio] All conditions met, starting playback with ${audioFiles.length} files`
+      );
+      playNextAudio();
+    } else {
+      console.log(
+        `[AmbientBackgroundAudio] Conditions not met - enabled: ${enabledRef.current}, files: ${audioFiles.length}, interacted: ${userInteractedRef.current}, playing: ${isPlayingRef.current}, switching: ${isSwitchingRef.current}`
+      );
+    }
+  }, [audioFiles, playNextAudio]);
 
   // Handle user interaction to unlock audio playback
   useEffect(() => {
@@ -236,15 +306,17 @@ export function AmbientBackgroundAudio({
         "[AmbientBackgroundAudio] User interaction detected, attempting to play audio"
       );
       // Try to play if enabled and not already playing
+      const files = audioFilesRef.current;
       if (
         enabledRef.current &&
         !isPlayingRef.current &&
-        audioFiles.length > 0
+        !isSwitchingRef.current &&
+        files.length > 0
       ) {
         playNextAudio();
       } else {
         console.log(
-          `[AmbientBackgroundAudio] Skipping playback - enabled: ${enabledRef.current}, playing: ${isPlayingRef.current}, files: ${audioFiles.length}`
+          `[AmbientBackgroundAudio] Skipping playback - enabled: ${enabledRef.current}, playing: ${isPlayingRef.current}, switching: ${isSwitchingRef.current}, files: ${files.length}`
         );
       }
       // Remove listeners after first interaction
@@ -262,7 +334,7 @@ export function AmbientBackgroundAudio({
       window.removeEventListener("keydown", handleInteraction);
       window.removeEventListener("touchstart", handleInteraction);
     };
-  }, [audioFiles.length, playNextAudio]);
+  }, [playNextAudio]);
 
   /**
    * Update volume with throttling
@@ -303,10 +375,11 @@ export function AmbientBackgroundAudio({
     }
 
     // Start playing if not already playing and user has interacted
+    const files = audioFilesRef.current;
     if (
       !isPlayingRef.current &&
       !isSwitchingRef.current &&
-      audioFiles.length > 0 &&
+      files.length > 0 &&
       userInteractedRef.current
     ) {
       console.log("[AmbientBackgroundAudio] Enabled, starting playback");
@@ -314,6 +387,10 @@ export function AmbientBackgroundAudio({
     } else if (!userInteractedRef.current) {
       console.log(
         "[AmbientBackgroundAudio] Waiting for user interaction to start playback"
+      );
+    } else if (files.length === 0) {
+      console.log(
+        "[AmbientBackgroundAudio] Waiting for audio files to load..."
       );
     }
 
@@ -323,7 +400,7 @@ export function AmbientBackgroundAudio({
       cleanupAudio(nextAudioRef.current);
       nextAudioRef.current = null;
     };
-  }, [enabled, audioFiles.length, playNextAudio, cleanupAudio]);
+  }, [enabled, playNextAudio, cleanupAudio]);
 
   // Update volume when cameraY changes
   useEffect(() => {
