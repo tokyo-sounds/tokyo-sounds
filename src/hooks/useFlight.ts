@@ -231,16 +231,16 @@ export function useFlight({
         case "ShiftLeft":
         case "ShiftRight":
           e.preventDefault();
+          keysRef.current.boost = true;
+          keysRef.current.sprint = true;
+          break;
+        case "Space":
+          e.preventDefault();
           if (modeRef.current === "elytra") {
             keysRef.current.freeze = !keysRef.current.freeze;
           } else {
             keysRef.current.up = true;
           }
-          break;
-        case "Space":
-          e.preventDefault();
-          keysRef.current.boost = true;
-          keysRef.current.sprint = true;
           break;
         case "ControlLeft":
         case "ControlRight":
@@ -282,11 +282,11 @@ export function useFlight({
           break;
         case "ShiftLeft":
         case "ShiftRight":
-          keysRef.current.up = false;
-          break;
-        case "Space":
           keysRef.current.boost = false;
           keysRef.current.sprint = false;
+          break;
+        case "Space":
+          keysRef.current.up = false;
           break;
         case "ControlLeft":
         case "ControlRight":

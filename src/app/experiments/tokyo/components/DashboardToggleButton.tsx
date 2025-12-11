@@ -31,7 +31,7 @@ export default function DashboardToggleButton({
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        {dashboardVisible ? "非表示" : "ダッシュボード表示"}
+        {dashboardVisible ? "UI 非表示" : "UI 表示"}
       </TooltipContent>
     </Tooltip>
   );

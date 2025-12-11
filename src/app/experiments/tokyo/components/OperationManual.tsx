@@ -1,27 +1,36 @@
-"use client";
-
-import { useState } from "react";
 import { Kbd } from "@/components/ui/kbd";
 import { Info, X } from "lucide-react";
 
-export default function OperationManul() {
-  const [isOpen, setIsOpen] = useState(true);
-
+export default function OperationManul({
+  operationManualOpen,
+  setOperationManualOpen,
+}: {
+  operationManualOpen: boolean;
+  setOperationManualOpen: (open: boolean) => void;
+}) {
   return (
-    <div className="flex flex-col gap-2 flight-dashboard-card font-sans p-3 rounded-lg">
+    <div
+      className={`flex flex-col gap-2 flight-dashboard-card font-sans rounded-lg transition-all ${
+        operationManualOpen ? "p-3" : "p-0"
+      }`}
+    >
       <button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => setOperationManualOpen(!operationManualOpen)}
         aria-label="Open operation manual"
-        className="flex items-center justify-between gap-2 focus:outline-none cursor-pointer pointer-events-auto"
+        className={`focus:outline-none cursor-pointer pointer-events-auto ${
+          operationManualOpen ? "p-0" : "p-2"
+        }`}
       >
-        <span className="text-muted">操作ガイド</span>
-        {isOpen ? (
-          <X strokeWidth={1} className="size-4" />
+        {operationManualOpen ? (
+          <div className="flex items-center justify-between gap-2 text-muted">
+            操作ガイド
+            <X strokeWidth={1} className="size-4" />
+          </div>
         ) : (
           <Info strokeWidth={1} className="size-4" />
         )}
       </button>
-      {isOpen && (
+      {operationManualOpen && (
         <>
           <div className="flex items-end gap-2">
             <div className="grid grid-cols-4 grid-rows-2 gap-1 *:text-muted *:bg-transparent *:border">
@@ -34,15 +43,25 @@ export default function OperationManul() {
           </div>
           <div className="flex justify-between">
             <Kbd className="text-muted bg-transparent border font-mono">
-              SHIFT
+              SPACE
             </Kbd>
             <span className="text-muted">ブレーキ</span>
           </div>
           <div className="flex justify-between">
             <Kbd className="text-muted bg-transparent border font-mono">
-              SPACE
+              SHIFT
             </Kbd>
             <span className="text-muted">ターボ</span>
+          </div>
+          <div className="flex justify-between">
+            <Kbd className="text-muted bg-transparent border font-mono">H</Kbd>
+            <span className="text-muted">操作ガイド</span>
+          </div>
+          <div className="flex justify-between">
+            <Kbd className="text-muted bg-transparent border font-mono">
+              TAB
+            </Kbd>
+            <span className="text-muted">UI 表示/非表示</span>
           </div>
         </>
       )}

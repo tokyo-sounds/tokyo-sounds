@@ -189,7 +189,7 @@ export default function TokyoPage() {
     needsPermission: false,
     isMobile: false,
   });
-  const [dashboardVisible, setDashboardVisible] = useState(false);
+  const [dashboardVisible, setDashboardVisible] = useState(true);
 
   const collisionGroupRef = useRef<THREE.Group | null>(null);
   const planeControllerRef = useRef<PlaneControllerHandle | null>(null);
@@ -337,6 +337,37 @@ export default function TokyoPage() {
 
   const initialCameraPosition: [number, number, number] = [0, 200, 100];
 
+  // Keyboard Shortcuts
+  const [operationManualOpen, setOperationManualOpen] = useState(true);
+
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === "h" || event.key === "H") {
+        setOperationManualOpen((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === "Tab") {
+        event.preventDefault();
+        setDashboardVisible((prev) => !prev);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, []);
+
   if (!started) {
     return (
       <LandingPage
@@ -433,12 +464,15 @@ export default function TokyoPage() {
           flightSpeed={flightSpeed}
           pitch={pitch}
           roll={roll}
+          cameraY={cameraY}
           mapsApiKey={mapsApiKey}
           handleTeleport={handleTeleport}
           gyroState={gyroState}
           planeControllerRef={
             planeControllerRef as React.RefObject<PlaneControllerHandle>
           }
+          operationManualOpen={operationManualOpen}
+          setOperationManualOpen={setOperationManualOpen}
           generativeEnabled={generativeEnabled}
           lyriaStatus={lyriaStatus}
           spatialAudioEnabled={spatialAudioEnabled}
