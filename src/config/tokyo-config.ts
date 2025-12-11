@@ -788,3 +788,56 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
   },
 };
 
+/**
+ * Tokyo map bounds for random ambient audio placement
+ */
+export const TOKYO_MAP_BOUNDS = {
+  minLat: 35.60,  // South boundary
+  maxLat: 35.80,  // North boundary
+  minLng: 139.60, // West boundary
+  maxLng: 139.85, // East boundary
+};
+
+/**
+ * Available ambient audio files for random distribution
+ */
+export const RANDOM_AMBIENT_AUDIO_POOL: string[] = [
+  "/audio/tokyo-street.mp3",
+  "/audio/池袋/train-apraoching-ikebukuro.mp3",
+  "/audio/池袋/bilingual-train-annoucement.mp3",
+  "/audio/池袋/ガチャ.m4a",
+  "/audio/池袋/ゲームセンター.m4a",
+  "/audio/秋葉原/akihabara_train_departing.mp3",
+  "/audio/秋葉原/akihabara_train_entering.mp3",
+  "/audio/秋葉原/gacha.mp3",
+  "/audio/原宿/harajuku_station.mp3",
+  "/audio/中野/中野站 东京 _ 中野站 北口前 90stereo_Freesound_[cut_12sec].mp3",
+  "/audio/中野/ramenya_slurping.mp3",
+];
+
+/**
+ * Configuration for random ambient audio distribution
+ */
+export interface RandomAmbientAudioConfig {
+  count: number;              // Total number of random audio sources
+  minDistance: number;        // Minimum distance between sources in meters
+  refDistance: number;        // Reference distance for audio falloff
+  maxDistance: number;        // Maximum distance for audio playback
+  volume: number;             // Volume level (0-1)
+  altitude: number;           // Base altitude in meters
+  altitudeVariation: number;  // Altitude variation range in meters
+}
+
+/**
+ * Default configuration for random ambient audio
+ */
+export const DEFAULT_RANDOM_AMBIENT_CONFIG: RandomAmbientAudioConfig = {
+  count: 20,                  // 20 random ambient sources (reduced for memory efficiency)
+  minDistance: 300,           // At least 300m apart
+  refDistance: 100,            // Reference distance 100m
+  maxDistance: 600,           // Max distance 600m (reduced)
+  volume: 0.3,                // 30% volume
+  altitude: 20,                // 20m above ground
+  altitudeVariation: 10,      // ±10m variation
+};
+

@@ -48,6 +48,7 @@ import {
   type DistrictDebugInfo,
 } from "@/components/city/DistrictLyriaAudio";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
+import { RandomAmbientAudio } from "@/components/city/RandomAmbientAudio";
 import {
   PlaneController,
   type PlaneControllerHandle,
@@ -292,8 +293,11 @@ export default function TokyoClient({
     []
   );
 
+  const [tilesLoaded, setTilesLoaded] = useState(false);
+
   const handleTilesLoaded = useCallback(() => {
     setStatus("Tiles loaded");
+    setTilesLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -447,6 +451,17 @@ export default function TokyoClient({
             enabled={spatialAudioEnabled}
             showDebug={debugOptions.showBounds}
             onStatsUpdate={setSpatialAudioStats}
+          />
+
+          <RandomAmbientAudio
+            enabled={spatialAudioEnabled && tilesLoaded}
+            tilesLoaded={tilesLoaded}
+            showDebug={debugOptions.showBounds}
+            config={{
+              count: 10, // Reduced for memory efficiency
+              minDistance: 400,
+              volume: 0.5,
+            }}
           />
 
           <OtherPlayers
