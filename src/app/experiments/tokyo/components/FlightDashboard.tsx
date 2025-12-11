@@ -3,11 +3,12 @@
 import StatusBar from "./StatusBar";
 import SpeedoMeter from "./SpeedoMeter";
 import Compass from "./Compass";
-import OperationManual from "./OperationManual";
 import CompassBar from "./CompassBar";
 import AttitudeIndicator from "./AttitudeIndicator";
+import InformationContainer from "./InformationContainer";
 import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { type PlaneControllerHandle } from "@/components/city/PlaneController";
+import { type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 
 interface FlightDashboardProps {
   flightSpeed: number;
@@ -39,6 +40,9 @@ interface FlightDashboardProps {
   };
   isMobile: boolean;
   planeControllerRef: React.RefObject<PlaneControllerHandle>;
+  districts: DistrictDebugInfo[];
+  districtDebugCollapsed: boolean;
+  setDistrictDebugCollapsed: (collapsed: boolean) => void;
 }
 
 export default function FlightDashboard({
@@ -62,6 +66,9 @@ export default function FlightDashboard({
   isMobile,
   operationManualOpen,
   setOperationManualOpen,
+  districts,
+  districtDebugCollapsed,
+  setDistrictDebugCollapsed,
 }: FlightDashboardProps) {
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
@@ -93,8 +100,15 @@ export default function FlightDashboard({
           playerCount={playerCount}
         />
       </div>
-      <div className="absolute top-1/4 right-4">
-        <OperationManual operationManualOpen={operationManualOpen} setOperationManualOpen={setOperationManualOpen} />
+      <div className="absolute top-1/5 left-4">
+        <InformationContainer
+          districts={districts}
+          districtDebugCollapsed={districtDebugCollapsed}
+          setDistrictDebugCollapsed={setDistrictDebugCollapsed}
+          operationManualOpen={operationManualOpen}
+          setOperationManualOpen={setOperationManualOpen}
+          generativeEnabled={generativeEnabled}
+        />
       </div>
       <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
         <SpeedoMeter flightSpeed={flightSpeed} size={speedoMeterSize} />

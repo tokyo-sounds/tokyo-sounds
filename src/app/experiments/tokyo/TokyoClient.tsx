@@ -40,7 +40,6 @@ import DemoTourGuide from "./components/DemoTourGuide";
 import FlightDashboard from "./components/FlightDashboard";
 import FlightBoundsHelper from "./components/FlightBoundsHelper";
 import DistrictIndicator from "./components/DistrictIndicator";
-import DistrictDebugPanel from "./components/DistrictDebugPanel";
 import TimeOfDayEffects from "./components/TimeOfDayEffects";
 import DebugMenu from "./components/DebugMenu";
 import { GoogleTilesScene } from "@/components/city/GoogleTilesScene";
@@ -330,25 +329,35 @@ export default function TokyoClient({
 
   // Keyboard Shortcuts
   const [operationManualOpen, setOperationManualOpen] = useState(true);
+  const [debugMenuOpen, setDebugMenuOpen] = useState(false);
 
   useEffect(() => {
     const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key === "h" || event.key === "H") {
-        setOperationManualOpen((prev) => !prev);
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-
-    return () => {
-      window.removeEventListener("keydown", handleKeyPress);
-    };
-  }, []);
-  useEffect(() => {
-    const handleKeyPress = (event: KeyboardEvent) => {
-      if (event.key === "Tab") {
-        event.preventDefault();
-        setDashboardVisible((prev) => !prev);
+      switch (event.key) {
+        case "h":
+        case "H":
+          setOperationManualOpen((prev) => !prev);
+          break;
+        case "i":
+        case "I":
+          // Toggle district debug panel, and close operation manual if opening district panel
+          setDistrictDebugCollapsed((prev) => {
+            const newCollapsed = !prev;
+            if (!newCollapsed) {
+              // Opening district panel, close operation manual
+              setOperationManualOpen(false);
+            }
+            return newCollapsed;
+          });
+          break;
+        case "/":
+          event.preventDefault();
+          setDebugMenuOpen((prev) => !prev);
+          break;
+        case "Tab":
+          event.preventDefault();
+          setDashboardVisible((prev) => !prev);
+          break;
       }
     };
 
@@ -470,6 +479,9 @@ export default function TokyoClient({
           heading={heading}
           speedoMeterSize={speedoMeterSize}
           isMobile={isMobile}
+          districts={districtDebug}
+          districtDebugCollapsed={districtDebugCollapsed}
+          setDistrictDebugCollapsed={setDistrictDebugCollapsed}
         />
       )}
 
@@ -484,14 +496,6 @@ export default function TokyoClient({
 
       {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
-      {generativeEnabled && districtDebug.length > 0 && (
-        <DistrictDebugPanel
-          districts={districtDebug}
-          collapsed={districtDebugCollapsed}
-          onToggle={() => setDistrictDebugCollapsed(!districtDebugCollapsed)}
-        />
-      )}
-
       <DebugMenu
         options={debugOptions}
         onOptionsChange={(key, value) =>
@@ -504,6 +508,8 @@ export default function TokyoClient({
         apiKey={mapsApiKey}
         onTeleport={handleTeleport}
         searchDisabled={demoState?.active || false}
+        open={debugMenuOpen}
+        onOpenChange={setDebugMenuOpen}
       />
     </div>
   );

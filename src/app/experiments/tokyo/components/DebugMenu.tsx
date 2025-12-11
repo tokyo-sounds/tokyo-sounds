@@ -42,6 +42,8 @@ export default function DebugMenu({
   apiKey,
   onTeleport,
   searchDisabled,
+  open,
+  onOpenChange,
 }: {
   options: DebugOptions;
   onOptionsChange: (key: keyof DebugOptions, value: boolean) => void;
@@ -52,11 +54,13 @@ export default function DebugMenu({
   apiKey: string;
   onTeleport: (lat: number, lng: number, alt: number) => void;
   searchDisabled: boolean;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const { currentTime, setTimeOfDay } = useTimeOfDayStore();
   const timeOptions: TimeOfDay[] = ["morning", "afternoon", "evening"];
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={onOpenChange}>
       <Tooltip>
         <TooltipTrigger asChild>
           <SheetTrigger asChild>
