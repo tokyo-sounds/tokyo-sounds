@@ -7,7 +7,14 @@
  * Supports demo flythrough mode for first-time visitors
  */
 
-import { useRef, useEffect, useState, useImperativeHandle, forwardRef, useMemo } from "react";
+import {
+  useRef,
+  useEffect,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+  useMemo,
+} from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -18,7 +25,11 @@ import { type DemoWaypoint } from "@/config/tokyo-config";
 
 export interface PlaneControllerHandle {
   teleportTo: (position: THREE.Vector3, lookAt: THREE.Vector3) => void;
-  flyTo: (position: THREE.Vector3, lookAt: THREE.Vector3, duration?: number) => void;
+  flyTo: (
+    position: THREE.Vector3,
+    lookAt: THREE.Vector3,
+    duration?: number
+  ) => void;
   recalibrateGyro: () => void;
 }
 
@@ -30,13 +41,14 @@ export interface GyroState {
   isMobile: boolean;
 }
 
-const CAMERA_DISTANCE = 0.6; // distance behind plane
-const CAMERA_HEIGHT = 0.2; // height above plane
+const CAMERA_DISTANCE = 3; // distance behind plane
+const CAMERA_HEIGHT = 0.6; // height above plane
+const CAMERA_LOOK_OFFSET = 1; // offset from plane forward direction
 const CAMERA_LAG = 0.92; // lower = more responsive (0.9 = fast, 0.95 = slow)
 const CAMERA_LAG_BOOST = 0.85; // slightly tighter follow during boost (not too aggressive)
 const LAG_TRANSITION_SPEED = 3.0; // how fast to transition between lag values
 const PLANE_RESPONSIVENESS = 1.1; // plane turns slightly faster than camera follows
-const PLANE_SCALE = 0.1; // 10% of original size (90% reduction)
+const PLANE_SCALE = 0.15; // 15% of original size
 const DEMO_CAMERA_LAG = 0.95; // slower, more cinematic movement
 const DEFAULT_MODEL_PATH = "/models/plane_balance.glb";
 const SPEED_MODEL_PATH = "/models/plane_speed.glb";
@@ -51,7 +63,10 @@ interface PlaneControllerProps {
   collisionGroup?: THREE.Group | null;
   collisionEnabled?: boolean;
   onCollision?: (distance: number) => void;
-  onPlanePositionChange?: (position: THREE.Vector3, quaternion: THREE.Quaternion) => void;
+  onPlanePositionChange?: (
+    position: THREE.Vector3,
+    quaternion: THREE.Quaternion
+  ) => void;
   demoEnabled?: boolean;
   onDemoStateChange?: (state: DemoState) => void;
   onDemoWaypointReached?: (waypoint: DemoWaypoint) => void;
@@ -64,24 +79,30 @@ const COLLISION_DISTANCE = 2;
 const COLLISION_PUSH_STRENGTH = 1;
 const NUM_COLLISION_RAYS = 8;
 
-export const PlaneController = forwardRef<PlaneControllerHandle, PlaneControllerProps>(function PlaneController({
-  onSpeedChange,
-  onModeChange,
-  onCameraYChange,
-  onHeadingChange,
-  onPitchChange,
-  onRollChange,
-  collisionGroup,
-  collisionEnabled,
-  onCollision,
-  onPlanePositionChange,
-  demoEnabled = true,
-  onDemoStateChange,
-  onDemoWaypointReached,
-  onDemoComplete,
-  onGyroStateChange,
-  planeColor,
-}, ref) {
+export const PlaneController = forwardRef<
+  PlaneControllerHandle,
+  PlaneControllerProps
+>(function PlaneController(
+  {
+    onSpeedChange,
+    onModeChange,
+    onCameraYChange,
+    onHeadingChange,
+    onPitchChange,
+    onRollChange,
+    collisionGroup,
+    collisionEnabled,
+    onCollision,
+    onPlanePositionChange,
+    demoEnabled = true,
+    onDemoStateChange,
+    onDemoWaypointReached,
+    onDemoComplete,
+    onGyroStateChange,
+    planeColor,
+  },
+  ref
+) {
   const { camera } = useThree();
   const planeRef = useRef<THREE.Group>(null);
   const frameCountRef = useRef(0);
@@ -108,7 +129,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
 
   const smoothRoll = useRef(0);
   const smoothLag = useRef(CAMERA_LAG);
-  
+
   const flyToActiveRef = useRef(false);
 
   const {
@@ -128,19 +149,19 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   useEffect(() => {
     const initialYaw = -69 * (Math.PI / 180);
     const initialEuler = new THREE.Euler(0, initialYaw, 0, "YXZ");
-    
+
     virtualCameraRef.current.position.copy(camera.position);
     virtualCameraRef.current.quaternion.setFromEuler(initialEuler);
     smoothCameraPos.current.copy(camera.position);
     smoothCameraQuat.current.copy(virtualCameraRef.current.quaternion);
-    
+
     camera.quaternion.copy(virtualCameraRef.current.quaternion);
   }, [camera]);
 
-  const { 
-    update: updateFlight, 
-    keysRef, 
-    currentMode, 
+  const {
+    update: updateFlight,
+    keysRef,
+    currentMode,
     syncFromCamera,
     isMobile,
     isGyroActive,
@@ -163,8 +184,10 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       enableMouseLook: true,
       bankSpeedMin: 0.8 * PLANE_RESPONSIVENESS,
       bankSpeedMax: 2.5 * PLANE_RESPONSIVENESS,
-      pitchSpeedMin: 0.6 * PLANE_RESPONSIVENESS,
-      pitchSpeedMax: 2.0 * PLANE_RESPONSIVENESS,
+      pitchSpeedMin: 0.2 * PLANE_RESPONSIVENESS,
+      pitchSpeedMax: 1.0 * PLANE_RESPONSIVENESS,
+      rampUpTime: 1.5,
+      inputSmoothing: 8.0,
       enableGyroscope: true,
       invertGyroPitch: false, // phone down → plane pitches down (natural)
       gyroSensitivity: 0.4, // reduced for subtle control
@@ -182,7 +205,14 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       needsPermission: needsGyroPermission,
       isMobile,
     });
-  }, [isGyroActive, isGyroAvailable, isGyroEnabled, needsGyroPermission, isMobile, onGyroStateChange]);
+  }, [
+    isGyroActive,
+    isGyroAvailable,
+    isGyroEnabled,
+    needsGyroPermission,
+    isMobile,
+    onGyroStateChange,
+  ]);
 
   useEffect(() => {
     if (!demoState.active) return;
@@ -241,8 +271,12 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
           const hit = intersects[0];
           if (hit.distance < COLLISION_DISTANCE) {
             closestHit = Math.min(closestHit, hit.distance);
-            const pushStrength = (COLLISION_DISTANCE - hit.distance) / COLLISION_DISTANCE;
-            _pushBack.addScaledVector(_rayDir, -pushStrength * COLLISION_PUSH_STRENGTH);
+            const pushStrength =
+              (COLLISION_DISTANCE - hit.distance) / COLLISION_DISTANCE;
+            _pushBack.addScaledVector(
+              _rayDir,
+              -pushStrength * COLLISION_PUSH_STRENGTH
+            );
           }
         }
       }
@@ -251,10 +285,17 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       _raycaster.far = COLLISION_DISTANCE * 5;
       const forwardHits = _raycaster.intersectObject(collisionGroup, true);
 
-      if (forwardHits.length > 0 && forwardHits[0].distance < COLLISION_DISTANCE) {
+      if (
+        forwardHits.length > 0 &&
+        forwardHits[0].distance < COLLISION_DISTANCE
+      ) {
         closestHit = Math.min(closestHit, forwardHits[0].distance);
-        const pushStrength = (COLLISION_DISTANCE - forwardHits[0].distance) / COLLISION_DISTANCE;
-        _pushBack.addScaledVector(_forward, -pushStrength * COLLISION_PUSH_STRENGTH * 2);
+        const pushStrength =
+          (COLLISION_DISTANCE - forwardHits[0].distance) / COLLISION_DISTANCE;
+        _pushBack.addScaledVector(
+          _forward,
+          -pushStrength * COLLISION_PUSH_STRENGTH * 2
+        );
       }
 
       if (_pushBack.lengthSq() > 0.001) {
@@ -275,7 +316,10 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       smoothCameraPos.current.lerp(virtualCam.position, 1 - DEMO_CAMERA_LAG);
       camera.position.copy(smoothCameraPos.current);
 
-      smoothCameraQuat.current.slerp(virtualCam.quaternion, 1 - DEMO_CAMERA_LAG);
+      smoothCameraQuat.current.slerp(
+        virtualCam.quaternion,
+        1 - DEMO_CAMERA_LAG
+      );
       camera.quaternion.copy(smoothCameraQuat.current);
     } else if (isSimpleMode) {
       camera.position.copy(virtualCam.position);
@@ -291,18 +335,23 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       _targetCameraPos.y += camHeight;
 
       const targetLag = boosting ? CAMERA_LAG_BOOST : CAMERA_LAG;
-      smoothLag.current += (targetLag - smoothLag.current) * Math.min(1, delta * LAG_TRANSITION_SPEED);
+      smoothLag.current +=
+        (targetLag - smoothLag.current) *
+        Math.min(1, delta * LAG_TRANSITION_SPEED);
 
       smoothCameraPos.current.lerp(_targetCameraPos, 1 - smoothLag.current);
 
       _euler.setFromQuaternion(virtualCam.quaternion, "YXZ");
       const planeRoll = _euler.z;
 
-      smoothRoll.current += (planeRoll - smoothRoll.current) * (1 - smoothLag.current);
+      smoothRoll.current +=
+        (planeRoll - smoothRoll.current) * (1 - smoothLag.current);
 
       camera.position.copy(smoothCameraPos.current);
 
-      camera.lookAt(virtualCam.position);
+      const lookTarget = virtualCam.position.clone();
+      lookTarget.addScaledVector(_planeForward, CAMERA_LOOK_OFFSET);
+      camera.lookAt(lookTarget);
 
       _rollQuat.setFromAxisAngle(_rollAxis, smoothRoll.current);
       camera.quaternion.multiply(_rollQuat);
@@ -324,107 +373,124 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     }
   });
 
-  useImperativeHandle(ref, () => ({
-    teleportTo: (position: THREE.Vector3, lookAt: THREE.Vector3) => {
-      const virtualCam = virtualCameraRef.current;
-      virtualCam.position.copy(position);
-      virtualCam.lookAt(lookAt);
-      smoothCameraPos.current.copy(position);
-      smoothCameraQuat.current.copy(virtualCam.quaternion);
-      camera.position.copy(position);
-      camera.lookAt(lookAt);
-    },
-    flyTo: (position: THREE.Vector3, lookAt: THREE.Vector3, duration?: number) => {
-      const virtualCam = virtualCameraRef.current;
-      const startPos = virtualCam.position.clone();
-      const startQuat = virtualCam.quaternion.clone();
-      
-      flyToActiveRef.current = true;
-      
-      const distance = startPos.distanceTo(position);
-      const adaptiveDuration = duration ?? Math.max(1.5, Math.min(4, distance / 500));
-      
-      const horizontalDistance = Math.sqrt(
-        (position.x - startPos.x) ** 2 + (position.z - startPos.z) ** 2
-      );
-      
-      const arcHeight = Math.min(150, horizontalDistance * 0.1);
-      
-      const travelQuat = new THREE.Quaternion();
-      const up = new THREE.Vector3(0, 1, 0);
-      const lookMatrix = new THREE.Matrix4();
-      lookMatrix.lookAt(startPos, position, up);
-      travelQuat.setFromRotationMatrix(lookMatrix);
-      
-      const finalQuat = new THREE.Quaternion();
-      const finalLookMatrix = new THREE.Matrix4();
-      finalLookMatrix.lookAt(position, lookAt, up);
-      finalQuat.setFromRotationMatrix(finalLookMatrix);
-      
-      const TURN_PHASE = 0.15; // 15% turning, 85% flying with gradual orientation blend
-      
-      const startTime = performance.now();
-      
-      const animate = () => {
-        const now = performance.now();
-        const elapsed = (now - startTime) / 1000;
-        const t = Math.min(elapsed / adaptiveDuration, 1);
-        
-        const smooth = (x: number) => x * x * (3 - 2 * x);
-        
-        if (t < TURN_PHASE) {
-          const turnT = smooth(t / TURN_PHASE);
-          
-          virtualCam.position.copy(startPos);
-          virtualCam.quaternion.slerpQuaternions(startQuat, travelQuat, turnT);
-        } else {
-          const flyT = (t - TURN_PHASE) / (1 - TURN_PHASE);
-          const smoothFlyT = smooth(flyT);
-          
-          virtualCam.position.lerpVectors(startPos, position, smoothFlyT);
-          
-          const arcT = Math.sin(smoothFlyT * Math.PI);
-          virtualCam.position.y += arcHeight * arcT;
-          
-          const orientT = smoothFlyT * smoothFlyT;
-          virtualCam.quaternion.slerpQuaternions(travelQuat, finalQuat, orientT);
-        }
-        smoothCameraPos.current.copy(virtualCam.position);
+  useImperativeHandle(
+    ref,
+    () => ({
+      teleportTo: (position: THREE.Vector3, lookAt: THREE.Vector3) => {
+        const virtualCam = virtualCameraRef.current;
+        virtualCam.position.copy(position);
+        virtualCam.lookAt(lookAt);
+        smoothCameraPos.current.copy(position);
         smoothCameraQuat.current.copy(virtualCam.quaternion);
-        camera.position.copy(virtualCam.position);
-        camera.quaternion.copy(virtualCam.quaternion);
-        
-        if (t < 1) {
-          requestAnimationFrame(animate);
-        } else {
-          flyToActiveRef.current = false;
-          smoothRoll.current = 0;
-          syncFromCamera();
-        }
-      };
-      animate();
-    },
-    recalibrateGyro,
-  }), [camera, syncFromCamera, recalibrateGyro]);
+        camera.position.copy(position);
+        camera.lookAt(lookAt);
+      },
+      flyTo: (
+        position: THREE.Vector3,
+        lookAt: THREE.Vector3,
+        duration?: number
+      ) => {
+        const virtualCam = virtualCameraRef.current;
+        const startPos = virtualCam.position.clone();
+        const startQuat = virtualCam.quaternion.clone();
+
+        flyToActiveRef.current = true;
+
+        const distance = startPos.distanceTo(position);
+        const adaptiveDuration =
+          duration ?? Math.max(1.5, Math.min(4, distance / 500));
+
+        const horizontalDistance = Math.sqrt(
+          (position.x - startPos.x) ** 2 + (position.z - startPos.z) ** 2
+        );
+
+        const arcHeight = Math.min(150, horizontalDistance * 0.1);
+
+        const travelQuat = new THREE.Quaternion();
+        const up = new THREE.Vector3(0, 1, 0);
+        const lookMatrix = new THREE.Matrix4();
+        lookMatrix.lookAt(startPos, position, up);
+        travelQuat.setFromRotationMatrix(lookMatrix);
+
+        const finalQuat = new THREE.Quaternion();
+        const finalLookMatrix = new THREE.Matrix4();
+        finalLookMatrix.lookAt(position, lookAt, up);
+        finalQuat.setFromRotationMatrix(finalLookMatrix);
+
+        const TURN_PHASE = 0.15; // 15% turning, 85% flying with gradual orientation blend
+
+        const startTime = performance.now();
+
+        const animate = () => {
+          const now = performance.now();
+          const elapsed = (now - startTime) / 1000;
+          const t = Math.min(elapsed / adaptiveDuration, 1);
+
+          const smooth = (x: number) => x * x * (3 - 2 * x);
+
+          if (t < TURN_PHASE) {
+            const turnT = smooth(t / TURN_PHASE);
+
+            virtualCam.position.copy(startPos);
+            virtualCam.quaternion.slerpQuaternions(
+              startQuat,
+              travelQuat,
+              turnT
+            );
+          } else {
+            const flyT = (t - TURN_PHASE) / (1 - TURN_PHASE);
+            const smoothFlyT = smooth(flyT);
+
+            virtualCam.position.lerpVectors(startPos, position, smoothFlyT);
+
+            const arcT = Math.sin(smoothFlyT * Math.PI);
+            virtualCam.position.y += arcHeight * arcT;
+
+            const orientT = smoothFlyT * smoothFlyT;
+            virtualCam.quaternion.slerpQuaternions(
+              travelQuat,
+              finalQuat,
+              orientT
+            );
+          }
+          smoothCameraPos.current.copy(virtualCam.position);
+          smoothCameraQuat.current.copy(virtualCam.quaternion);
+          camera.position.copy(virtualCam.position);
+          camera.quaternion.copy(virtualCam.quaternion);
+
+          if (t < 1) {
+            requestAnimationFrame(animate);
+          } else {
+            flyToActiveRef.current = false;
+            smoothRoll.current = 0;
+            syncFromCamera();
+          }
+        };
+        animate();
+      },
+      recalibrateGyro,
+    }),
+    [camera, syncFromCamera, recalibrateGyro]
+  );
 
   const coloredScene = useMemo(() => {
     const activeScene = isBoosting ? speedScene : defaultScene;
     const clone = activeScene.clone();
-    
+
     if (planeColor) {
       clone.traverse((child) => {
         if (child instanceof THREE.Mesh && child.material) {
           if (Array.isArray(child.material)) {
             child.material = child.material.map((mat) => {
               const newMat = mat.clone();
-              if ('color' in newMat) {
+              if ("color" in newMat) {
                 newMat.color = new THREE.Color(planeColor);
               }
               return newMat;
             });
           } else {
             const newMat = child.material.clone();
-            if ('color' in newMat) {
+            if ("color" in newMat) {
               newMat.color = new THREE.Color(planeColor);
             }
             child.material = newMat;
@@ -432,7 +498,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
         }
       });
     }
-    
+
     return clone;
   }, [isBoosting, speedScene, defaultScene, planeColor]);
 
