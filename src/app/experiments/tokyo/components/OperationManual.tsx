@@ -2,7 +2,7 @@ import { Kbd } from "@/components/ui/kbd";
 
 export default function OperationManul() {
   return (
-    <div className="flex flex-col gap-2 bg-black/[0.1] backdrop-blur-xs rounded-lg p-3 text-background text-xs font-sans">
+    <div className="flex flex-col gap-2 flight-dashboard-card font-sans p-3 rounded-lg">
       <span>
         <Kbd>W</Kbd>
         <Kbd>S</Kbd> pitch

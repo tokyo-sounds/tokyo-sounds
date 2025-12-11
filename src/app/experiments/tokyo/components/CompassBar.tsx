@@ -69,15 +69,17 @@ export default function CompassBar({
   const visibleRange = 90;
 
   return (
-    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 bg-black/70 rounded px-4 py-2 text-white text-xs font-mono">
+    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flight-dashboard-card p-3 rounded-lg font-mono pointer-events-auto">
       <div className="flex items-center justify-center gap-4 mb-1">
         {isMobile &&
           (isGyroActive || isGyroEnabled || isGyroAvailable) &&
           onRecalibrateGyro && (
-            <button
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={onRecalibrateGyro}
-              className="p-1.5 hover:bg-white/10 rounded transition-colors"
-              title="Recalibrate gyroscope"
+              aria-label="Recalibrate gyroscope"
+              className="hover:bg-red-500"
             >
               <svg
                 width="16"
@@ -88,7 +90,7 @@ export default function CompassBar({
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="text-gray-400"
+                className="text-muted"
               >
                 <rect x="5" y="2" width="14" height="20" rx="2" ry="2" />
                 <path d="M2 12c0-3 2-5 5-5" />
@@ -96,13 +98,13 @@ export default function CompassBar({
                 <polyline points="5 4 2 7 5 10" />
                 <polyline points="19 20 22 17 19 14" />
               </svg>
-            </button>
+            </Button>
           )}
         <div className="flex items-center gap-1 w-16">
           <span className="text-white/50">R</span>
           <span
             className={`w-10 text-right ${
-              Math.abs(roll) > 30 ? "text-amber-400" : "text-white/70"
+              Math.abs(roll) > 30 ? "text-accent" : "text-background"
             }`}
           >
             {roll > 0 ? "+" : ""}
@@ -121,7 +123,7 @@ export default function CompassBar({
           <span className="text-white/50">P</span>
           <span
             className={`w-10 ${
-              Math.abs(pitch) > 30 ? "text-amber-400" : "text-white/70"
+              Math.abs(pitch) > 30 ? "text-accent" : "text-background"
             }`}
           >
             {pitch > 0 ? "+" : ""}
@@ -192,7 +194,7 @@ export default function CompassBar({
           title="Roll"
         >
           <div
-            className="absolute top-0 h-full bg-cyan-400/60 transition-all"
+            className="absolute top-0 h-full bg-primary transition-all"
             style={{
               left: roll < 0 ? `${50 + (roll / 90) * 50}%` : "50%",
               width: `${Math.min(50, Math.abs(roll / 90) * 50)}%`,
@@ -206,7 +208,7 @@ export default function CompassBar({
           title="Pitch"
         >
           <div
-            className="absolute left-0 w-full bg-cyan-400/60 transition-all"
+            className="absolute left-0 w-full bg-primary transition-all"
             style={{
               bottom: pitch > 0 ? "50%" : `${50 + (pitch / 90) * 50}%`,
               height: `${Math.min(50, Math.abs(pitch / 90) * 50)}%`,

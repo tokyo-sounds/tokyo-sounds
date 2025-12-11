@@ -11,15 +11,11 @@ import { SendHorizontal } from "lucide-react";
 
 interface CompassProps {
   heading: number; // 0-360 degrees (from CompassBar)
-  latitude?: number; // Optional position display
-  longitude?: number; // Optional position display
   size?: number; // Diameter of the compass in pixels
 }
 
 export default function Compass({
   heading,
-  latitude,
-  longitude,
   size = 240,
 }: CompassProps) {
   // Track cumulative rotation to handle 0°/360° boundary crossing

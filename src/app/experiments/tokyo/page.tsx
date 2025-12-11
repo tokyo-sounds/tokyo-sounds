@@ -442,6 +442,7 @@ export default function TokyoPage() {
         playerCount={playerCount}
         heading={heading}
         speedoMeterSize={speedoMeterSize}
+        isMobile={isMobile}
       />
 
       {currentDistrict && <DistrictIndicator district={currentDistrict} />}

@@ -31,8 +31,8 @@ interface FlightDashboardProps {
     isAvailable: boolean;
     isEnabled: boolean;
     needsPermission: boolean;
-    isMobile: boolean;
   };
+  isMobile: boolean;
   planeControllerRef: React.RefObject<PlaneControllerHandle>;
 }
 
@@ -53,6 +53,7 @@ export default function FlightDashboard({
   planeControllerRef,
   playerCount,
   multiplayerConnected,
+  isMobile,
 }: FlightDashboardProps) {
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
@@ -66,7 +67,7 @@ export default function FlightDashboard({
         isGyroActive={gyroState.isActive}
         isGyroEnabled={gyroState.isEnabled}
         isGyroAvailable={gyroState.isAvailable}
-        isMobile={gyroState.isMobile}
+        isMobile={isMobile}
         onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
       />
       <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
