@@ -220,16 +220,16 @@ export function useFlight({ camera, config: configOverrides, onSpeedChange, onMo
           break;
         case "ShiftLeft":
         case "ShiftRight":
-          keysRef.current.boost = true;
-          keysRef.current.sprint = true;
-          break;
-        case "Space":
           e.preventDefault();
           if (modeRef.current === "elytra") {
             keysRef.current.freeze = !keysRef.current.freeze;
           } else {
             keysRef.current.up = true;
           }
+          break;
+          case "Space":
+          keysRef.current.boost = true;
+          keysRef.current.sprint = true;
           break;
         case "ControlLeft":
         case "ControlRight":
