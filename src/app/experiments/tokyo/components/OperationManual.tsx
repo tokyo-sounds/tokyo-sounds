@@ -24,7 +24,7 @@ export default function OperationManul({
         className="w-full"
       >
         <AccordionItem value="manual" className="border-none">
-          <AccordionTrigger className="py-2 items-center hover:no-underline cursor-pointer">
+          <AccordionTrigger className="py-2 items-center text-muted justify-center hover:no-underline cursor-pointer">
             <Info strokeWidth={1} className="size-4" />
             <span>操作ガイド</span>
           </AccordionTrigger>
