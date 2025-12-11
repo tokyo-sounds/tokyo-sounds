@@ -49,6 +49,7 @@ import {
 } from "@/components/city/DistrictLyriaAudio";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
 import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
+import { AmbientBackgroundAudioProvider } from "@/components/city/AmbientBackgroundAudioContext";
 import {
   PlaneController,
   type PlaneControllerHandle,
@@ -386,7 +387,8 @@ export default function TokyoClient({
   }
 
   return (
-    <div className="w-full h-dvh bg-black relative overflow-hidden">
+    <AmbientBackgroundAudioProvider>
+      <div className="w-full h-dvh bg-black relative overflow-hidden">
       <Canvas
         shadows="soft"
         camera={{
@@ -435,7 +437,7 @@ export default function TokyoClient({
             <DistrictLyriaAudio
               apiKey={effectiveLyriaApiKey}
               enabled={generativeEnabled}
-              volume={0.6}
+              volume={0.4}
               onStatusUpdate={setLyriaStatus}
               onDebugUpdate={setDistrictDebug}
               onCurrentDistrictChange={setCurrentDistrict}
@@ -514,6 +516,7 @@ export default function TokyoClient({
         open={debugMenuOpen}
         onOpenChange={setDebugMenuOpen}
       />
-    </div>
+      </div>
+    </AmbientBackgroundAudioProvider>
   );
 }

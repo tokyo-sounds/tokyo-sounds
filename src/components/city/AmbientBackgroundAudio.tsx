@@ -9,13 +9,14 @@
  */
 
 import { useRef, useEffect, useMemo, useCallback, useState } from "react";
+import { useAmbientBackgroundAudio } from "./AmbientBackgroundAudioContext";
 
 interface AmbientBackgroundAudioProps {
   cameraY: number;
   enabled?: boolean;
   minHeight?: number; // Minimum height for maximum volume (default: 0)
   maxHeight?: number; // Maximum height for minimum volume/silence (default: 1000)
-  baseVolume?: number; // Base volume multiplier (0-1, default: 0.2)
+  baseVolume?: number; // Base volume multiplier (0-1, default: 0.7)
 }
 
 const VOLUME_UPDATE_THROTTLE_MS = 100; // Throttle volume updates to avoid excessive updates
@@ -55,8 +56,13 @@ export function AmbientBackgroundAudio({
   enabled = true,
   minHeight = 0,
   maxHeight = 1000,
-  baseVolume = 0.2,
+  baseVolume = 0.7,
 }: AmbientBackgroundAudioProps) {
+  const {
+    setCurrentFileName,
+    setIsPlaying: setContextIsPlaying,
+    isPlaying: contextIsPlaying,
+  } = useAmbientBackgroundAudio();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const nextAudioRef = useRef<HTMLAudioElement | null>(null);
   const isPlayingRef = useRef(false);
@@ -167,6 +173,9 @@ export function AmbientBackgroundAudio({
     }
 
     currentFileRef.current = nextFile;
+    // Extract filename from path for display
+    const fileName = nextFile.split("/").pop() || nextFile;
+    setCurrentFileName(fileName);
 
     // Clean up current audio before switching
     const oldAudio = audioRef.current;
@@ -213,6 +222,7 @@ export function AmbientBackgroundAudio({
       console.log(`[AmbientBackgroundAudio] Audio ended: ${nextFile}`);
       isSwitchingRef.current = false;
       isPlayingRef.current = false;
+      setContextIsPlaying(false);
       if (enabledRef.current) {
         // Small delay to ensure cleanup
         setTimeout(() => {
@@ -244,6 +254,7 @@ export function AmbientBackgroundAudio({
       .then(() => {
         isPlayingRef.current = true;
         isSwitchingRef.current = false;
+        setContextIsPlaying(true);
         console.log(`[AmbientBackgroundAudio] Started playing: ${nextFile}`);
       })
       .catch((err) => {
@@ -253,6 +264,7 @@ export function AmbientBackgroundAudio({
         );
         isSwitchingRef.current = false;
         isPlayingRef.current = false;
+        setContextIsPlaying(false);
         // If autoplay was blocked, wait for user interaction
         if (
           err.name === "NotAllowedError" ||
@@ -269,6 +281,28 @@ export function AmbientBackgroundAudio({
         }
       });
   }, [cleanupAudio]);
+
+  // Handle play/pause from context
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    if (contextIsPlaying && !isPlayingRef.current) {
+      // User wants to play
+      audioRef.current
+        .play()
+        .then(() => {
+          isPlayingRef.current = true;
+        })
+        .catch((err) => {
+          console.error("[AmbientBackgroundAudio] Failed to play:", err);
+          setContextIsPlaying(false);
+        });
+    } else if (!contextIsPlaying && isPlayingRef.current) {
+      // User wants to pause
+      audioRef.current.pause();
+      isPlayingRef.current = false;
+    }
+  }, [contextIsPlaying, setContextIsPlaying]);
 
   // Try to start playback when files are loaded and conditions are met
   useEffect(() => {
