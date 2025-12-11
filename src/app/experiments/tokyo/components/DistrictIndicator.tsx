@@ -14,12 +14,10 @@ export default function DistrictIndicator({
   if (!district) return null;
 
   return (
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-      <div className="bg-black/70 px-4 py-2 rounded text-white text-center font-mono">
-        <div className="text-2xl font-bold" style={{ color: district.color }}>
-          {district.nameJa}
-        </div>
-        <div className="text-xs text-white/70">{district.name}</div>
+    <div className="absolute top-1/6 left-1/2 transform -translate-x-1/2 pointer-events-none">
+      <div className="text-white text-center space-y-1 *:text-shadow-lg *:text-shadow-black/50">
+        <h2 className="text-sm text-white/70 font-sans font-light">{district.name}</h2>
+        <h1 className="text-5xl font-semibold font-noto">{district.nameJa}</h1>
       </div>
     </div>
   );

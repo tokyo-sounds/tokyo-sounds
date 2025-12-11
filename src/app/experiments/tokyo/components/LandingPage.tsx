@@ -3,11 +3,9 @@
  * Landing page for Tokyo Sounds
  * @returns null
  */
-import { PASTEL_COLORS } from "../page";
+import { PASTEL_COLORS } from "../TokyoClient";
 
 interface LandingPageProps {
-  mapsApiKey: string;
-  setMapsApiKey: (mapsApiKey: string) => void;
   playerName: string;
   setPlayerName: (playerName: string) => void;
   planeColor: string;
@@ -16,13 +14,10 @@ interface LandingPageProps {
   setGenerativeEnabled: (generativeEnabled: boolean) => void;
   spatialAudioEnabled: boolean;
   setSpatialAudioEnabled: (spatialAudioEnabled: boolean) => void;
-  lyriaApiKey: string;
   handleStart: () => void;
 }
 
 export default function LandingPage({
-  mapsApiKey,
-  setMapsApiKey,
   playerName,
   setPlayerName,
   planeColor,
@@ -31,11 +26,10 @@ export default function LandingPage({
   setGenerativeEnabled,
   spatialAudioEnabled,
   setSpatialAudioEnabled,
-  lyriaApiKey,
   handleStart,
 }: LandingPageProps) {
   return (
-    <div className="flex items-center justify-center w-full h-screen bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
+    <div className="flex items-center justify-center w-full h-svh bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
       <div className="text-center space-y-6 max-w-lg px-8">
         <div className="space-y-2">
           <h1 className="text-5xl font-black tracking-tight bg-linear-to-r from-cyan-400 via-fuchsia-500 to-amber-400 bg-clip-text text-transparent">
@@ -47,18 +41,6 @@ export default function LandingPage({
         </div>
 
         <div className="bg-slate-900/60 border border-slate-700/50 p-6 rounded-2xl space-y-4">
-          <div>
-            <label className="block text-slate-400 text-sm mb-2">
-              Google Maps API Key
-            </label>
-            <input
-              type="password"
-              value={mapsApiKey}
-              onChange={(e) => setMapsApiKey(e.target.value)}
-              placeholder="Enter API key (Map Tiles API required)"
-              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none"
-            />
-          </div>
 
           <div className="border-t border-slate-700/50 pt-4">
             <label className="block text-slate-400 text-sm mb-2">
@@ -127,15 +109,6 @@ export default function LandingPage({
             </label>
           </div>
 
-          {generativeEnabled && !lyriaApiKey && (
-            <p className="text-amber-400 text-xs">
-              ⚠️ Set NEXT_PUBLIC_GOOGLE_AI_API_KEY in .env.local
-            </p>
-          )}
-          {generativeEnabled && lyriaApiKey && (
-            <p className="text-green-400 text-xs">✓ Lyria API key detected</p>
-          )}
-
           <div className="bg-slate-800/50 p-3 rounded-lg text-xs space-y-1">
             <p className="text-cyan-400 font-bold">CONTROLS</p>
             <div className="grid grid-cols-2 gap-x-4 text-slate-400">
@@ -156,7 +129,6 @@ export default function LandingPage({
 
           <button
             onClick={handleStart}
-            disabled={!mapsApiKey}
             className="w-full px-6 py-3 bg-linear-to-r from-cyan-500 via-fuchsia-500 to-amber-500 text-white font-bold rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity"
           >
             Enter Tokyo
