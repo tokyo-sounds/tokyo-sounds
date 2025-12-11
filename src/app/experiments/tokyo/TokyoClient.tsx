@@ -48,6 +48,7 @@ import {
   type DistrictDebugInfo,
 } from "@/components/city/DistrictLyriaAudio";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
+import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
 import {
   PlaneController,
   type PlaneControllerHandle,
@@ -495,6 +496,8 @@ export default function TokyoClient({
       {currentDistrict && <DistrictIndicator district={currentDistrict} />}
 
       {demoState?.active && <DemoTourGuide demoState={demoState} />}
+
+      <AmbientBackgroundAudio cameraY={cameraY} enabled={started} />
 
       <DebugMenu
         options={debugOptions}
