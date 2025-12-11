@@ -1,5 +1,3 @@
-import SpeedoMeter from "./SpeedoMeter";
-
 interface FlightDashboardProps {
   flightSpeed: number;
   generativeEnabled: boolean;
@@ -24,24 +22,10 @@ export default function FlightDashboard({
   multiplayerConnected,
 }: FlightDashboardProps) {
   return (
-    <div className="absolute top-4 left-4 bg-black/70 rounded p-3 text-white text-xs font-mono">
-      <SpeedoMeter flightSpeed={flightSpeed} />
-      <div className="flex items-center gap-3 mb-2">
-        <span className="text-white/70">SPD</span>
-        <span
-          className={
-            flightSpeed > 150
-              ? "text-red-400"
-              : flightSpeed > 80
-              ? "text-amber-400"
-              : "text-white"
-          }
-        >
-          {flightSpeed}
-        </span>
+    <div className="flex flex-col items-center justify-center gap-2 absolute top-4 left-4 p-6 bg-black/[0.1]  backdrop-blur-sm rounded-lg text-white text-xs font-mono">
+      <div className="w-full flex items-center justify-between gap-2">
         {generativeEnabled && (
           <>
-            <span className="text-white/30">|</span>
             <span className="text-white/70">♪ {lyriaStatus}</span>
           </>
         )}

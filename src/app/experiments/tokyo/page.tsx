@@ -38,6 +38,7 @@ import CompassBar from "./components/CompassBar";
 import LandingPage from "./components/LandingPage";
 import DemoTourGuide from "./components/DemoTourGuide";
 import FlightDashboard from "./components/FlightDashboard";
+import SpeedoMeter from "./components/SpeedoMeter";
 import FlightBoundsHelper from "./components/FlightBoundsHelper";
 import DistrictIndicator from "./components/DistrictIndicator";
 import DistrictDebugPanel from "./components/DistrictDebugPanel";
@@ -58,6 +59,7 @@ import { OtherPlayers } from "@/components/city/OtherPlayers";
 // Hooks
 import { clearVisitedFlag, type DemoState } from "@/hooks/useDemoFlythrough";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
+import { useIsMobile } from "@/hooks/use-mobile";
 // Stores
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
 import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
@@ -146,6 +148,8 @@ export default function TokyoPage() {
     }
     return PASTEL_COLORS[4].hex;
   });
+  const isMobile = useIsMobile();
+  const speedoMeterSize = isMobile ? 150 : 240;
   const [status, setStatus] = useState("Ready");
   const [flightSpeed, setFlightSpeed] = useState(0);
   const [movementMode, setMovementMode] = useState<MovementMode>("elytra");
@@ -444,6 +448,10 @@ export default function TokyoPage() {
         multiplayerConnected={multiplayerConnected}
         playerCount={playerCount}
       />
+
+      <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
+        <SpeedoMeter flightSpeed={flightSpeed} size={speedoMeterSize} />
+      </div>
 
       {currentDistrict && <DistrictIndicator district={currentDistrict} />}
 

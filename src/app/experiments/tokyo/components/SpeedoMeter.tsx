@@ -6,16 +6,12 @@
  * Displays flight speed with smooth acceleration/deceleration animations
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
-import { motion, useMotionValue, useSpring } from "motion/react";
+import { useMemo } from "react";
 import {
   speedToAngle,
-  detectSpeedChange,
   getSpeedColor,
   getSpeedColorValue,
-  getSpringConfig,
   generateSpeedMarks,
-  type SpeedChangeDirection,
 } from "@/lib/speedometer-utils";
 import { MIN_SPEED, MAX_SPEED } from "@/lib/flight";
 
@@ -30,41 +26,13 @@ export default function SpeedoMeter({
   flightSpeed,
   minSpeed = MIN_SPEED,
   maxSpeed = MAX_SPEED,
-  size = 200,
+  size = 240,
 }: SpeedoMeterProps) {
-  const prevSpeedRef = useRef<number>(flightSpeed);
-  const [direction, setDirection] = useState<SpeedChangeDirection>("stable");
-
   // Calculate current angle
   const targetAngle = useMemo(
     () => speedToAngle(flightSpeed, minSpeed, maxSpeed),
     [flightSpeed, minSpeed, maxSpeed]
   );
-
-  // Detect speed change direction
-  useEffect(() => {
-    const newDirection = detectSpeedChange(
-      prevSpeedRef.current,
-      flightSpeed,
-      0.1
-    );
-    setDirection(newDirection);
-    prevSpeedRef.current = flightSpeed;
-  }, [flightSpeed]);
-
-  // Motion value for smooth animation
-  const angle = useMotionValue(targetAngle);
-
-  // Get spring config based on speed direction
-  const springConfig = useMemo(() => getSpringConfig(direction), [direction]);
-
-  // Apply spring animation to angle
-  const springAngle = useSpring(angle, springConfig);
-
-  // Update target angle when speed changes
-  useEffect(() => {
-    angle.set(targetAngle);
-  }, [targetAngle, angle]);
 
   // Generate speed marks
   const speedMarks = useMemo(
@@ -75,7 +43,7 @@ export default function SpeedoMeter({
   // SVG constants
   const centerX = size / 2;
   const centerY = size / 2;
-  const radius = size * 0.4;
+  const radius = size * 0.33;
   const needleLength = radius * 0.75;
   const needleWidth = 4; // Width of the triangle needle at its base
   const needleBaseOffset = 8; // Distance from center for the triangle base
@@ -94,10 +62,13 @@ export default function SpeedoMeter({
   };
 
   const speedColor = getSpeedColor(flightSpeed, minSpeed, maxSpeed);
-  const speedColorValue = getSpeedColorValue(flightSpeed, minSpeed, maxSpeed);
+  // const speedColorValue = getSpeedColorValue(flightSpeed, minSpeed, maxSpeed);
 
   return (
-    <div className="relative" style={{ width: size, height: size }}>
+    <div
+      className="relative rounded-full bg-black/[0.1] backdrop-blur-xs   text-white text-xs font-mono **:drop-shadow-lg **:drop-shadow-black/50"
+      style={{ width: size, height: size }}
+    >
       <svg
         width={size}
         height={size}
@@ -112,6 +83,14 @@ export default function SpeedoMeter({
           fill="none"
           stroke="rgba(255, 255, 255, 0.1)"
           strokeWidth="2"
+        />
+        <circle
+          cx={centerX}
+          cy={centerY}
+          r={radius * 0.6}
+          fill="none"
+          stroke="rgba(255, 255, 255, 0.1)"
+          strokeWidth="1"
         />
 
         {/* Speed marks */}
@@ -146,7 +125,7 @@ export default function SpeedoMeter({
                 <text
                   x={labelX}
                   y={labelY}
-                  fill="rgba(255, 255, 255, 0.6)"
+                  fill="rgba(255, 255, 255, 0.8)"
                   fontSize="10"
                   textAnchor="middle"
                   dominantBaseline="middle"
@@ -169,10 +148,11 @@ export default function SpeedoMeter({
       </svg>
 
       {/* Needle - separate SVG with CSS rotation for reliable animation */}
-      <motion.div
-        className="absolute inset-0 pointer-events-none"
+      <div
+        className="absolute inset-0 pointer-events-none transition-transform duration-500 ease-out"
         style={{
-          rotate: springAngle,
+          transform: `rotate(${targetAngle}deg)`,
+          transformOrigin: "center center",
         }}
       >
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
@@ -182,10 +162,10 @@ export default function SpeedoMeter({
                 L ${centerX - needleWidth / 2} ${centerY - needleBaseOffset} 
                 L ${centerX + needleWidth / 2} ${centerY - needleBaseOffset} 
                 Z`}
-            fill={speedColorValue}
+            fill="orange"
           />
         </svg>
-      </motion.div>
+      </div>
 
       {/* Speed display - positioned at center of the gauge */}
       <div
@@ -199,7 +179,7 @@ export default function SpeedoMeter({
         <div className={`text-2xl font-mono font-bold ${speedColor}`}>
           {Math.round(flightSpeed)}
         </div>
-        <div className="text-xs text-white/50 font-mono">km/h</div>
+        <div className="text-xs text-muted font-mono">km/h</div>
       </div>
     </div>
   );
