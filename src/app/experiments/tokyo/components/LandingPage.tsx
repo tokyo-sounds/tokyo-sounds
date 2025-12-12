@@ -3,7 +3,7 @@
  * Landing page for Tokyo Sounds
  * @returns null
  */
-import { PASTEL_COLORS } from "../page";
+import { PASTEL_COLORS } from "../TokyoClient";
 
 interface LandingPageProps {
   playerName: string;

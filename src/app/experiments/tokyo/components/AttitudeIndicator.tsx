@@ -10,7 +10,7 @@ export default function AttitudeIndicator({
   cameraY,
 }: AttitudeIndicatorProps) {
   return (
-    <div className="relative flex items-center justify-center w-[80svw] md:w-xl h-[60svh]">
+    <div className="relative flex items-center justify-center w-[80dvw] md:w-xl h-[60dvh]">
       {/* Background Circle */}
       <div className="size-48 md:size-60 border rounded-full" />
       {/* Roll Indicator */}
