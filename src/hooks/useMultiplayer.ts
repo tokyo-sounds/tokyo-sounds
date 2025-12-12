@@ -22,6 +22,8 @@ import {
   RECONNECT_INTERVAL_MS,
 } from "@/types/multiplayer";
 
+const DEBUG = process.env.NODE_ENV === "development";
+
 export type ConnectionStatus = "disconnected" | "connecting" | "connected";
 
 export interface UseMultiplayerOptions {
@@ -76,7 +78,6 @@ export function useMultiplayer({
       switch (message.type) {
         case "welcome":
           playerIdRef.current = message.id;
-          console.log(`[Multiplayer] Connected as ${message.id}`);
           break;
 
         case "players":
@@ -85,28 +86,25 @@ export function useMultiplayer({
           break;
 
         case "playerJoined":
-          console.log(`[Multiplayer] Player joined: ${message.player.name}`);
           break;
 
         case "playerLeft":
-          console.log(`[Multiplayer] Player left: ${message.id}`);
           setNearbyPlayers((prev) => prev.filter((p) => p.id !== message.id));
           break;
       }
-    } catch (error) {
-      console.error("[Multiplayer] Error parsing message:", error);
+    } catch {
     }
   }, []);
 
   const connect = useCallback(() => {
-    if (!enabled || !serverUrl) {
-      console.log("[Multiplayer] Not connecting:", { enabled, serverUrl });
-      return;
-    }
+    if (!enabled || !serverUrl) return;
     if (wsRef.current?.readyState === WebSocket.OPEN) return;
     if (wsRef.current?.readyState === WebSocket.CONNECTING) return;
 
-    console.log("[Multiplayer] Attempting connection to:", serverUrl);
+    if (DEBUG && typeof window !== "undefined" && window.location.protocol === "https:" && serverUrl.startsWith("ws://")) {
+      console.warn("[Multiplayer] Mixed content: cannot connect to ws:// from https:// page");
+    }
+    
     setConnectionStatus("connecting");
 
     try {
@@ -120,7 +118,6 @@ export function useMultiplayer({
         }
 
         setConnectionStatus("connected");
-        console.log("[Multiplayer] Connected to server");
 
         sendMessage({
           type: "join",
@@ -131,10 +128,9 @@ export function useMultiplayer({
 
       ws.onmessage = handleMessage;
 
-      ws.onclose = (event) => {
+      ws.onclose = () => {
         if (!mountedRef.current) return;
 
-        console.log("[Multiplayer] Connection closed:", event.code, event.reason);
         setConnectionStatus("disconnected");
         setNearbyPlayers([]);
         setPlayerCount(0);
@@ -150,11 +146,9 @@ export function useMultiplayer({
         }
       };
 
-      ws.onerror = (event) => {
-        console.log("[Multiplayer] Connection error:", event);
+      ws.onerror = () => {
       };
-    } catch (error) {
-      console.log("[Multiplayer] Failed to create WebSocket:", error);
+    } catch {
       setConnectionStatus("disconnected");
 
       if (enabled && mountedRef.current) {

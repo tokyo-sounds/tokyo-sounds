@@ -63,6 +63,8 @@ interface PlaneControllerProps {
   collisionGroup?: THREE.Group | null;
   collisionEnabled?: boolean;
   onCollision?: (distance: number) => void;
+  localPlayerPositionRef?: React.RefObject<THREE.Vector3>;
+  localPlayerQuaternionRef?: React.RefObject<THREE.Quaternion>;
   onPlanePositionChange?: (
     position: THREE.Vector3,
     quaternion: THREE.Quaternion
@@ -79,30 +81,25 @@ const COLLISION_DISTANCE = 2;
 const COLLISION_PUSH_STRENGTH = 1;
 const NUM_COLLISION_RAYS = 8;
 
-export const PlaneController = forwardRef<
-  PlaneControllerHandle,
-  PlaneControllerProps
->(function PlaneController(
-  {
-    onSpeedChange,
-    onModeChange,
-    onCameraYChange,
-    onHeadingChange,
-    onPitchChange,
-    onRollChange,
-    collisionGroup,
-    collisionEnabled,
-    onCollision,
-    onPlanePositionChange,
-    demoEnabled = true,
-    onDemoStateChange,
-    onDemoWaypointReached,
-    onDemoComplete,
-    onGyroStateChange,
-    planeColor,
-  },
-  ref
-) {
+export const PlaneController = forwardRef<PlaneControllerHandle, PlaneControllerProps>(function PlaneController({
+  onSpeedChange,
+  onModeChange,
+  onCameraYChange,
+  onHeadingChange,
+  onPitchChange,
+  onRollChange,
+  collisionGroup,
+  collisionEnabled,
+  onCollision,
+  localPlayerPositionRef,
+  localPlayerQuaternionRef,
+  demoEnabled = true,
+  onDemoStateChange,
+  onDemoWaypointReached,
+  onDemoComplete,
+  onGyroStateChange,
+  planeColor,
+}, ref) {
   const { camera } = useThree();
   const planeRef = useRef<THREE.Group>(null);
   const frameCountRef = useRef(0);
@@ -307,7 +304,12 @@ export const PlaneController = forwardRef<
     planeRef.current.position.copy(virtualCam.position);
     planeRef.current.quaternion.copy(virtualCam.quaternion);
 
-    onPlanePositionChange?.(virtualCam.position, virtualCam.quaternion);
+    if (localPlayerPositionRef?.current) {
+      localPlayerPositionRef.current.copy(virtualCam.position);
+    }
+    if (localPlayerQuaternionRef?.current) {
+      localPlayerQuaternionRef.current.copy(virtualCam.quaternion);
+    }
 
     const isSimpleMode = currentMode === "simple";
 
