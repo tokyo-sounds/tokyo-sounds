@@ -224,7 +224,7 @@ function AmbientAudioControl() {
       </div>
       <div className="flex gap-2">
         <Button
-          variant="outline"
+          variant="ghost"
           size="sm"
           onClick={handleToggle}
           className="flex-1 text-xs border-white/20 text-white/70 hover:text-white hover:bg-white/10"
