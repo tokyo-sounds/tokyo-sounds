@@ -69,7 +69,7 @@ export default function CompassBar({
   const visibleRange = 90;
 
   return (
-    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flight-dashboard-card p-3 rounded-lg font-mono">
+    <div className="absolute top-4 left-1/2 transform -translate-x-1/2 flight-dashboard-card p-3 rounded-lg font-mono pointer-events-auto">
       <div className="flex items-center justify-center gap-4 mb-1">
         {isMobile &&
           (isGyroActive || isGyroEnabled || isGyroAvailable) &&
@@ -178,6 +178,8 @@ export default function CompassBar({
           );
         })}
       </div>
+
+
     </div>
   );
 }
