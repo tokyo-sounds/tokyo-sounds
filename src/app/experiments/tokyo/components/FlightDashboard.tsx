@@ -111,7 +111,7 @@ export default function FlightDashboard({
           generativeEnabled={generativeEnabled}
         />
       </div>
-      <div className="absolute top-4 left-4">
+      <div className="absolute top-1/2 -translate-y-1/2 right-4">
         <TimeOfDayEffectsMenu />
       </div>
       <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">

@@ -21,7 +21,7 @@ export default function TimeOfDayEffectsMenu() {
   const { currentTime, setTimeOfDay } = useTimeOfDayStore();
   const timeOptions: TimeOfDay[] = ["morning", "afternoon", "evening"];
   return (
-    <div className="flex gap-1 pointer-events-auto">
+    <div className="flex flex-col gap-1 pointer-events-auto">
       {timeOptions.map((time) => {
         const Icon = TIME_OF_DAY_ICONS[time];
         return (
