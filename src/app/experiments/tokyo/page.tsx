@@ -26,6 +26,7 @@ import {
   DistrictLyriaAudio,
   type DistrictDebugInfo,
 } from "@/components/city/DistrictLyriaAudio";
+import { DistrictTracker } from "@/components/city/DistrictTracker";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
 import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
 import { AmbientBackgroundAudioProvider } from "@/components/city/AmbientBackgroundAudioContext";
@@ -90,7 +91,6 @@ function getMultiplayerUrl(): string {
 }
 
 // Multiplayer
-const ENV_MULTIPLAYER_URL = getMultiplayerUrl();
 const STORAGE_KEYS = {
   playerName: "tokyo-sounds-player-name",
   planeColor: "tokyo-sounds-plane-color",
@@ -100,29 +100,25 @@ const ENV_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 const ENV_LYRIA_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || "";
 
 export default function TokyoPage() {
+  // Track hydration completion to prevent SSR/CSR mismatches
+  const [mounted, setMounted] = useState(false);
+
   const [started, setStarted] = useState(false);
-  const [playerName, setPlayerName] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem(STORAGE_KEYS.playerName) || "";
-    }
-    return "";
-  });
-  const [planeColor, setPlaneColor] = useState(() => {
-    if (typeof window !== "undefined") {
-      return (
-        localStorage.getItem(STORAGE_KEYS.planeColor) || PASTEL_COLORS[4].hex
-      );
-    }
-    return PASTEL_COLORS[4].hex;
-  });
+  // Initialize with safe defaults that match SSR
+  const [playerName, setPlayerName] = useState("");
+  const [planeColor, setPlaneColor] = useState(PASTEL_COLORS[4].hex);
+
+  // Calculate multiplayer URL inside component to avoid module-level window access
+  const multiplayerUrl = mounted ? getMultiplayerUrl() : "ws://localhost:3001";
+
   const isMobile = useIsMobile();
-  const speedoMeterSize = isMobile ? 120 : 200; // size of the speed meter and compass
+  // Use safe default for speedoMeterSize until hydration completes
+  const speedoMeterSize = mounted && isMobile ? 120 : 200; // size of the speed meter and compass
   const [status, setStatus] = useState("Ready");
   const [flightSpeed, setFlightSpeed] = useState(0);
   const [movementMode, setMovementMode] = useState<MovementMode>("elytra");
   const [currentDistrict, setCurrentDistrict] = useState<District | null>(null);
   const [districtDebug, setDistrictDebug] = useState<DistrictDebugInfo[]>([]);
-  const [districtDebugCollapsed, setDistrictDebugCollapsed] = useState(true);
   const [lyriaStatus, setLyriaStatus] = useState("Idle");
   const [spatialAudioEnabled, setSpatialAudioEnabled] = useState(true);
   const [spatialAudioStats, setSpatialAudioStats] = useState({
@@ -174,19 +170,41 @@ export default function TokyoPage() {
     sendUpdate: sendMultiplayerUpdate,
     playerCount,
   } = useMultiplayer({
-    serverUrl: ENV_MULTIPLAYER_URL,
+    serverUrl: multiplayerUrl,
     playerName: playerName || "Anonymous",
     planeColor,
     enabled: started,
   });
 
+  // Load from localStorage after hydration
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.playerName, playerName);
-  }, [playerName]);
+    setMounted(true);
+
+    // Load playerName from localStorage
+    const storedPlayerName = localStorage.getItem(STORAGE_KEYS.playerName);
+    if (storedPlayerName) {
+      setPlayerName(storedPlayerName);
+    }
+
+    // Load planeColor from localStorage
+    const storedPlaneColor = localStorage.getItem(STORAGE_KEYS.planeColor);
+    if (storedPlaneColor) {
+      setPlaneColor(storedPlaneColor);
+    }
+  }, []);
+
+  // Save to localStorage when values change (only after hydration)
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem(STORAGE_KEYS.playerName, playerName);
+    }
+  }, [playerName, mounted]);
 
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEYS.planeColor, planeColor);
-  }, [planeColor]);
+    if (mounted) {
+      localStorage.setItem(STORAGE_KEYS.planeColor, planeColor);
+    }
+  }, [planeColor, mounted]);
 
   const handleStart = useCallback(async () => {
     try {
@@ -296,31 +314,39 @@ export default function TokyoPage() {
   const initialCameraPosition: [number, number, number] = [0, 200, 100];
 
   // Keyboard Shortcuts
-  const [operationManualOpen, setOperationManualOpen] = useState(true);
+  // Initialize with false to match SSR, then set to true after hydration
+  const [operationManualOpen, setOperationManualOpen] = useState(false);
   const [debugMenuOpen, setDebugMenuOpen] = useState(false);
+  // Track closing state to prevent immediate reopen after Esc closes menu
+  const isClosingDebugMenuRef = useRef(false);
+
+  // Set operationManualOpen to true after hydration
+  useEffect(() => {
+    if (mounted) {
+      setOperationManualOpen(true);
+    }
+  }, [mounted]);
 
   useEffect(() => {
+    if (!mounted) return;
+
     const handleKeyPress = (event: KeyboardEvent) => {
       switch (event.key) {
         case "h":
         case "H":
           setOperationManualOpen((prev) => !prev);
           break;
-        case "i":
-        case "I":
-          // Toggle district debug panel, and close operation manual if opening district panel
-          setDistrictDebugCollapsed((prev) => {
-            const newCollapsed = !prev;
-            if (!newCollapsed) {
-              // Opening district panel, close operation manual
-              setOperationManualOpen(false);
-            }
-            return newCollapsed;
-          });
-          break;
-        case "/":
+        case "Escape":
+          if (demoState?.active) {
+            return;
+          }
+          // If menu is open or closing, let Sheet handle it (close menu)
+          if (debugMenuOpen || isClosingDebugMenuRef.current) {
+            return;
+          }
+          // Otherwise open menu
           event.preventDefault();
-          setDebugMenuOpen((prev) => !prev);
+          setDebugMenuOpen(true);
           break;
         case "Tab":
           event.preventDefault();
@@ -334,7 +360,7 @@ export default function TokyoPage() {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, []);
+  }, [mounted, demoState?.active, debugMenuOpen]);
 
   if (!started) {
     return (
@@ -399,7 +425,7 @@ export default function TokyoPage() {
 
             <FlightBoundsHelper visible={debugOptions.showBounds} />
 
-            {generativeEnabled && effectiveLyriaApiKey && (
+            {generativeEnabled && effectiveLyriaApiKey ? (
               <DistrictLyriaAudio
                 apiKey={effectiveLyriaApiKey}
                 enabled={generativeEnabled}
@@ -407,6 +433,12 @@ export default function TokyoPage() {
                 onStatusUpdate={setLyriaStatus}
                 onDebugUpdate={setDistrictDebug}
                 onCurrentDistrictChange={setCurrentDistrict}
+                debugUpdateInterval={debugMenuOpen ? 3 : 30}
+              />
+            ) : (
+              <DistrictTracker
+                onCurrentDistrictChange={setCurrentDistrict}
+                onDebugUpdate={setDistrictDebug}
               />
             )}
 
@@ -448,9 +480,6 @@ export default function TokyoPage() {
             heading={heading}
             speedoMeterSize={speedoMeterSize}
             isMobile={isMobile}
-            districts={districtDebug}
-            districtDebugCollapsed={districtDebugCollapsed}
-            setDistrictDebugCollapsed={setDistrictDebugCollapsed}
           />
         )}
 
@@ -477,10 +506,22 @@ export default function TokyoPage() {
           cameraY={cameraY}
           collisionDistance={collisionDistance}
           apiKey={ENV_MAPS_API_KEY}
+          generativeEnabled={generativeEnabled}
+          districts={districtDebug}
           onTeleport={handleTeleport}
           searchDisabled={demoState?.active || false}
           open={debugMenuOpen}
-          onOpenChange={setDebugMenuOpen}
+          onOpenChange={(open) => {
+            // Set flag when closing to prevent immediate reopen
+            if (!open) {
+              isClosingDebugMenuRef.current = true;
+              // Reset flag after brief delay to allow reopening
+              setTimeout(() => {
+                isClosingDebugMenuRef.current = false;
+              }, 100);
+            }
+            setDebugMenuOpen(open);
+          }}
         />
       </div>
     </AmbientBackgroundAudioProvider>

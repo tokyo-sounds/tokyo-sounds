@@ -25,7 +25,7 @@ export default function TimeOfDayEffectsMenu() {
       {timeOptions.map((time) => {
         const Icon = TIME_OF_DAY_ICONS[time];
         return (
-          <Tooltip key={time}>
+          <Tooltip key={time} delayDuration={700}>
             <TooltipTrigger asChild>
               <Button
                 key={time}
@@ -41,7 +41,7 @@ export default function TimeOfDayEffectsMenu() {
                 <Icon className="size-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
+            <TooltipContent className="pointer-events-none select-none">
               <p>{TIME_OF_DAY_PRESETS[time].nameJa}</p>
             </TooltipContent>
           </Tooltip>
