@@ -35,6 +35,7 @@ interface DistrictLyriaAudioProps {
   onStatusUpdate?: (status: string) => void;
   onDebugUpdate?: (districts: DistrictDebugInfo[]) => void;
   onCurrentDistrictChange?: (district: District | null) => void;
+  debugUpdateInterval?: number; // Frame interval for debug updates (default: 30)
 }
 
 /** DistrictLyriaAudio
@@ -55,6 +56,7 @@ export function DistrictLyriaAudio({
   onStatusUpdate,
   onDebugUpdate,
   onCurrentDistrictChange,
+  debugUpdateInterval = 30,
 }: DistrictLyriaAudioProps) {
   const { camera } = useThree();
   const [status, setStatus] = useState<string>("Initializing...");
@@ -589,19 +591,18 @@ export function DistrictLyriaAudio({
       console.log(`[DistrictLyria] Position: ${geo.lat.toFixed(4)}, ${geo.lng.toFixed(4)} → ${currentDistrict?.name || "none"}`);
     }
 
-    if (onDebugUpdate && frameCountRef.current % 30 === 0) {
-      districtWeights.forEach((dw, i) => {
-        lastDebugInfoRef.current[i] = {
-          name: dw.district.name,
-          nameJa: dw.district.nameJa,
-          weight: smoothedWeightsRef.current.get(dw.district.id) || 0,
-          distance: dw.distance,
-          color: dw.district.color,
-          cameraLat: geo.lat,
-          cameraLng: geo.lng,
-        };
-      });
-      onDebugUpdate(lastDebugInfoRef.current);
+    if (onDebugUpdate && frameCountRef.current % debugUpdateInterval === 0) {
+      // Create new array to ensure React detects the change
+      const newDebugInfo: DistrictDebugInfo[] = districtWeights.map((dw) => ({
+        name: dw.district.name,
+        nameJa: dw.district.nameJa,
+        weight: smoothedWeightsRef.current.get(dw.district.id) || 0,
+        distance: dw.distance,
+        color: dw.district.color,
+        cameraLat: geo.lat,
+        cameraLng: geo.lng,
+      }));
+      onDebugUpdate(newDebugInfo);
     }
 
     if (!sessionRef.current || !enabled) return;

@@ -90,7 +90,7 @@ export default function Compass({ heading, size = 240 }: CompassProps) {
 
   return (
     <div
-      className="relative rounded-full bg-black/[0.25] border border-border/50 backdrop-blur-xs text-white text-xs font-mono **:drop-shadow-lg **:drop-shadow-black/50"
+      className="relative rounded-full flight-dashboard-card afont-mono **:drop-shadow-lg **:drop-shadow-black/50"
       style={{ width: size, height: size }}
     >
       <svg
