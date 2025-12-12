@@ -207,6 +207,468 @@ export const TOKYO_DISTRICTS: District[] = [
       "Lively gastropub jazz, Ebisu craft beer celebration, upbeat fusion grooves, sophisticated dinner party energy, trendy Tokyo nightlife",
     color: "#daa520",
   },
+  {
+    id: "okubo",
+    name: "Okubo",
+    nameJa: "大久保",
+    center: { lat: 35.7008, lng: 139.7003 }, // Okubo Station
+    radius: 500,
+    prompt:
+      "Multicultural Asian fusion beats, Korean and Thai restaurant vibes, diverse street food energy, international community atmosphere, warm and welcoming urban soundscape",
+    promptMorning:
+      "Gentle morning market sounds, peaceful Okubo dawn, soft Asian instrumental melodies, quiet multicultural neighborhood awakening, serene breakfast ambiance",
+    promptEvening:
+      "Lively Asian street food festival energy, bustling Korean and Thai restaurant atmosphere, vibrant multicultural nightlife, diverse community celebration, warm evening gathering vibes",
+    color: "#ff8c00",
+  },
+  {
+    id: "shin-okubo",
+    name: "Shin-Okubo",
+    nameJa: "新大久保",
+    center: { lat: 35.7012, lng: 139.7005 }, // Shin-Okubo Station
+    radius: 500,
+    prompt:
+      "K-pop influenced electronic beats, Korean town energy, vibrant K-POP culture vibes, Seoul street atmosphere in Tokyo, dynamic Korean nightlife sounds",
+    promptMorning:
+      "Soft K-pop ballad vibes, quiet Shin-Okubo morning, gentle Korean cafe ambiance, peaceful Korea town dawn, serene breakfast atmosphere",
+    promptEvening:
+      "High-energy K-pop dance beats, Shin-Okubo Korea town nightlife explosion, vibrant K-POP club energy, crowded Korean restaurant excitement, electric Seoul-in-Tokyo night fever",
+    color: "#ff1493",
+  },
+  {
+    id: "nakano",
+    name: "Nakano",
+    nameJa: "中野",
+    center: { lat: 35.7056, lng: 139.6656 }, // Nakano Station
+    radius: 600,
+    prompt:
+      "Retro anime soundtrack vibes, Nakano Broadway otaku paradise, nostalgic chiptune and synthwave fusion, vintage game center energy, classic anime culture atmosphere",
+    promptMorning:
+      "Gentle retro game music, peaceful Nakano Broadway morning, soft 8-bit lullaby, quiet otaku district awakening, serene anime cafe ambiance",
+    promptEvening:
+      "Intense anime opening theme energy, blazing Nakano Broadway nightlife, maximum chiptune intensity, crowded game center and anime shop excitement, nostalgic otaku night adventure",
+    color: "#9370db",
+  },
+  {
+    id: "yoyogi",
+    name: "Yoyogi",
+    nameJa: "代代木",
+    center: { lat: 35.6831, lng: 139.702 }, // Yoyogi Station
+    radius: 500,
+    prompt:
+      "Nature-meets-urban electronic fusion, Meiji Shrine tranquility meets city energy, peaceful park ambiance with modern beats, green oasis in the metropolis, balanced urban-natural soundscape",
+    promptMorning:
+      "Serene forest meditation sounds, peaceful Yoyogi Park dawn, gentle bird songs with soft synth pads, tranquil Meiji Shrine morning prayers, calm nature escape in the city",
+    promptEvening:
+      "Lively park gathering energy, Yoyogi evening festival vibes, nature sounds blending with urban beats, Meiji Shrine lantern-lit atmosphere, vibrant green space nightlife",
+    color: "#32cd32",
+  },
+  {
+    id: "takanawa-gateway",
+    name: "Takanawa Gateway",
+    nameJa: "高輪ゲートウェイ",
+    center: { lat: 35.6285, lng: 139.7389 }, // Takanawa Gateway Station
+    radius: 500,
+    prompt:
+      "Futuristic electronic soundscape, cutting-edge architecture ambiance, modern transit hub energy, sleek glass and steel atmosphere, next-generation Tokyo vibes",
+    promptMorning:
+      "Gentle ambient tech sounds, peaceful Takanawa Gateway dawn, soft digital chimes, quiet modern station awakening, serene futuristic morning",
+    promptEvening:
+      "Dynamic electronic pulse, Takanawa Gateway night energy, vibrant LED-lit architecture, bustling modern transit hub, electric future city atmosphere",
+    color: "#00ced1",
+  },
+  {
+    id: "tamachi",
+    name: "Tamachi",
+    nameJa: "田町",
+    center: { lat: 35.6457, lng: 139.7474 }, // Tamachi Station
+    radius: 500,
+    prompt:
+      "Business district sophistication, Keio University academic energy, corporate and student life fusion, modern office towers with campus vibes, professional yet youthful atmosphere",
+    promptMorning:
+      "Soft corporate ambient, peaceful Tamachi morning, gentle academic campus sounds, quiet business district awakening, serene commuter ambiance",
+    promptEvening:
+      "Lively business district energy, Tamachi evening rush, vibrant student nightlife, bustling office and campus fusion, dynamic professional-social atmosphere",
+    color: "#4169e1",
+  },
+  {
+    id: "hamamatsucho",
+    name: "Hamamatsucho",
+    nameJa: "浜松町",
+    center: { lat: 35.655, lng: 139.757 }, // Hamamatsucho Station
+    radius: 500,
+    prompt:
+      "Business district elegance, Tokyo Tower proximity vibes, corporate sophistication, waterfront energy, refined urban professional atmosphere",
+    promptMorning:
+      "Gentle business district awakening, peaceful Hamamatsucho dawn, soft corporate ambient, quiet waterfront morning, serene professional ambiance",
+    promptEvening:
+      "Sophisticated business district nightlife, Hamamatsucho evening elegance, vibrant corporate social scene, Tokyo Tower illuminated atmosphere, refined urban night energy",
+    color: "#1e90ff",
+  },
+  {
+    id: "shimbashi",
+    name: "Shimbashi",
+    nameJa: "新橋",
+    center: { lat: 35.666, lng: 139.757 }, // Shimbashi Station
+    radius: 600,
+    prompt:
+      "Classic salaryman district, traditional izakaya alley energy, after-work drinking culture, nostalgic Showa-era business district, authentic Tokyo working class atmosphere",
+    promptMorning:
+      "Gentle morning commuter sounds, peaceful Shimbashi dawn, soft traditional district awakening, quiet izakaya street before the rush, serene business district morning",
+    promptEvening:
+      "Lively izakaya nightlife explosion, Shimbashi salaryman celebration, vibrant after-work drinking culture, crowded traditional alley atmosphere, electric working-class Tokyo night",
+    color: "#cd5c5c",
+  },
+  {
+    id: "yurakucho",
+    name: "Yurakucho",
+    nameJa: "有楽町",
+    center: { lat: 35.675, lng: 139.763 }, // Yurakucho Station
+    radius: 500,
+    prompt:
+      "Upscale business district elegance, Ginza-adjacent sophistication, luxury shopping proximity, refined corporate atmosphere, polished metropolitan vibes",
+    promptMorning:
+      "Soft upscale district awakening, peaceful Yurakucho morning, gentle luxury shopping ambiance, quiet business district dawn, serene refined atmosphere",
+    promptEvening:
+      "Sophisticated business district nightlife, Yurakucho evening elegance, vibrant upscale dining scene, luxury shopping district energy, polished metropolitan night",
+    color: "#b8860b",
+  },
+  {
+    id: "kanda",
+    name: "Kanda",
+    nameJa: "神田",
+    center: { lat: 35.6917, lng: 139.7709 }, // Kanda Station
+    radius: 600,
+    prompt:
+      "Bookstore street intellectual energy, traditional and modern fusion, academic and tech district blend, classic Tokyo culture meets electronics, scholarly urban atmosphere",
+    promptMorning:
+      "Gentle bookstore street awakening, peaceful Kanda morning, soft academic ambient, quiet traditional district dawn, serene intellectual atmosphere",
+    promptEvening:
+      "Lively bookstore and electronics energy, Kanda evening intellectual buzz, vibrant traditional izakaya scene, classic Tokyo culture nightlife, scholarly urban night",
+    color: "#8b008b",
+  },
+  {
+    id: "okachimachi",
+    name: "Okachimachi",
+    nameJa: "御徒町",
+    center: { lat: 35.7074, lng: 139.7745 }, // Okachimachi Station
+    radius: 600,
+    prompt:
+      "Ameyoko market bustle, vibrant street food energy, bustling shopping district, traditional market atmosphere, lively Tokyo street culture",
+    promptMorning:
+      "Gentle market preparation sounds, peaceful Okachimachi dawn, soft vendor setup ambiance, quiet Ameyoko before the crowds, serene market morning",
+    promptEvening:
+      "Lively Ameyoko market energy, Okachimachi evening shopping fever, vibrant street food celebration, bustling traditional market nightlife, electric market atmosphere",
+    color: "#ff4500",
+  },
+  {
+    id: "uguisudani",
+    name: "Uguisudani",
+    nameJa: "鶯谷",
+    center: { lat: 35.7203, lng: 139.778 }, // Uguisudani Station
+    radius: 500,
+    prompt:
+      "Traditional ryokan district nostalgia, Showa-era atmosphere, historic Japanese inns, peaceful residential area, nostalgic Tokyo heritage sounds",
+    promptMorning:
+      "Serene traditional district awakening, peaceful Uguisudani dawn, gentle ryokan ambiance, quiet historic neighborhood morning, tranquil Showa-era atmosphere",
+    promptEvening:
+      "Nostalgic traditional district evening, Uguisudani ryokan street atmosphere, gentle historic neighborhood nightlife, peaceful traditional Tokyo night, serene heritage ambiance",
+    color: "#6b8e23",
+  },
+  {
+    id: "nippori",
+    name: "Nippori",
+    nameJa: "日暮里",
+    center: { lat: 35.7281, lng: 139.7707 }, // Nippori Station
+    radius: 600,
+    prompt:
+      "Fabric district craftsmanship, traditional textile market energy, Yanaka Ginza shopping street, old Tokyo shitamachi vibes, nostalgic artisan atmosphere",
+    promptMorning:
+      "Gentle fabric market awakening, peaceful Nippori dawn, soft textile district ambiance, quiet Yanaka Ginza morning, serene traditional craft atmosphere",
+    promptEvening:
+      "Lively fabric district energy, Nippori evening shopping buzz, vibrant traditional market nightlife, nostalgic shitamachi street culture, artisan district celebration",
+    color: "#d2691e",
+  },
+  {
+    id: "tabata",
+    name: "Tabata",
+    nameJa: "田端",
+    center: { lat: 35.7371, lng: 139.7617 }, // Tabata Station
+    radius: 500,
+    prompt:
+      "Quiet residential neighborhood, peaceful park surroundings, family-friendly atmosphere, serene local community vibes, calm Tokyo suburbia",
+    promptMorning:
+      "Serene residential awakening, peaceful Tabata dawn, gentle park morning sounds, quiet neighborhood morning, tranquil family district atmosphere",
+    promptEvening:
+      "Peaceful residential evening, Tabata neighborhood night, gentle local community atmosphere, serene family district nightlife, calm residential Tokyo night",
+    color: "#9acd32",
+  },
+  {
+    id: "komagome",
+    name: "Komagome",
+    nameJa: "駒込",
+    center: { lat: 35.736, lng: 139.747 }, // Komagome Station
+    radius: 500,
+    prompt:
+      "Traditional garden district, Rikugien Garden serenity, residential elegance, peaceful neighborhood atmosphere, refined Tokyo suburbia",
+    promptMorning:
+      "Serene garden district awakening, peaceful Komagome dawn, gentle Rikugien Garden ambiance, quiet residential morning, tranquil refined atmosphere",
+    promptEvening:
+      "Peaceful garden district evening, Komagome neighborhood night, gentle traditional garden atmosphere, serene residential nightlife, calm elegant Tokyo night",
+    color: "#2e8b57",
+  },
+  {
+    id: "sugamo",
+    name: "Sugamo",
+    nameJa: "巣鴨",
+    center: { lat: 35.733, lng: 139.733 }, // Sugamo Station
+    radius: 600,
+    prompt:
+      "Traditional shopping street nostalgia, elderly-friendly district, Jizo-dori shopping street, old Tokyo charm, nostalgic community atmosphere",
+    promptMorning:
+      "Gentle traditional shopping street awakening, peaceful Sugamo dawn, soft Jizo-dori morning ambiance, quiet nostalgic district morning, serene traditional atmosphere",
+    promptEvening:
+      "Lively traditional shopping street energy, Sugamo evening shopping buzz, vibrant Jizo-dori nightlife, nostalgic community celebration, traditional Tokyo night",
+    color: "#a0522d",
+  },
+  {
+    id: "otsuka",
+    name: "Otsuka",
+    nameJa: "大塚",
+    center: { lat: 35.7312, lng: 139.7281 }, // Otsuka Station
+    radius: 500,
+    prompt:
+      "Local residential charm, Arakawa tram line nostalgia, neighborhood shopping district, peaceful community vibes, authentic Tokyo living",
+    promptMorning:
+      "Serene residential awakening, peaceful Otsuka dawn, gentle tram line sounds, quiet neighborhood morning, tranquil local community atmosphere",
+    promptEvening:
+      "Peaceful residential evening, Otsuka neighborhood night, gentle local shopping district atmosphere, serene community nightlife, calm authentic Tokyo night",
+    color: "#bc8f8f",
+  },
+  {
+    id: "mejiro",
+    name: "Mejiro",
+    nameJa: "目白",
+    center: { lat: 35.7203, lng: 139.7061 }, // Mejiro Station
+    radius: 500,
+    prompt:
+      "Upscale residential elegance, Gakushuin University academic atmosphere, refined neighborhood vibes, sophisticated residential district, polished Tokyo suburbia",
+    promptMorning:
+      "Serene upscale district awakening, peaceful Mejiro dawn, gentle academic campus ambiance, quiet refined neighborhood morning, tranquil sophisticated atmosphere",
+    promptEvening:
+      "Peaceful upscale residential evening, Mejiro neighborhood night, gentle refined district atmosphere, serene academic community nightlife, calm elegant Tokyo night",
+    color: "#c0c0c0",
+  },
+  {
+    id: "takadanobaba",
+    name: "Takadanobaba",
+    nameJa: "高田馬場",
+    center: { lat: 35.7126, lng: 139.7036 }, // Takadanobaba Station
+    radius: 600,
+    prompt:
+      "Student district energy, Waseda University vibes, affordable dining and entertainment, youthful academic atmosphere, vibrant student nightlife",
+    promptMorning:
+      "Gentle student district awakening, peaceful Takadanobaba dawn, soft academic campus sounds, quiet student street morning, serene youthful atmosphere",
+    promptEvening:
+      "Lively student district nightlife, Takadanobaba evening student energy, vibrant affordable dining scene, crowded student entertainment, electric youthful Tokyo night",
+    color: "#ff6347",
+  },
+  {
+    id: "meguro",
+    name: "Meguro",
+    nameJa: "目黒",
+    center: { lat: 35.6329, lng: 139.7156 }, // Meguro Station
+    radius: 600,
+    prompt:
+      "Upscale residential sophistication, Meguro River cherry blossoms, refined neighborhood elegance, high-end dining and galleries, polished Tokyo living",
+    promptMorning:
+      "Serene upscale district awakening, peaceful Meguro dawn, gentle cherry blossom river ambiance, quiet refined neighborhood morning, tranquil sophisticated atmosphere",
+    promptEvening:
+      "Sophisticated upscale residential evening, Meguro neighborhood night, vibrant high-end dining scene, elegant gallery district nightlife, polished metropolitan night",
+    color: "#4682b4",
+  },
+  {
+    id: "gotanda",
+    name: "Gotanda",
+    nameJa: "五反田",
+    center: { lat: 35.6264, lng: 139.7232 }, // Gotanda Station
+    radius: 600,
+    prompt:
+      "Business and residential blend, diverse dining scene, commercial district energy, mixed-use urban atmosphere, dynamic Tokyo neighborhood",
+    promptMorning:
+      "Gentle mixed-use district awakening, peaceful Gotanda dawn, soft commercial and residential ambiance, quiet business district morning, serene urban atmosphere",
+    promptEvening:
+      "Lively business and residential evening, Gotanda nightlife energy, vibrant diverse dining scene, bustling commercial district night, dynamic Tokyo neighborhood night",
+    color: "#708090",
+  },
+  {
+    id: "osaki",
+    name: "Osaki",
+    nameJa: "大崎",
+    center: { lat: 35.62, lng: 139.728 }, // Osaki Station
+    radius: 500,
+    prompt:
+      "Modern business district, office tower concentration, corporate hub energy, sleek commercial atmosphere, contemporary Tokyo business center",
+    promptMorning:
+      "Gentle business district awakening, peaceful Osaki dawn, soft corporate ambient, quiet office district morning, serene professional atmosphere",
+    promptEvening:
+      "Sophisticated business district evening, Osaki corporate night energy, vibrant office district nightlife, modern business center atmosphere, polished commercial night",
+    color: "#2f4f4f",
+  },
+  {
+    id: "ochanomizu",
+    name: "Ochanomizu",
+    nameJa: "御茶ノ水",
+    center: { lat: 35.6993, lng: 139.7651 }, // Ochanomizu Station
+    radius: 600,
+    prompt:
+      "Musical instrument district harmony, academic campus energy, university and music shop fusion, scholarly musical atmosphere, intellectual Tokyo soundscape",
+    promptMorning:
+      "Gentle musical district awakening, peaceful Ochanomizu dawn, soft instrument shop ambiance, quiet academic campus morning, serene scholarly atmosphere",
+    promptEvening:
+      "Lively musical instrument district energy, Ochanomizu evening music scene, vibrant university nightlife, academic and musical fusion, intellectual Tokyo night",
+    color: "#9932cc",
+  },
+  {
+    id: "suidobashi",
+    name: "Suidobashi",
+    nameJa: "水道橋",
+    center: { lat: 35.7022, lng: 139.7531 }, // Suidobashi Station
+    radius: 500,
+    prompt:
+      "Tokyo Dome entertainment energy, sports and concert venue atmosphere, vibrant event district, dynamic entertainment hub, exciting Tokyo entertainment center",
+    promptMorning:
+      "Gentle entertainment district awakening, peaceful Suidobashi dawn, soft event venue ambiance, quiet sports district morning, serene entertainment atmosphere",
+    promptEvening:
+      "Lively Tokyo Dome energy, Suidobashi evening event excitement, vibrant sports and concert atmosphere, dynamic entertainment hub nightlife, electric event district night",
+    color: "#c71585",
+  },
+  {
+    id: "iidabashi",
+    name: "Iidabashi",
+    nameJa: "飯田橋",
+    center: { lat: 35.7021, lng: 139.7454 }, // Iidabashi Station
+    radius: 600,
+    prompt:
+      "Kagurazaka French quarter elegance, cobblestone street atmosphere, European-style dining, sophisticated cultural district, refined Tokyo charm",
+    promptMorning:
+      "Serene French quarter awakening, peaceful Iidabashi dawn, gentle cobblestone street ambiance, quiet Kagurazaka morning, tranquil refined atmosphere",
+    promptEvening:
+      "Sophisticated French quarter evening, Iidabashi Kagurazaka nightlife, vibrant European dining scene, elegant cultural district night, refined Tokyo charm night",
+    color: "#da70d6",
+  },
+  {
+    id: "ichigaya",
+    name: "Ichigaya",
+    nameJa: "市ヶ谷",
+    center: { lat: 35.6917, lng: 139.7356 }, // Ichigaya Station
+    radius: 500,
+    prompt:
+      "Moats and fishing spots, urban leisure oasis, historical military district, peaceful recreational area, unique Tokyo relaxation space",
+    promptMorning:
+      "Serene moat district awakening, peaceful Ichigaya dawn, gentle fishing spot ambiance, quiet recreational morning, tranquil leisure atmosphere",
+    promptEvening:
+      "Peaceful moat district evening, Ichigaya recreational night, gentle fishing and leisure atmosphere, serene historical district nightlife, calm unique Tokyo night",
+    color: "#87ceeb",
+  },
+  {
+    id: "yotsuya",
+    name: "Yotsuya",
+    nameJa: "四ツ谷",
+    center: { lat: 35.686, lng: 139.7302 }, // Yotsuya Station
+    radius: 500,
+    prompt:
+      "Historical and modern blend, Akasaka Palace proximity, mixed residential and commercial, elegant neighborhood atmosphere, refined Tokyo district",
+    promptMorning:
+      "Serene mixed district awakening, peaceful Yotsuya dawn, gentle historical and modern ambiance, quiet elegant neighborhood morning, tranquil refined atmosphere",
+    promptEvening:
+      "Sophisticated mixed district evening, Yotsuya neighborhood night, vibrant historical and modern fusion, elegant residential nightlife, refined Tokyo district night",
+    color: "#b0c4de",
+  },
+  {
+    id: "shinanomachi",
+    name: "Shinanomachi",
+    nameJa: "信濃町",
+    center: { lat: 35.6811, lng: 139.7232 }, // Shinanomachi Station
+    radius: 500,
+    prompt:
+      "Meiji Memorial Gallery historical atmosphere, quiet residential elegance, cultural heritage district, peaceful neighborhood vibes, refined Tokyo suburbia",
+    promptMorning:
+      "Serene historical district awakening, peaceful Shinanomachi dawn, gentle memorial gallery ambiance, quiet cultural neighborhood morning, tranquil refined atmosphere",
+    promptEvening:
+      "Peaceful historical district evening, Shinanomachi neighborhood night, gentle cultural heritage atmosphere, serene memorial district nightlife, calm refined Tokyo night",
+    color: "#778899",
+  },
+  {
+    id: "sendagaya",
+    name: "Sendagaya",
+    nameJa: "千駄ヶ谷",
+    center: { lat: 35.6804, lng: 139.7121 }, // Sendagaya Station
+    radius: 600,
+    prompt:
+      "National Stadium sports energy, athletic district atmosphere, sports event excitement, dynamic sports hub, vibrant Tokyo sports center",
+    promptMorning:
+      "Gentle sports district awakening, peaceful Sendagaya dawn, soft stadium ambiance, quiet athletic district morning, serene sports atmosphere",
+    promptEvening:
+      "Lively National Stadium energy, Sendagaya evening sports excitement, vibrant athletic district nightlife, dynamic sports hub atmosphere, electric sports center night",
+    color: "#ff7f50",
+  },
+  {
+    id: "koenji",
+    name: "Koenji",
+    nameJa: "高円寺",
+    center: { lat: 35.7052, lng: 139.6492 }, // Koenji Station
+    radius: 600,
+    prompt:
+      "Vintage fashion and music culture, bohemian district energy, indie music scene, thrift shop paradise, alternative Tokyo subculture atmosphere",
+    promptMorning:
+      "Gentle bohemian district awakening, peaceful Koenji dawn, soft vintage shop ambiance, quiet indie music scene morning, serene alternative atmosphere",
+    promptEvening:
+      "Lively vintage fashion and music energy, Koenji evening indie scene, vibrant thrift shop nightlife, bohemian district celebration, electric alternative Tokyo night",
+    color: "#ba55d3",
+  },
+  {
+    id: "asagaya",
+    name: "Asagaya",
+    nameJa: "阿佐ヶ谷",
+    center: { lat: 35.7056, lng: 139.6356 }, // Asagaya Station
+    radius: 600,
+    prompt:
+      "Tanabata festival nostalgia, Showa-era shopping street charm, traditional market atmosphere, nostalgic shitamachi vibes, retro Tokyo culture",
+    promptMorning:
+      "Gentle nostalgic shopping street awakening, peaceful Asagaya dawn, soft Tanabata festival ambiance, quiet Showa-era district morning, serene retro atmosphere",
+    promptEvening:
+      "Lively Tanabata festival energy, Asagaya evening shopping street buzz, vibrant nostalgic market nightlife, Showa-era celebration, traditional Tokyo culture night",
+    color: "#ffb6c1",
+  },
+  {
+    id: "ogikubo",
+    name: "Ogikubo",
+    nameJa: "荻窪",
+    center: { lat: 35.7048, lng: 139.6201 }, // Ogikubo Station
+    radius: 600,
+    prompt:
+      "Ramen shop district literary atmosphere, traditional noodle culture, bookish neighborhood vibes, authentic local dining scene, cultural Tokyo suburbia",
+    promptMorning:
+      "Gentle ramen district awakening, peaceful Ogikubo dawn, soft literary ambiance, quiet noodle shop morning, serene cultural atmosphere",
+    promptEvening:
+      "Lively ramen shop district energy, Ogikubo evening dining scene, vibrant traditional noodle culture, literary neighborhood nightlife, authentic Tokyo dining night",
+    color: "#dda0dd",
+  },
+  {
+    id: "kichijoji",
+    name: "Kichijoji",
+    nameJa: "吉祥寺",
+    center: { lat: 35.7031, lng: 139.5795 }, // Kichijoji Station
+    radius: 700,
+    prompt:
+      "Most livable Tokyo district, Inokashira Park natural beauty, vibrant shopping streets, perfect urban-nature balance, ideal Tokyo living atmosphere",
+    promptMorning:
+      "Serene park district awakening, peaceful Kichijoji dawn, gentle Inokashira Park ambiance, quiet shopping street morning, tranquil ideal living atmosphere",
+    promptEvening:
+      "Lively most livable district energy, Kichijoji evening shopping and dining, vibrant park and urban fusion, perfect balance nightlife, ideal Tokyo living night",
+    color: "#98fb98",
+  },
 ];
 
 export const DEFAULT_DISTRICT_PROMPT =
