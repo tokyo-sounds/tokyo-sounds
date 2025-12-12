@@ -3,9 +3,13 @@ import { TimeOfDay } from "@/config/tokyo-config";
 import { type MovementMode } from "@/lib/flight";
 import { TIME_OF_DAY_PRESETS } from "@/config/tokyo-config";
 import { clearVisitedFlag } from "@/hooks/useDemoFlythrough";
+import { useAmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudioContext";
 import { LocationSearch } from "@/components/city/LocationSearch";
+import { type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
+import DistrictDebugContent from "./DistricDebugContent";
 import { DebugOptions } from "../type/FlightPageTypes";
 import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
   Sheet,
   SheetContent,
@@ -18,8 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CodeXml, SprayCan, Play, Pause } from "lucide-react";
-import { useAmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudioContext";
+import { CodeXml, Play, Pause, Settings, RotateCcw } from "lucide-react";
 
 /** DebugMenu
  *
@@ -33,6 +36,10 @@ import { useAmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAu
  * @returns null
  */
 
+function DebugMenuLabel({ children }: { children: React.ReactNode }) {
+  return <h3 className="text-sm text-muted mb-1">{children}</h3>;
+}
+
 export default function DebugMenu({
   options,
   onOptionsChange,
@@ -45,6 +52,8 @@ export default function DebugMenu({
   searchDisabled,
   open,
   onOpenChange,
+  generativeEnabled,
+  districts,
 }: {
   options: DebugOptions;
   onOptionsChange: (key: keyof DebugOptions, value: boolean) => void;
@@ -57,6 +66,8 @@ export default function DebugMenu({
   searchDisabled: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
+  generativeEnabled: boolean;
+  districts: DistrictDebugInfo[];
 }) {
   const { currentTime, setTimeOfDay } = useTimeOfDayStore();
   const timeOptions: TimeOfDay[] = ["morning", "afternoon", "evening"];
@@ -69,130 +80,170 @@ export default function DebugMenu({
               variant="ghost"
               className="absolute bottom-4 right-4 text-white/70 text-shadow-sm hover:text-white text-xs font-mono"
             >
-              <CodeXml className="size-4" />
+              <Settings className="size-4" />
             </Button>
           </SheetTrigger>
         </TooltipTrigger>
         <TooltipContent>
-          <p>開発者メニュー</p>
+          <p>設置</p>
         </TooltipContent>
       </Tooltip>
       <SheetContent className="bg-black/70 backdrop-blur-xs px-4 text-white border-none">
-        <SheetHeader>
-          <SheetTitle className="text-white/70 font-sans">DEBUG</SheetTitle>
+        <SheetHeader className="pl-0">
+          <SheetTitle className="text-white/70 text-lg font-noto inline-flex items-center gap-2">
+            <Settings className="size-4" /> 設置
+          </SheetTitle>
         </SheetHeader>
-        <div className="space-y-2">
-          <div className="w-full flex justify-between">
-            <span>Status:</span>
-            <span className="font-light">{status}</span>
-          </div>
-          <div className="w-full flex justify-between">
-            <span>Flight Mode:</span>
-            <span className="font-light">{movementMode.toUpperCase()}</span>
-          </div>
-          <div className="w-full flex justify-between">
-            <span>Camera Y:</span>
-            <span className="font-light">{cameraY.toFixed(2)}</span>
-          </div>
-          <div className="w-full flex justify-between">
-            <span>Collision Distance:</span>
-            <span className="font-light">{collisionDistance?.toFixed(2)}m</span>
-          </div>
-
-          <div className="w-full pt-2 border-t border-white/20">
-            <div className="text-white/50 mb-2">Background Audio</div>
-            <AmbientAudioControl />
-          </div>
-
-          <div>
-            <div className="text-white/50 mb-1">Time of Day</div>
-            <div className="flex gap-1">
-              {timeOptions.map((time) => (
-                <button
-                  key={time}
-                  onClick={() => setTimeOfDay(time)}
-                  className={`flex-1 px-2 py-1 rounded text-sm transition-colors ${
-                    currentTime === time
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-muted-foreground text-muted hover:bg-muted/50"
-                  }`}
-                >
-                  {TIME_OF_DAY_PRESETS[time].nameJa}
-                </button>
-              ))}
+        <Tabs defaultValue="options" className="space-y-2 h-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="options" className="inline-flex gap-2 text-sm">
+              <Settings className="size-4" />
+              オプション
+            </TabsTrigger>
+            <TabsTrigger value="console" className="inline-flex gap-2 text-sm">
+              <CodeXml className="size-4" />
+              開発者オプション
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="options" className="flex flex-col gap-2">
+            <div>
+              <DebugMenuLabel>環境設定</DebugMenuLabel>
+              <div className="bg-muted/40 text-muted-foreground inline-flex h-9 w-full gap-1 items-center justify-center rounded-lg p-[3px]">
+                {timeOptions.map((time) => (
+                  <Button
+                    key={time}
+                    onClick={() => setTimeOfDay(time)}
+                    className={`inline-flex h-[calc(100%-1px)] flex-1 items-center justify-center rounded-md border border-transparent text-sm font-medium ${
+                      currentTime === time
+                        ? "bg-primary hover:bg-primary/70 text-primary-foreground"
+                        : "bg-transparent text-white/70 hover:bg-muted/40"
+                    }`}
+                  >
+                    {TIME_OF_DAY_PRESETS[time].nameJa}
+                  </Button>
+                ))}
+              </div>
             </div>
-          </div>
-
-          <div className="mb-3 pb-2">
-            <div className="text-white/50 mb-1">Location Search</div>
-            <LocationSearch
-              apiKey={apiKey}
-              onTeleport={onTeleport}
-              disabled={searchDisabled}
-              minimal
-              dropdownPosition="below"
-              dropdownClassName="fixed top-24 left-1/2 -translate-x-1/2"
-            />
-          </div>
-
-          <div className="space-y-1">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={options.showMeshes}
-                onChange={(e) =>
-                  onOptionsChange("showMeshes", e.target.checked)
-                }
-                className="w-3 h-3"
-              />
-              <span className="text-white/70">Meshes</span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={options.wireframe}
-                onChange={(e) => onOptionsChange("wireframe", e.target.checked)}
-                className="w-3 h-3"
-              />
-              <span className="text-white/70">Wireframe</span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={options.showBounds}
-                onChange={(e) =>
-                  onOptionsChange("showBounds", e.target.checked)
-                }
-                className="w-3 h-3"
-              />
-              <span className="text-white/70">Grids</span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={options.collision}
-                onChange={(e) => onOptionsChange("collision", e.target.checked)}
-                className="w-3 h-3"
-              />
-              <span className="text-white/70">Collision</span>
-            </label>
-
-            <div className="mt-2 pt-2 border-t border-white/20">
-              <button
-                onClick={() => {
-                  clearVisitedFlag();
-                  window.location.reload();
-                }}
-                className="w-full px-2 py-1 bg-fuchsia-500/30 hover:bg-fuchsia-500/50 rounded text-[10px] text-fuchsia-300 transition-colors"
-              >
-                Restart Demo Tour
-              </button>
+            <div>
+              <DebugMenuLabel>背景音</DebugMenuLabel>
+              <AmbientAudioControl />
             </div>
-          </div>
-        </div>
+            <div className="flex-1">
+              <DebugMenuLabel>AI生成音楽</DebugMenuLabel>
+              {/* District Debug Panel Section */}
+              {generativeEnabled && districts.length > 0 ? (
+                <DistrictDebugContent districts={districts} />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center text-sm text-center text-muted/50">
+                  未設定またはAI生成音楽が無効です
+                </div>
+              )}
+            </div>
+          </TabsContent>
+          <TabsContent value="console" className="flex flex-col justify-between gap-2">
+            <div>
+              <DebugMenuLabel>テレポート</DebugMenuLabel>
+              <LocationSearch
+                apiKey={apiKey}
+                onTeleport={onTeleport}
+                disabled={searchDisabled}
+                minimal
+                dropdownPosition="below"
+                dropdownClassName="fixed top-24 left-1/2 -translate-x-1/2"
+              />
+            </div>
+            <div className="space-y-1">
+              <DebugMenuLabel>描画設定</DebugMenuLabel>
+              <div className="grid grid-cols-2 space-y-1">
+                <label className="flex items-center gap-2 cursor-pointer px-2">
+                  <input
+                    type="checkbox"
+                    checked={options.showMeshes}
+                    onChange={(e) =>
+                      onOptionsChange("showMeshes", e.target.checked)
+                    }
+                    className="size-3"
+                  />
+                  <span className="text-muted/50">Meshes</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer px-2">
+                  <input
+                    type="checkbox"
+                    checked={options.wireframe}
+                    onChange={(e) =>
+                      onOptionsChange("wireframe", e.target.checked)
+                    }
+                    className="size-3"
+                  />
+                  <span className="text-muted/50">Wireframe</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer px-2">
+                  <input
+                    type="checkbox"
+                    checked={options.showBounds}
+                    onChange={(e) =>
+                      onOptionsChange("showBounds", e.target.checked)
+                    }
+                    className="size-3"
+                  />
+                  <span className="text-muted/50">Grids</span>
+                </label>
+
+                <label className="flex items-center gap-2 cursor-pointer px-2">
+                  <input
+                    type="checkbox"
+                    checked={options.collision}
+                    onChange={(e) =>
+                      onOptionsChange("collision", e.target.checked)
+                    }
+                    className="size-3"
+                  />
+                  <span className="text-muted/50">Collision</span>
+                </label>
+              </div>
+            </div>
+            <div>
+              <DebugMenuLabel>コンソール</DebugMenuLabel>
+              <div className="bg-neutral-950 p-3 rounded-md *:text-xs *:data-[status-value]:font-mono *:data-[status-value]:text-right *:data-[status-value]:text-accent/70 **:data-[status-label]:text-primary **:data-[status-label]:font-mono">
+                <h4>
+                  状態 <span data-status-label>Status</span>
+                </h4>
+                <p data-status-value>{status}</p>
+                <h4>
+                  飛行モード <span data-status-label>Flight Mode</span>
+                </h4>
+                <p data-status-value>{movementMode.toUpperCase()}</p>
+                <h4>
+                  カメラ高さ <span data-status-label>Camera Y</span>
+                </h4>
+                <p data-status-value>{cameraY.toFixed(2)}</p>
+                <h4>
+                  衝突距離 <span data-status-label>Collision Distance</span>
+                </h4>
+                <p data-status-value>{collisionDistance?.toFixed(2)}m</p>
+              </div>
+            </div>
+
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={() => {
+                clearVisitedFlag();
+                window.location.reload();
+              }}
+              className="w-full space-x-2 hover:animate-pulse"
+            >
+              <Play className="size-4" />
+              デモプレイ
+            </Button>
+
+            <div className="flex-1 mt-1 text-sm text-muted/40 text-right">
+              <span className="text-xs font-mono border border-muted/40 rounded px-1.5 py-1">M</span> ドローンモード
+            </div>
+          </TabsContent>
+        </Tabs>
       </SheetContent>
     </Sheet>
   );
@@ -215,33 +266,34 @@ function AmbientAudioControl() {
   };
 
   return (
-    <div className="space-y-2">
-      <div className="w-full flex justify-between items-center">
-        <span className="text-white/70">Current Track:</span>
-        <span className="font-light text-xs text-white/50 truncate max-w-[200px]">
-          {currentFileName || "None"}
-        </span>
-      </div>
-      <div className="flex gap-2">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={handleToggle}
-          className="flex-1 text-xs border-white/20 text-white/70 hover:text-white hover:bg-white/10"
-        >
-          {isPlaying ? (
-            <>
-              <Pause className="size-3 mr-1" />
-              Pause
-            </>
-          ) : (
-            <>
-              <Play className="size-3 mr-1" />
-              Play
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
+    <Button
+      variant="ghost"
+      size="lg"
+      onClick={handleToggle}
+      className="group w-full hover:bg-muted/[0.2] hover:border hover:border-border/70 hover:text-white transition-all"
+    >
+      {isPlaying ? (
+        <>
+          <span className="hidden group-hover:inline-flex items-center">
+            <Pause className="size-3 mr-1" />
+            停止
+          </span>
+          <span className="inline group-hover:hidden">
+            {currentFileName || "None"}
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="hidden items-center group-hover:inline-flex">
+            <Play className="size-3 mr-1" />
+            再生
+          </span>
+          <span className="inline group-hover:hidden">
+            {currentFileName || "None"}
+          </span>
+        </>
+      )}
+    </Button>
   );
 }
+

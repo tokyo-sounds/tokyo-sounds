@@ -119,7 +119,6 @@ export default function TokyoPage() {
   const [movementMode, setMovementMode] = useState<MovementMode>("elytra");
   const [currentDistrict, setCurrentDistrict] = useState<District | null>(null);
   const [districtDebug, setDistrictDebug] = useState<DistrictDebugInfo[]>([]);
-  const [districtDebugCollapsed, setDistrictDebugCollapsed] = useState(true);
   const [lyriaStatus, setLyriaStatus] = useState("Idle");
   const [spatialAudioEnabled, setSpatialAudioEnabled] = useState(true);
   const [spatialAudioStats, setSpatialAudioStats] = useState({
@@ -318,6 +317,8 @@ export default function TokyoPage() {
   // Initialize with false to match SSR, then set to true after hydration
   const [operationManualOpen, setOperationManualOpen] = useState(false);
   const [debugMenuOpen, setDebugMenuOpen] = useState(false);
+  // Track closing state to prevent immediate reopen after Esc closes menu
+  const isClosingDebugMenuRef = useRef(false);
 
   // Set operationManualOpen to true after hydration
   useEffect(() => {
@@ -335,21 +336,17 @@ export default function TokyoPage() {
         case "H":
           setOperationManualOpen((prev) => !prev);
           break;
-        case "i":
-        case "I":
-          // Toggle district debug panel, and close operation manual if opening district panel
-          setDistrictDebugCollapsed((prev) => {
-            const newCollapsed = !prev;
-            if (!newCollapsed) {
-              // Opening district panel, close operation manual
-              setOperationManualOpen(false);
-            }
-            return newCollapsed;
-          });
-          break;
-        case "/":
+        case "Escape":
+          if (demoState?.active) {
+            return;
+          }
+          // If menu is open or closing, let Sheet handle it (close menu)
+          if (debugMenuOpen || isClosingDebugMenuRef.current) {
+            return;
+          }
+          // Otherwise open menu
           event.preventDefault();
-          setDebugMenuOpen((prev) => !prev);
+          setDebugMenuOpen(true);
           break;
         case "Tab":
           event.preventDefault();
@@ -363,7 +360,7 @@ export default function TokyoPage() {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [mounted]);
+  }, [mounted, demoState?.active, debugMenuOpen]);
 
   if (!started) {
     return (
@@ -436,6 +433,7 @@ export default function TokyoPage() {
                 onStatusUpdate={setLyriaStatus}
                 onDebugUpdate={setDistrictDebug}
                 onCurrentDistrictChange={setCurrentDistrict}
+                debugUpdateInterval={debugMenuOpen ? 3 : 30}
               />
             ) : (
               <DistrictTracker
@@ -482,9 +480,6 @@ export default function TokyoPage() {
             heading={heading}
             speedoMeterSize={speedoMeterSize}
             isMobile={isMobile}
-            districts={districtDebug}
-            districtDebugCollapsed={districtDebugCollapsed}
-            setDistrictDebugCollapsed={setDistrictDebugCollapsed}
           />
         )}
 
@@ -511,10 +506,22 @@ export default function TokyoPage() {
           cameraY={cameraY}
           collisionDistance={collisionDistance}
           apiKey={ENV_MAPS_API_KEY}
+          generativeEnabled={generativeEnabled}
+          districts={districtDebug}
           onTeleport={handleTeleport}
           searchDisabled={demoState?.active || false}
           open={debugMenuOpen}
-          onOpenChange={setDebugMenuOpen}
+          onOpenChange={(open) => {
+            // Set flag when closing to prevent immediate reopen
+            if (!open) {
+              isClosingDebugMenuRef.current = true;
+              // Reset flag after brief delay to allow reopening
+              setTimeout(() => {
+                isClosingDebugMenuRef.current = false;
+              }, 100);
+            }
+            setDebugMenuOpen(open);
+          }}
         />
       </div>
     </AmbientBackgroundAudioProvider>
