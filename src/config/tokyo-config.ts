@@ -252,7 +252,7 @@ export const TOKYO_DISTRICTS: District[] = [
   {
     id: "yoyogi",
     name: "Yoyogi",
-    nameJa: "代代木",
+    nameJa: "代々木",
     center: { lat: 35.6831, lng: 139.702 }, // Yoyogi Station
     radius: 500,
     prompt:
@@ -1187,7 +1187,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
   morning: {
     id: "morning",
     name: "Sunrise",
-    nameJa: "日の出",
+    nameJa: "朝",
     sunElevation: 5, // Very low sun for dramatic sunrise
     sunAzimuth: 85, // East, slightly south
     sky: {
@@ -1223,7 +1223,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
   afternoon: {
     id: "afternoon",
     name: "Afternoon",
-    nameJa: "午後",
+    nameJa: "昼",
     sunElevation: 45,
     sunAzimuth: 220, // Southwest
     sky: {
@@ -1259,7 +1259,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
   evening: {
     id: "evening",
     name: "Sunset",
-    nameJa: "日没",
+    nameJa: "夕方",
     sunElevation: 3, // Very low sun on horizon for sunset
     sunAzimuth: 275, // West, slightly north
     sky: {

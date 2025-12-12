@@ -33,23 +33,23 @@ export default function OperationManual({
             <Kbd className="text-muted bg-transparent border font-mono">
               SPACE
             </Kbd>
-            <span className="text-muted">ブレーキ</span>
+            <span className="text-muted">ポーズ</span>
           </div>
           <div className="flex justify-between">
             <Kbd className="text-muted bg-transparent border font-mono">
               SHIFT
             </Kbd>
-            <span className="text-muted">ターボ</span>
+            <span className="text-muted">加速</span>
           </div>
           <div className="flex justify-between">
             <Kbd className="text-muted bg-transparent border font-mono">
               TAB
             </Kbd>
-            <span className="text-muted">UI 表示/非表示</span>
+            <span className="text-muted">表示切替</span>
           </div>
           <div className="flex justify-between">
             <Kbd className="text-muted bg-transparent border font-mono">/</Kbd>
-            <span className="text-muted">開発者メニュー</span>
+            <span className="text-muted">設定</span>
           </div>
         </div>
       </AccordionContent>
