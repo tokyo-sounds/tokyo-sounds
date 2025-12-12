@@ -26,6 +26,7 @@ import {
   DistrictLyriaAudio,
   type DistrictDebugInfo,
 } from "@/components/city/DistrictLyriaAudio";
+import { DistrictTracker } from "@/components/city/DistrictTracker";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
 import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
 import { AmbientBackgroundAudioProvider } from "@/components/city/AmbientBackgroundAudioContext";
@@ -399,7 +400,7 @@ export default function TokyoPage() {
 
             <FlightBoundsHelper visible={debugOptions.showBounds} />
 
-            {generativeEnabled && effectiveLyriaApiKey && (
+            {generativeEnabled && effectiveLyriaApiKey ? (
               <DistrictLyriaAudio
                 apiKey={effectiveLyriaApiKey}
                 enabled={generativeEnabled}
@@ -407,6 +408,11 @@ export default function TokyoPage() {
                 onStatusUpdate={setLyriaStatus}
                 onDebugUpdate={setDistrictDebug}
                 onCurrentDistrictChange={setCurrentDistrict}
+              />
+            ) : (
+              <DistrictTracker
+                onCurrentDistrictChange={setCurrentDistrict}
+                onDebugUpdate={setDistrictDebug}
               />
             )}
 
