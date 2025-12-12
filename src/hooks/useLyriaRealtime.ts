@@ -8,7 +8,9 @@ import type { WeightedPrompt } from "@/lib/proximity-weights";
 
 // Types for Lyria API (based on @google/genai documentation)
 interface LyriaSession {
-  setWeightedPrompts: (config: { weightedPrompts: WeightedPrompt[] }) => Promise<void>;
+  setWeightedPrompts: (config: {
+    weightedPrompts: WeightedPrompt[];
+  }) => Promise<void>;
   setMusicGenerationConfig: (config: MusicGenerationConfig) => Promise<void>;
   play: () => Promise<void>;
   pause: () => Promise<void>;
@@ -22,13 +24,22 @@ interface MusicGenerationConfig {
   bpm?: number;
 }
 
+// Lyria API メッセージの型定義
+interface LyriaMessage {
+  data?: string;
+  serverContent?: {
+    audioChunks?: string[];
+  };
+  audioChunk?: string;
+}
+
 interface LyriaClient {
   live: {
     music: {
       connect: (config: {
         model: string;
         callbacks: {
-          onmessage: (message: { data: string }) => void;
+          onmessage: (message: LyriaMessage) => void;
           onerror: (error: Error) => void;
           onclose: () => void;
         };
@@ -61,7 +72,7 @@ export function useLyriaRealtime({
   enabled = true,
   sampleRateHz = 44100,
   bpm = 120,
-  onAudioChunk
+  onAudioChunk,
 }: UseLyriaRealtimeOptions): UseLyriaRealtimeResult {
   const sessionRef = useRef<LyriaSession | null>(null);
   const [isConnected, setIsConnected] = useState(false);
@@ -88,7 +99,7 @@ export function useLyriaRealtime({
 
         const client = new GoogleGenAI({
           apiKey,
-          apiVersion: "v1alpha"
+          apiVersion: "v1alpha",
         }) as unknown as LyriaClient;
 
         const session = await client.live.music.connect({
@@ -98,10 +109,10 @@ export function useLyriaRealtime({
               console.log("Received Lyria message:", message);
 
               if (mounted && onAudioChunk) {
-                const audioData = message.data ||
-                // do a deeper analysis of the bug, but since it works, assign `any` so that it can build
-                  (message as any).serverContent?.audioChunks?.[0] ||
-                  (message as any).audioChunk;
+                const audioData =
+                  message.data ||
+                  message.serverContent?.audioChunks?.[0] ||
+                  message.audioChunk;
 
                 if (audioData) {
                   console.log("Processing audio data, type:", typeof audioData);
@@ -125,14 +136,14 @@ export function useLyriaRealtime({
                 setIsConnected(false);
                 setIsPlaying(false);
               }
-            }
-          }
+            },
+          },
         });
 
         await session.setMusicGenerationConfig({
           audioFormat: "pcm16",
           sampleRateHz,
-          bpm
+          bpm,
         });
 
         if (mounted) {
@@ -141,11 +152,12 @@ export function useLyriaRealtime({
           setError(null);
 
           console.log("Lyria session created. Available methods:", {
-            hasPlay: typeof session.play === 'function',
-            hasPause: typeof session.pause === 'function',
-            hasStop: typeof session.stop === 'function',
-            hasSetWeightedPrompts: typeof session.setWeightedPrompts === 'function',
-            sessionKeys: Object.keys(session)
+            hasPlay: typeof session.play === "function",
+            hasPause: typeof session.pause === "function",
+            hasStop: typeof session.stop === "function",
+            hasSetWeightedPrompts:
+              typeof session.setWeightedPrompts === "function",
+            sessionKeys: Object.keys(session),
           });
         }
       } catch (err) {
@@ -161,10 +173,10 @@ export function useLyriaRealtime({
 
     return () => {
       mounted = false;
-      if (sessionRef.current && typeof sessionRef.current.stop === 'function') {
+      if (sessionRef.current && typeof sessionRef.current.stop === "function") {
         try {
           const stopPromise = sessionRef.current.stop();
-          if (stopPromise && typeof stopPromise.catch === 'function') {
+          if (stopPromise && typeof stopPromise.catch === "function") {
             stopPromise.catch(console.error);
           }
         } catch (err) {
@@ -176,19 +188,24 @@ export function useLyriaRealtime({
     };
   }, [apiKey, enabled, sampleRateHz, bpm, onAudioChunk, decodeAudioData]);
 
-  const updateWeightedPrompts = useCallback(async (prompts: WeightedPrompt[]) => {
-    if (!sessionRef.current) {
-      console.warn("Cannot update prompts: Lyria session not connected");
-      return;
-    }
+  const updateWeightedPrompts = useCallback(
+    async (prompts: WeightedPrompt[]) => {
+      if (!sessionRef.current) {
+        console.warn("Cannot update prompts: Lyria session not connected");
+        return;
+      }
 
-    try {
-      await sessionRef.current.setWeightedPrompts({ weightedPrompts: prompts });
-    } catch (err) {
-      console.error("Failed to update weighted prompts:", err);
-      setError(err instanceof Error ? err : new Error(String(err)));
-    }
-  }, []);
+      try {
+        await sessionRef.current.setWeightedPrompts({
+          weightedPrompts: prompts,
+        });
+      } catch (err) {
+        console.error("Failed to update weighted prompts:", err);
+        setError(err instanceof Error ? err : new Error(String(err)));
+      }
+    },
+    []
+  );
 
   const play = useCallback(async () => {
     if (!sessionRef.current) {
@@ -260,6 +277,6 @@ export function useLyriaRealtime({
     play,
     pause,
     stop,
-    resetContext
+    resetContext,
   };
 }

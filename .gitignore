@@ -33,6 +33,7 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.env*.local
 
 # vercel
 .vercel
@@ -41,10 +42,16 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# markdown files (ignore all except README.md)
+# markdown files (ignore all except README.md and /docs)
 *.md
 !README.md
+!docs/**/*.md
 
 .playwright-mcp/
 .cursor/
 certificates
+.env*.local
+
+/src/generated/prisma
+
+.env*.local

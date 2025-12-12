@@ -21,7 +21,8 @@ interface GenerativeAudioState {
 }
 
 const getDefaultApiKey = (): string => {
-  return process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || "";
+  // API key is now passed from server component via props
+  return "";
 };
 
 export const useGenerativeAudioStore = create<GenerativeAudioState>()(
@@ -35,19 +36,20 @@ export const useGenerativeAudioStore = create<GenerativeAudioState>()(
       setEnabled: (enabled) => set({ enabled }),
       setApiKey: (apiKey) => set({ apiKey }),
       setVolume: (volume) => set({ volume: Math.max(0, Math.min(1, volume)) }),
-      setShowDebugInfo: (show) => set({ showDebugInfo: show })
+      setShowDebugInfo: (show) => set({ showDebugInfo: show }),
     }),
     {
       name: "generative-audio-storage",
       partialize: (state) => ({
         apiKey: state.apiKey,
         volume: state.volume,
-        enabled: state.enabled
+        enabled: state.enabled,
       }),
       merge: (persistedState: any, currentState) => ({
         ...currentState,
         ...persistedState,
-        apiKey: persistedState?.apiKey || getDefaultApiKey() || currentState.apiKey,
+        apiKey:
+          persistedState?.apiKey || getDefaultApiKey() || currentState.apiKey,
       }),
     }
   )

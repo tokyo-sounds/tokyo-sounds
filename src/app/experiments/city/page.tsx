@@ -1,16 +1,26 @@
 "use client";
 
+// MIGRATED: Removed export const dynamic = "force-dynamic" (incompatible with Cache Components)
+// Cache Components では、client component はデフォルトで動的です
+
 import { Suspense, useEffect, useRef, useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 
 import { AudioSessionContext } from "@/hooks/useAudio";
-import { createSharedAudioContext, createAudioSession, GraphSpec } from "@/lib/audio";
+import {
+  createSharedAudioContext,
+  createAudioSession,
+  GraphSpec,
+} from "@/lib/audio";
 import { type MovementMode } from "@/lib/flight";
 import { CityScene } from "@/components/city/CityScene";
 import { FlightControls } from "@/components/city/FlightControls";
 import { CityUI } from "@/components/city/CityUI";
-import { DebugPanel, type SpatialDebugInfo } from "@/components/city/DebugPanel";
+import {
+  DebugPanel,
+  type SpatialDebugInfo,
+} from "@/components/city/DebugPanel";
 import type { PlateDebugInfo } from "@/components/city/CityLyriaAudio";
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
 
@@ -52,8 +62,14 @@ function createCityAudioSpec(audioFiles: AudioFileInfo[]): GraphSpec {
   ]);
 
   const connections: GraphSpec["connections"] = audioFiles.flatMap((_, i) => [
-    { from: { id: `player_building_${i}` }, to: { id: `filter_building_${i}` } },
-    { from: { id: `filter_building_${i}` }, to: { id: `reverb_building_${i}` } },
+    {
+      from: { id: `player_building_${i}` },
+      to: { id: `filter_building_${i}` },
+    },
+    {
+      from: { id: `filter_building_${i}` },
+      to: { id: `reverb_building_${i}` },
+    },
     { from: { id: `reverb_building_${i}` }, to: { id: `gain_building_${i}` } },
   ]);
 
@@ -82,7 +98,11 @@ function createCityAudioSpec(audioFiles: AudioFileInfo[]): GraphSpec {
 const Loader = () => (
   <mesh>
     <boxGeometry args={[2, 2, 2]} />
-    <meshStandardMaterial color="#ff6b9d" emissive="#ff6b9d" emissiveIntensity={0.3} />
+    <meshStandardMaterial
+      color="#ff6b9d"
+      emissive="#ff6b9d"
+      emissiveIntensity={0.3}
+    />
   </mesh>
 );
 
@@ -93,7 +113,12 @@ export default function CityPage() {
   const [started, setStarted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [audioFiles, setAudioFiles] = useState<AudioFileInfo[]>([]);
-  const [stats, setStats] = useState({ totalSources: 0, activeSources: 0, culledSources: 0, estimatedMemoryMB: 0 });
+  const [stats, setStats] = useState({
+    totalSources: 0,
+    activeSources: 0,
+    culledSources: 0,
+    estimatedMemoryMB: 0,
+  });
   const [flightSpeed, setFlightSpeed] = useState(50);
   const [movementMode, setMovementMode] = useState<MovementMode>("elytra");
   const [isPointerLocked, setIsPointerLocked] = useState(false);
@@ -104,31 +129,43 @@ export default function CityPage() {
     needsPermission: false,
   });
   const [plateDebugInfo, setPlateDebugInfo] = useState<PlateDebugInfo[]>([]);
-  const [spatialDebugInfo, setSpatialDebugInfo] = useState<SpatialDebugInfo[]>([]);
-  const [cameraPosition, setCameraPosition] = useState({ x: 0, y: 100, z: 200 });
+  const [spatialDebugInfo, setSpatialDebugInfo] = useState<SpatialDebugInfo[]>(
+    []
+  );
+  const [cameraPosition, setCameraPosition] = useState({
+    x: 0,
+    y: 100,
+    z: 200,
+  });
   const cameraRef = useRef<THREE.Camera | null>(null);
   const gyroControlsRef = useRef<{
     requestPermission: () => Promise<boolean>;
     recalibrate: () => void;
   } | null>(null);
-  
-  const { 
-    enabled: generativeEnabled, 
+
+  const {
+    enabled: generativeEnabled,
     setEnabled: setGenerativeEnabled,
     apiKey,
-    setApiKey 
+    setApiKey,
   } = useGenerativeAudioStore();
 
   useEffect(() => {
     const loadAudioFiles = async () => {
       const knownFiles = [
         { name: "Tokyo Street", url: "/audio/tokyo-street.mp3" },
-        { name: "Train Announcement", url: "/audio/bilingual-train-annoucement.mp3" },
-        { name: "Train Approaching", url: "/audio/train-apraoching-ikebukuro.mp3" },
+        {
+          name: "Train Announcement",
+          url: "/audio/bilingual-train-annoucement.mp3",
+        },
+        {
+          name: "Train Approaching",
+          url: "/audio/train-apraoching-ikebukuro.mp3",
+        },
       ];
 
       const validatedFiles: AudioFileInfo[] = [];
-      
+
       for (const file of knownFiles) {
         try {
           const response = await fetch(file.url, { method: "HEAD" });
@@ -159,18 +196,21 @@ export default function CityPage() {
     try {
       const DOE = window.DeviceOrientationEvent as any;
       const DME = window.DeviceMotionEvent as any;
-      
+
       let gyroGranted = false;
-      
+
       if (typeof DOE?.requestPermission === "function") {
         try {
           const permission = await DOE.requestPermission();
           gyroGranted = permission === "granted";
         } catch (e) {
-          console.error("[CityPage] Failed to request gyroscope permission:", e);
+          console.error(
+            "[CityPage] Failed to request gyroscope permission:",
+            e
+          );
         }
       }
-      
+
       if (typeof DME?.requestPermission === "function") {
         try {
           await DME.requestPermission();
@@ -178,21 +218,27 @@ export default function CityPage() {
           console.error("[CityPage] Failed to request motion permission:", e);
         }
       }
-      
+
       if (gyroGranted) {
-        setGyroState(prev => ({ ...prev, isEnabled: true, needsPermission: false }));
+        setGyroState((prev) => ({
+          ...prev,
+          isEnabled: true,
+          needsPermission: false,
+        }));
       }
 
       const audioContext = createSharedAudioContext({ sampleRate: 44100 });
-      
+
       if (audioContext.state === "suspended") {
         await audioContext.resume();
       }
-      
+
       setSharedContext(audioContext);
 
       const spec = createCityAudioSpec(audioFiles);
-      const audioSession = await createAudioSession(spec, { context: audioContext });
+      const audioSession = await createAudioSession(spec, {
+        context: audioContext,
+      });
       setSession(audioSession);
       setReady(true);
     } catch (err) {
@@ -216,19 +262,19 @@ export default function CityPage() {
     const update = (time: number) => {
       if (cameraRef.current && session) {
         cameraRef.current.getWorldPosition(position);
-        
+
         if (time - lastCull >= CULL_INTERVAL) {
           session.updateSpatialCulling(position);
           lastCull = time;
         }
-        
+
         if (time - lastUIUpdate >= UI_UPDATE_INTERVAL) {
           lastUIUpdate = time;
-          
+
           const currentStats = session.getSpatialStats();
           setStats(currentStats);
           setCameraPosition({ x: position.x, y: position.y, z: position.z });
-          
+
           const bindings = (session as any).spatialBindings;
           if (bindings instanceof Map) {
             const spatialInfo: SpatialDebugInfo[] = [];
@@ -237,17 +283,24 @@ export default function CityPage() {
               if (audio) {
                 audio.getWorldPosition(audioPos);
                 const distance = position.distanceTo(audioPos);
-                
+
                 const refDist = binding.options?.refDistance || 20;
                 const maxDist = binding.options?.maxDistance || 500;
                 let volume = 1;
                 if (distance > refDist) {
-                  volume = Math.max(0, 1 - (distance - refDist) / (maxDist - refDist));
+                  volume = Math.max(
+                    0,
+                    1 - (distance - refDist) / (maxDist - refDist)
+                  );
                 }
-                
-                const name = nodeId.replace("gain_building_", "").replace(/_/g, " ");
-                const displayName = audioFiles[parseInt(nodeId.split("_").pop() || "0")]?.name || name;
-                
+
+                const name = nodeId
+                  .replace("gain_building_", "")
+                  .replace(/_/g, " ");
+                const displayName =
+                  audioFiles[parseInt(nodeId.split("_").pop() || "0")]?.name ||
+                  name;
+
                 spatialInfo.push({
                   name: displayName,
                   distance,
@@ -315,14 +368,15 @@ export default function CityPage() {
                 <p className="text-slate-300 text-sm">Lock in place</p>
               </div>
             </div>
-            
+
             <p className="text-xs text-slate-600 text-center">
               Gravity affects your speed
             </p>
 
             <div className="pt-4 border-t border-slate-700/50">
               <p className="text-slate-500 text-sm mb-4">
-                {audioFiles.length} audio sources detected • {audioFiles.length} colored buildings
+                {audioFiles.length} audio sources detected • {audioFiles.length}{" "}
+                colored buildings
               </p>
 
               <div className="space-y-4">
@@ -357,9 +411,10 @@ export default function CityPage() {
               >
                 {loading ? "INITIALIZING..." : "ENTER CITY"}
               </button>
-              
+
               <p className="text-[10px] text-slate-600 text-center mt-3">
-                iOS: Safari required for gyroscope. Enable Motion & Orientation in Settings → Safari.
+                iOS: Safari required for gyroscope. Enable Motion & Orientation
+                in Settings → Safari.
               </p>
             </div>
           </div>
@@ -397,9 +452,9 @@ export default function CityPage() {
             />
           </Suspense>
 
-          <FlightControls 
-            cameraRef={cameraRef} 
-            speed={flightSpeed} 
+          <FlightControls
+            cameraRef={cameraRef}
+            speed={flightSpeed}
             config={{
               mode: movementMode,
               enableMouseLook: true,
@@ -442,4 +497,3 @@ export default function CityPage() {
     </AudioSessionContext.Provider>
   );
 }
-

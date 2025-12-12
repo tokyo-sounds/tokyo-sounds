@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Tokyo Page
  * Real-world Google 3D Tiles flight experience with Lyria audio
@@ -241,18 +239,6 @@ function CompassBar({ heading, pitch, roll, apiKey, onTeleport, searchDisabled, 
  * @param district - District
  * @returns null
  */
-function DistrictIndicator({ district }: { district: District | null }) {
-  if (!district) return null;
-
-  return (
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
-      <div className="bg-black/70 px-4 py-2 rounded text-white text-center font-mono">
-        <div className="text-2xl font-bold" style={{ color: district.color }}>{district.nameJa}</div>
-        <div className="text-xs text-white/70">{district.name}</div>
-      </div>
-    </div>
-  );
-}
 
 /** FlightBoundsHelper
  * 
@@ -996,9 +982,5 @@ export default function TokyoPage() {
         collisionDistance={collisionDistance}
       />
 
-      <div className="absolute top-4 right-4 bg-black/70 text-white px-3 py-2 rounded text-xs font-mono">
-        {status} | {movementMode.toUpperCase()}
-      </div>
-    </div>
-  );
+  return <TokyoClient mapsApiKey={mapsApiKey} lyriaApiKey={lyriaApiKey} />;
 }
