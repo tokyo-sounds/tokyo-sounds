@@ -6,6 +6,7 @@ import Compass from "./Compass";
 import CompassBar from "./CompassBar";
 import AttitudeIndicator from "./AttitudeIndicator";
 import InformationContainer from "./InformationContainer";
+import TimeOfDayEffectsMenu from "./TimeOfDayEffectsMenu";
 import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { type PlaneControllerHandle } from "@/components/city/PlaneController";
 import { type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
@@ -109,6 +110,9 @@ export default function FlightDashboard({
           setOperationManualOpen={setOperationManualOpen}
           generativeEnabled={generativeEnabled}
         />
+      </div>
+      <div className="absolute top-4 left-4">
+        <TimeOfDayEffectsMenu />
       </div>
       <div className="absolute bottom-6 md:bottom-10 left-6 md:left-10">
         <SpeedoMeter flightSpeed={flightSpeed} size={speedoMeterSize} />
