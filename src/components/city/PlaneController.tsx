@@ -51,7 +51,8 @@ interface PlaneControllerProps {
   collisionGroup?: THREE.Group | null;
   collisionEnabled?: boolean;
   onCollision?: (distance: number) => void;
-  onPlanePositionChange?: (position: THREE.Vector3, quaternion: THREE.Quaternion) => void;
+  localPlayerPositionRef?: React.RefObject<THREE.Vector3>;
+  localPlayerQuaternionRef?: React.RefObject<THREE.Quaternion>;
   demoEnabled?: boolean;
   onDemoStateChange?: (state: DemoState) => void;
   onDemoWaypointReached?: (waypoint: DemoWaypoint) => void;
@@ -74,7 +75,8 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   collisionGroup,
   collisionEnabled,
   onCollision,
-  onPlanePositionChange,
+  localPlayerPositionRef,
+  localPlayerQuaternionRef,
   demoEnabled = true,
   onDemoStateChange,
   onDemoWaypointReached,
@@ -266,7 +268,12 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     planeRef.current.position.copy(virtualCam.position);
     planeRef.current.quaternion.copy(virtualCam.quaternion);
 
-    onPlanePositionChange?.(virtualCam.position, virtualCam.quaternion);
+    if (localPlayerPositionRef?.current) {
+      localPlayerPositionRef.current.copy(virtualCam.position);
+    }
+    if (localPlayerQuaternionRef?.current) {
+      localPlayerQuaternionRef.current.copy(virtualCam.quaternion);
+    }
 
     const isSimpleMode = currentMode === "simple";
 

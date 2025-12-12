@@ -37,9 +37,8 @@ import { DistrictLyriaAudio, type DistrictDebugInfo } from "@/components/city/Di
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
 import { PlaneController, type PlaneControllerHandle, type GyroState } from "@/components/city/PlaneController";
 import { LocationSearch } from "@/components/city/LocationSearch";
-import { OtherPlayers } from "@/components/city/OtherPlayers";
+import { MultiplayerManager } from "@/components/city/MultiplayerManager";
 import { clearVisitedFlag, type DemoState } from "@/hooks/useDemoFlythrough";
-import { useMultiplayer } from "@/hooks/useMultiplayer";
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
 import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
 import { type MovementMode } from "@/lib/flight";
@@ -599,6 +598,12 @@ export default function TokyoPage() {
   const planeControllerRef = useRef<PlaneControllerHandle | null>(null);
   const localPlayerPositionRef = useRef(new THREE.Vector3(0, 200, 100));
   const localPlayerQuaternionRef = useRef(new THREE.Quaternion());
+  
+  const flightDataRef = useRef({ heading: 0, pitch: 0, roll: 0, speed: 0 });
+  
+  useEffect(() => {
+    flightDataRef.current = { heading, pitch, roll, speed: flightSpeed };
+  }, [heading, pitch, roll, flightSpeed]);
 
   const {
     enabled: generativeEnabled,
@@ -608,18 +613,13 @@ export default function TokyoPage() {
   
   const lyriaApiKey = storeApiKey || ENV_LYRIA_API_KEY;
 
-  const {
-    isConnected: multiplayerConnected,
-    connectionStatus: multiplayerStatus,
-    nearbyPlayers,
-    sendUpdate: sendMultiplayerUpdate,
-    playerCount,
-  } = useMultiplayer({
-    serverUrl: ENV_MULTIPLAYER_URL,
-    playerName: playerName || "Anonymous",
-    planeColor,
-    enabled: started,
-  });
+  const [multiplayerConnected, setMultiplayerConnected] = useState(false);
+  const [playerCount, setPlayerCount] = useState(0);
+  
+  const handleMultiplayerConnectionChange = useCallback((connected: boolean, count: number) => {
+    setMultiplayerConnected(connected);
+    setPlayerCount(count);
+  }, []);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.playerName, playerName);
@@ -707,19 +707,9 @@ export default function TokyoPage() {
     }
   }, [collisionDistance]);
 
-  const handlePlanePositionChange = useCallback((position: THREE.Vector3, quaternion: THREE.Quaternion) => {
-    localPlayerPositionRef.current.copy(position);
-    localPlayerQuaternionRef.current.copy(quaternion);
-    
-    sendMultiplayerUpdate({
-      position: { x: position.x, y: position.y, z: position.z },
-      quaternion: { x: quaternion.x, y: quaternion.y, z: quaternion.z, w: quaternion.w },
-      heading,
-      pitch,
-      roll,
-      speed: flightSpeed,
-    });
-  }, [sendMultiplayerUpdate, heading, pitch, roll, flightSpeed]);
+  const handleCollision = useCallback((dist: number) => {
+    setCollisionDistance(dist);
+  }, []);
 
   const initialCameraPosition: [number, number, number] = [0, 200, 100];
 
@@ -874,8 +864,9 @@ export default function TokyoPage() {
             onRollChange={setRoll}
             collisionGroup={collisionGroupRef.current}
             collisionEnabled={debugOptions.collision}
-            onCollision={(dist: number) => setCollisionDistance(dist)}
-            onPlanePositionChange={handlePlanePositionChange}
+            onCollision={handleCollision}
+            localPlayerPositionRef={localPlayerPositionRef}
+            localPlayerQuaternionRef={localPlayerQuaternionRef}
             demoEnabled={debugOptions.demoEnabled}
             onDemoStateChange={setDemoState}
             onGyroStateChange={setGyroState}
@@ -903,9 +894,16 @@ export default function TokyoPage() {
             onStatsUpdate={setSpatialAudioStats}
           />
 
-          <OtherPlayers
-            players={nearbyPlayers}
-            localPlayerPosition={localPlayerPositionRef.current}
+          {/* Multiplayer - isolated state management */}
+          <MultiplayerManager
+            serverUrl={ENV_MULTIPLAYER_URL}
+            playerName={playerName || "Anonymous"}
+            planeColor={planeColor}
+            enabled={started}
+            localPlayerPositionRef={localPlayerPositionRef}
+            localPlayerQuaternionRef={localPlayerQuaternionRef}
+            flightDataRef={flightDataRef}
+            onConnectionChange={handleMultiplayerConnectionChange}
           />
         </Suspense>
       </Canvas>
