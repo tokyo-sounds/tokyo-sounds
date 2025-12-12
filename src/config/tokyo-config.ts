@@ -2,7 +2,7 @@
  * Tokyo Configuration
  * District definitions (station-centered with radii), Lyria prompts, and coordinate settings
  */
-
+import { LucideIcon } from "lucide-react";
 export const TOKYO_CENTER = {
   lat: 35.6762,
   lng: 139.6503,
@@ -45,20 +45,26 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "新宿",
     center: { lat: 35.6896, lng: 139.7006 }, // Shinjuku Station
     radius: 800,
-    prompt: "Pulsing electronic beats, neon-soaked synths, late night Tokyo energy, Shinjuku nightlife vibes, dense urban soundscape with distant train announcements",
-    promptMorning: "Gentle ambient piano, early morning Shinjuku calm before the rush, soft synth pads, peaceful Tokyo dawn, quiet city awakening",
-    promptEvening: "Intense neon-soaked electronic, pulsing Shinjuku nightlife energy, vibrant synth leads, bustling izakaya atmosphere, electric Tokyo night fever",
+    prompt:
+      "Pulsing electronic beats, neon-soaked synths, late night Tokyo energy, Shinjuku nightlife vibes, dense urban soundscape with distant train announcements",
+    promptMorning:
+      "Gentle ambient piano, early morning Shinjuku calm before the rush, soft synth pads, peaceful Tokyo dawn, quiet city awakening",
+    promptEvening:
+      "Intense neon-soaked electronic, pulsing Shinjuku nightlife energy, vibrant synth leads, bustling izakaya atmosphere, electric Tokyo night fever",
     color: "#ff00ff",
   },
   {
     id: "shibuya",
     name: "Shibuya",
     nameJa: "渋谷",
-    center: { lat: 35.6580, lng: 139.7016 }, // Shibuya Station
+    center: { lat: 35.658, lng: 139.7016 }, // Shibuya Station
     radius: 700,
-    prompt: "Trendy J-pop influenced electronic, upbeat and youthful, Shibuya crossing energy, fashion district vibes, bright and colorful synth melodies",
-    promptMorning: "Soft lo-fi beats, peaceful Shibuya morning, gentle acoustic guitar, calm before the crossing crowds, serene Tokyo sunrise",
-    promptEvening: "High-energy J-pop dance beats, Shibuya 109 shopping fever, youthful electronic anthems, crowded crossing excitement, vibrant nighttime fashion scene",
+    prompt:
+      "Trendy J-pop influenced electronic, upbeat and youthful, Shibuya crossing energy, fashion district vibes, bright and colorful synth melodies",
+    promptMorning:
+      "Soft lo-fi beats, peaceful Shibuya morning, gentle acoustic guitar, calm before the crossing crowds, serene Tokyo sunrise",
+    promptEvening:
+      "High-energy J-pop dance beats, Shibuya 109 shopping fever, youthful electronic anthems, crowded crossing excitement, vibrant nighttime fashion scene",
     color: "#00ffff",
   },
   {
@@ -67,20 +73,26 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "東京駅",
     center: { lat: 35.6812, lng: 139.7671 }, // Tokyo Station
     radius: 600,
-    prompt: "Grand central station atmosphere, historic brick architecture echoes, bustling commuter energy, Marunouchi business district sophistication",
-    promptMorning: "Contemplative orchestral strings, quiet Tokyo Station dawn, elegant piano, peaceful Marunouchi morning, refined early commuter ambiance",
-    promptEvening: "Dramatic orchestral swells, rush hour energy, powerful brass and strings, busy station announcements, evening commuter symphony",
+    prompt:
+      "Grand central station atmosphere, historic brick architecture echoes, bustling commuter energy, Marunouchi business district sophistication",
+    promptMorning:
+      "Contemplative orchestral strings, quiet Tokyo Station dawn, elegant piano, peaceful Marunouchi morning, refined early commuter ambiance",
+    promptEvening:
+      "Dramatic orchestral swells, rush hour energy, powerful brass and strings, busy station announcements, evening commuter symphony",
     color: "#dc143c",
   },
   {
     id: "ikebukuro",
     name: "Ikebukuro",
     nameJa: "池袋",
-    center: { lat: 35.7295, lng: 139.7109 },  // Ikebukuro Station
+    center: { lat: 35.7295, lng: 139.7109 }, // Ikebukuro Station
     radius: 700,
-    prompt: "Energetic arcade game inspired music, anime soundtrack vibes, playful chiptune elements, otaku culture energy, Ikebukuro night adventure",
-    promptMorning: "Gentle chiptune lullaby, sleepy Ikebukuro morning, soft 8-bit melodies, quiet anime cafe ambiance, peaceful otaku dawn",
-    promptEvening: "Intense arcade game soundtrack, blazing chiptune energy, anime battle theme vibes, crowded game center excitement, Ikebukuro night fever",
+    prompt:
+      "Energetic arcade game inspired music, anime soundtrack vibes, playful chiptune elements, otaku culture energy, Ikebukuro night adventure",
+    promptMorning:
+      "Gentle chiptune lullaby, sleepy Ikebukuro morning, soft 8-bit melodies, quiet anime cafe ambiance, peaceful otaku dawn",
+    promptEvening:
+      "Intense arcade game soundtrack, blazing chiptune energy, anime battle theme vibes, crowded game center excitement, Ikebukuro night fever",
     color: "#ffaa00",
   },
   {
@@ -89,9 +101,12 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "銀座",
     center: { lat: 35.6717, lng: 139.7649 }, // Ginza Station
     radius: 500,
-    prompt: "Sophisticated jazz lounge, upscale metropolitan elegance, smooth saxophone melodies, luxury shopping district ambiance, refined Tokyo nightlife",
-    promptMorning: "Delicate jazz piano solo, quiet Ginza morning elegance, soft brushed drums, peaceful luxury district awakening, refined sunrise ambiance",
-    promptEvening: "Swinging jazz ensemble, lively Ginza cocktail hour, energetic saxophone solos, bustling upscale nightlife, champagne celebration vibes",
+    prompt:
+      "Sophisticated jazz lounge, upscale metropolitan elegance, smooth saxophone melodies, luxury shopping district ambiance, refined Tokyo nightlife",
+    promptMorning:
+      "Delicate jazz piano solo, quiet Ginza morning elegance, soft brushed drums, peaceful luxury district awakening, refined sunrise ambiance",
+    promptEvening:
+      "Swinging jazz ensemble, lively Ginza cocktail hour, energetic saxophone solos, bustling upscale nightlife, champagne celebration vibes",
     color: "#ffd700",
   },
   {
@@ -100,9 +115,12 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "秋葉原",
     center: { lat: 35.6984, lng: 139.7731 }, // Akihabara Station
     radius: 500,
-    prompt: "Intense 8-bit chiptune energy, electronic otaku paradise, anime theme song influences, bustling tech district sounds, neon electric atmosphere",
-    promptMorning: "Soft synth arpeggios, quiet Akihabara morning, gentle electronic hum, peaceful tech district dawn, calm before the crowds",
-    promptEvening: "Maximum chiptune intensity, blazing Akihabara electric night, anime opening theme energy, crowded maid cafe excitement, neon sensory overload",
+    prompt:
+      "Intense 8-bit chiptune energy, electronic otaku paradise, anime theme song influences, bustling tech district sounds, neon electric atmosphere",
+    promptMorning:
+      "Soft synth arpeggios, quiet Akihabara morning, gentle electronic hum, peaceful tech district dawn, calm before the crowds",
+    promptEvening:
+      "Maximum chiptune intensity, blazing Akihabara electric night, anime opening theme energy, crowded maid cafe excitement, neon sensory overload",
     color: "#ff6b6b",
   },
   {
@@ -111,9 +129,12 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "浅草",
     center: { lat: 35.7148, lng: 139.7967 }, // Asakusa Station / Senso-ji
     radius: 600,
-    prompt: "Traditional Japanese festival music, taiko drums, shamisen strings, temple bell resonance, old Edo atmosphere, nostalgic Tokyo heritage sounds",
-    promptMorning: "Serene temple bells, peaceful Senso-ji dawn meditation, gentle shakuhachi flute, tranquil Asakusa morning prayers, spiritual Tokyo sunrise",
-    promptEvening: "Lively matsuri festival drums, energetic Asakusa night market, cheerful shamisen melodies, lantern-lit celebration, traditional Tokyo nightlife",
+    prompt:
+      "Traditional Japanese festival music, taiko drums, shamisen strings, temple bell resonance, old Edo atmosphere, nostalgic Tokyo heritage sounds",
+    promptMorning:
+      "Serene temple bells, peaceful Senso-ji dawn meditation, gentle shakuhachi flute, tranquil Asakusa morning prayers, spiritual Tokyo sunrise",
+    promptEvening:
+      "Lively matsuri festival drums, energetic Asakusa night market, cheerful shamisen melodies, lantern-lit celebration, traditional Tokyo nightlife",
     color: "#8b4513",
   },
   {
@@ -122,9 +143,12 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "六本木",
     center: { lat: 35.6627, lng: 139.7313 }, // Roppongi Station
     radius: 500,
-    prompt: "International nightclub beats, cosmopolitan electronic fusion, deep house grooves, sophisticated club atmosphere, Roppongi after dark energy",
-    promptMorning: "Ambient downtempo, quiet Roppongi morning after, soft deep house pads, peaceful international district awakening, calm cosmopolitan dawn",
-    promptEvening: "Peak-time club bangers, Roppongi nightclub fever, driving house beats, international party energy, VIP lounge excitement",
+    prompt:
+      "International nightclub beats, cosmopolitan electronic fusion, deep house grooves, sophisticated club atmosphere, Roppongi after dark energy",
+    promptMorning:
+      "Ambient downtempo, quiet Roppongi morning after, soft deep house pads, peaceful international district awakening, calm cosmopolitan dawn",
+    promptEvening:
+      "Peak-time club bangers, Roppongi nightclub fever, driving house beats, international party energy, VIP lounge excitement",
     color: "#9400d3",
   },
   {
@@ -133,9 +157,12 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "品川",
     center: { lat: 35.6284, lng: 139.7387 }, // Shinagawa Station
     radius: 600,
-    prompt: "Shinkansen station energy, travel hub ambiance, modern transit sounds, business traveler atmosphere, gateway to Tokyo vibes",
-    promptMorning: "Gentle train platform ambiance, peaceful Shinagawa dawn, soft announcement chimes, quiet early commuter moments, serene travel hub morning",
-    promptEvening: "Exciting Shinkansen departure energy, busy platform rush, dramatic travel anticipation, evening business class atmosphere, gateway to adventure",
+    prompt:
+      "Shinkansen station energy, travel hub ambiance, modern transit sounds, business traveler atmosphere, gateway to Tokyo vibes",
+    promptMorning:
+      "Gentle train platform ambiance, peaceful Shinagawa dawn, soft announcement chimes, quiet early commuter moments, serene travel hub morning",
+    promptEvening:
+      "Exciting Shinkansen departure energy, busy platform rush, dramatic travel anticipation, evening business class atmosphere, gateway to adventure",
     color: "#20b2aa",
   },
   {
@@ -144,9 +171,12 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "上野",
     center: { lat: 35.7141, lng: 139.7774 }, // Ueno Station
     radius: 600,
-    prompt: "Park and museum atmosphere, cultural heritage sounds, pandas and nature, Ameyoko market bustle, nostalgic shitamachi vibes",
-    promptMorning: "Birdsong and gentle breeze, peaceful Ueno Park dawn, soft traditional instruments, quiet museum district awakening, serene nature sounds",
-    promptEvening: "Lively Ameyoko market energy, bustling shitamachi nightlife, cheerful vendor calls, nostalgic evening atmosphere, old Tokyo charm",
+    prompt:
+      "Park and museum atmosphere, cultural heritage sounds, pandas and nature, Ameyoko market bustle, nostalgic shitamachi vibes",
+    promptMorning:
+      "Birdsong and gentle breeze, peaceful Ueno Park dawn, soft traditional instruments, quiet museum district awakening, serene nature sounds",
+    promptEvening:
+      "Lively Ameyoko market energy, bustling shitamachi nightlife, cheerful vendor calls, nostalgic evening atmosphere, old Tokyo charm",
     color: "#228b22",
   },
   {
@@ -155,9 +185,12 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "原宿",
     center: { lat: 35.6702, lng: 139.7027 }, // Harajuku Station
     radius: 400,
-    prompt: "Kawaii pop culture beats, colorful Takeshita street energy, youth fashion vibes, sweet and playful electronic melodies, Meiji shrine serenity nearby",
-    promptMorning: "Gentle Meiji shrine forest ambiance, peaceful Harajuku dawn, soft wind through trees, tranquil morning meditation, serene nature escape",
-    promptEvening: "Ultra-kawaii pop explosion, Takeshita street maximum energy, colorful fashion parade beats, sweet electronic candy rush, Harajuku night sparkle",
+    prompt:
+      "Kawaii pop culture beats, colorful Takeshita street energy, youth fashion vibes, sweet and playful electronic melodies, Meiji shrine serenity nearby",
+    promptMorning:
+      "Gentle Meiji shrine forest ambiance, peaceful Harajuku dawn, soft wind through trees, tranquil morning meditation, serene nature escape",
+    promptEvening:
+      "Ultra-kawaii pop explosion, Takeshita street maximum energy, colorful fashion parade beats, sweet electronic candy rush, Harajuku night sparkle",
     color: "#ff69b4",
   },
   {
@@ -166,21 +199,30 @@ export const TOKYO_DISTRICTS: District[] = [
     nameJa: "恵比寿",
     center: { lat: 35.6467, lng: 139.7101 }, // Ebisu Station
     radius: 400,
-    prompt: "Trendy gastropub atmosphere, craft beer and jazz fusion, sophisticated nightlife, Yebisu garden place elegance, relaxed urban vibes",
-    promptMorning: "Soft acoustic coffee shop vibes, quiet Ebisu morning, gentle bossa nova, peaceful garden place dawn, refined breakfast ambiance",
-    promptEvening: "Lively gastropub jazz, Ebisu craft beer celebration, upbeat fusion grooves, sophisticated dinner party energy, trendy Tokyo nightlife",
+    prompt:
+      "Trendy gastropub atmosphere, craft beer and jazz fusion, sophisticated nightlife, Yebisu garden place elegance, relaxed urban vibes",
+    promptMorning:
+      "Soft acoustic coffee shop vibes, quiet Ebisu morning, gentle bossa nova, peaceful garden place dawn, refined breakfast ambiance",
+    promptEvening:
+      "Lively gastropub jazz, Ebisu craft beer celebration, upbeat fusion grooves, sophisticated dinner party energy, trendy Tokyo nightlife",
     color: "#daa520",
   },
 ];
 
-export const DEFAULT_DISTRICT_PROMPT = "Ambient Tokyo cityscape, gentle urban hum, distant traffic sounds, modern Japanese metropolis atmosphere, calm urban exploration";
-export const DEFAULT_DISTRICT_PROMPT_MORNING = "Peaceful Tokyo dawn, soft ambient pads, gentle city awakening, tranquil urban morning, serene Japanese cityscape";
-export const DEFAULT_DISTRICT_PROMPT_EVENING = "Vibrant Tokyo nightlife, energetic urban pulse, lively city sounds, exciting metropolitan evening, dynamic Japanese metropolis";
+export const DEFAULT_DISTRICT_PROMPT =
+  "Ambient Tokyo cityscape, gentle urban hum, distant traffic sounds, modern Japanese metropolis atmosphere, calm urban exploration";
+export const DEFAULT_DISTRICT_PROMPT_MORNING =
+  "Peaceful Tokyo dawn, soft ambient pads, gentle city awakening, tranquil urban morning, serene Japanese cityscape";
+export const DEFAULT_DISTRICT_PROMPT_EVENING =
+  "Vibrant Tokyo nightlife, energetic urban pulse, lively city sounds, exciting metropolitan evening, dynamic Japanese metropolis";
 
 /**
  * Get the appropriate prompt for a district based on time of day
  */
-export function getDistrictPrompt(district: District, timeOfDay: TimeOfDay): string {
+export function getDistrictPrompt(
+  district: District,
+  timeOfDay: TimeOfDay
+): string {
   switch (timeOfDay) {
     case "morning":
       return district.promptMorning || district.prompt;
@@ -226,7 +268,10 @@ export const AUDIO_POI_TYPES = [
 
 // audio file mappings for POI types
 export const POI_AUDIO_MAPPINGS: Record<string, string[]> = {
-  train_station: ["/audio/池袋/train-apraoching-ikebukuro.mp3", "/audio/池袋/bilingual-train-annoucement.mp3"],
+  train_station: [
+    "/audio/池袋/train-apraoching-ikebukuro.mp3",
+    "/audio/池袋/bilingual-train-annoucement.mp3",
+  ],
   subway_station: ["/audio/池袋/train-apraoching-ikebukuro.mp3"],
   // temple: ["/audio/tokyo-street.mp3"], // TODO: Add temple audio
   // shrine: ["/audio/tokyo-street.mp3"], // TODO: Add shrine audio
@@ -340,8 +385,8 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     id: "ikebukuro_bic_camera_1",
     name: "Bic Camera",
     nameJa: "ビックカメラ",
-    lat: 35.7290,
-    lng: 139.7120,
+    lat: 35.729,
+    lng: 139.712,
     alt: 30,
     src: "/audio/池袋/ビックカメラ 池袋カメラ・パソコン館.m4a",
     volume: 0.6,
@@ -379,7 +424,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     id: "ikebukuro_famima_2",
     name: "FamilyMart 2",
     nameJa: "ファミマ２",
-    lat: 35.7310,
+    lat: 35.731,
     lng: 139.7095,
     alt: 15,
     src: "/audio/池袋/ファミマ２.m4a",
@@ -433,7 +478,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     id: "akihabara_train_entering_2",
     name: "Train Entering 2",
     nameJa: "電車到着２",
-    lat: 35.6980,
+    lat: 35.698,
     lng: 139.7728,
     alt: 25,
     src: "/audio/秋葉原/akihabara_train_entering2.mp3",
@@ -460,7 +505,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     name: "Gacha Machine",
     nameJa: "ガチャ",
     lat: 35.6978,
-    lng: 139.7740,
+    lng: 139.774,
     alt: 20,
     src: "/audio/秋葉原/gacha.mp3",
     volume: 0.6,
@@ -502,7 +547,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     id: "nakano_ramen",
     name: "Ramen Shop",
     nameJa: "ラーメン屋",
-    lat: 35.7060,
+    lat: 35.706,
     lng: 139.6662,
     alt: 15,
     src: "/audio/中野/ramenya_slurping.mp3",
@@ -530,7 +575,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     id: "tokyo_street_shibuya",
     name: "Tokyo Street (Shibuya)",
     nameJa: "東京の街（渋谷）",
-    lat: 35.6580,
+    lat: 35.658,
     lng: 139.7016,
     alt: 20,
     src: "/audio/tokyo-street.mp3",
@@ -576,7 +621,7 @@ export const DEMO_WAYPOINTS: DemoWaypoint[] = [
     id: "shibuya",
     name: "Shibuya Station",
     nameJa: "渋谷駅",
-    lat: 35.6580,
+    lat: 35.658,
     lng: 139.7016,
     orbitAltitude: 150,
     orbitRadius: 200,
@@ -676,7 +721,6 @@ export interface TimeOfDayPreset {
     far: number;
   };
 }
-
 export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
   morning: {
     id: "morning",
@@ -787,4 +831,3 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
     },
   },
 };
-

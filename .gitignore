@@ -55,3 +55,5 @@ certificates
 /src/generated/prisma
 
 .env*.local
+
+.env*.local
