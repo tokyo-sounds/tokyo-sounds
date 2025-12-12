@@ -16,3 +16,5 @@ export type { TokyoSpatialAudioProps } from "./TokyoSpatialAudio";
 
 export { OtherPlayers } from "./OtherPlayers";
 
+export { MultiplayerManager } from "./MultiplayerManager";
+

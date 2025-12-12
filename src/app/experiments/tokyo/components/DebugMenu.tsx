@@ -18,7 +18,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CodeXml, SprayCan } from "lucide-react";
+import { CodeXml, SprayCan, Play, Pause } from "lucide-react";
+import { useAmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudioContext";
 
 /** DebugMenu
  *
@@ -96,6 +97,11 @@ export default function DebugMenu({
           <div className="w-full flex justify-between">
             <span>Collision Distance:</span>
             <span className="font-light">{collisionDistance?.toFixed(2)}m</span>
+          </div>
+
+          <div className="w-full pt-2 border-t border-white/20">
+            <div className="text-white/50 mb-2">Background Audio</div>
+            <AmbientAudioControl />
           </div>
 
           <div>
@@ -189,5 +195,53 @@ export default function DebugMenu({
         </div>
       </SheetContent>
     </Sheet>
+  );
+}
+
+/**
+ * Ambient Audio Control Component
+ * Displays current playing audio file and provides play/pause controls
+ */
+function AmbientAudioControl() {
+  const { currentFileName, isPlaying, play, pause } =
+    useAmbientBackgroundAudio();
+
+  const handleToggle = () => {
+    if (isPlaying) {
+      pause();
+    } else {
+      play();
+    }
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="w-full flex justify-between items-center">
+        <span className="text-white/70">Current Track:</span>
+        <span className="font-light text-xs text-white/50 truncate max-w-[200px]">
+          {currentFileName || "None"}
+        </span>
+      </div>
+      <div className="flex gap-2">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleToggle}
+          className="flex-1 text-xs border-white/20 text-white/70 hover:text-white hover:bg-white/10"
+        >
+          {isPlaying ? (
+            <>
+              <Pause className="size-3 mr-1" />
+              Pause
+            </>
+          ) : (
+            <>
+              <Play className="size-3 mr-1" />
+              Play
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
   );
 }

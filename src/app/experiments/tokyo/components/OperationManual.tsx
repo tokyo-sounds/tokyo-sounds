@@ -13,7 +13,7 @@ export default function OperationManual({
   setOperationManualOpen: (open: boolean) => void;
 }) {
   return (
-    <AccordionItem value="manual" className="border-none">
+    <AccordionItem value="manual" className="hidden md:block border-none">
       <AccordionTrigger className="py-2 items-center text-muted justify-center hover:no-underline cursor-pointer">
         <Kbd className="text-muted bg-transparent border font-mono">H</Kbd>
         <span>操作ガイド</span>
