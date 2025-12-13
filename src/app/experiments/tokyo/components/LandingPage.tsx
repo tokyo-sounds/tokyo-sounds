@@ -4,6 +4,18 @@
  * @returns null
  */
 import { PASTEL_COLORS } from "../page";
+import HomeHero from "@/components/layout/HomeHero";
+import Nav from "@/components/layout/nav";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from "@/components/ui/collapsible";
+import { ChevronDown, SendHorizontal } from "lucide-react";
 
 interface LandingPageProps {
   playerName: string;
@@ -29,112 +41,92 @@ export default function LandingPage({
   handleStart,
 }: LandingPageProps) {
   return (
-    <div className="flex items-center justify-center w-full h-svh bg-linear-to-br from-slate-950 via-indigo-950 to-slate-950">
-      <div className="text-center space-y-6 max-w-lg px-8">
-        <div className="space-y-2">
-          <h1 className="text-5xl font-black tracking-tight bg-linear-to-r from-cyan-400 via-fuchsia-500 to-amber-400 bg-clip-text text-transparent">
-            TOKYO SOUNDS
-          </h1>
-          <p className="text-slate-400">
-            Fly through real Tokyo with AI-generated music
-          </p>
-        </div>
-
-        <div className="bg-slate-900/60 border border-slate-700/50 p-6 rounded-2xl space-y-4">
-
-          <div className="border-t border-slate-700/50 pt-4">
-            <label className="block text-slate-400 text-sm mb-2">
-              Player Name
-            </label>
-            <input
-              type="text"
-              value={playerName}
-              onChange={(e) => setPlayerName(e.target.value)}
-              placeholder="Enter your name (optional)"
-              maxLength={20}
-              className="w-full px-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-500 focus:border-fuchsia-500 focus:outline-none"
-            />
-          </div>
-
-          <div>
-            <label className="block text-slate-400 text-sm mb-2">
-              Plane Color
-            </label>
-            <div className="grid grid-cols-8 gap-2">
-              {PASTEL_COLORS.map((color) => (
-                <button
-                  key={color.hex}
-                  onClick={() => setPlaneColor(color.hex)}
-                  className={`w-8 h-8 rounded-lg transition-all hover:scale-110 ${
-                    planeColor === color.hex
-                      ? "ring-2 ring-white ring-offset-2 ring-offset-slate-900 scale-110"
-                      : "hover:ring-1 hover:ring-white/50"
-                  }`}
-                  style={{ backgroundColor: color.hex }}
-                  title={color.name}
-                />
-              ))}
+    <div className="w-full h-full min-h-svh flex flex-col items-center justify-center bg-linear-to-tr from-orange-600 to-red-800 overflow-hidden">
+      <Nav />
+      <HomeHero>
+        <Card className="w-full max-w-sm absolute top-1/2 left-1/2 -translate-x-1/2 bg-transparent backdrop-blur-xs border-border/50 shadow-xl text-background/70 tracking-wider animate-in fade-in-0 slide-in-from-bottom duration-500">
+          <CardContent className="space-y-4 **:text-xs">
+            <div className="space-y-2">
+              <Label htmlFor="playerName">名前</Label>
+              <Input
+                id="playerName"
+                type="text"
+                value={playerName}
+                onChange={(e) => setPlayerName(e.target.value)}
+                placeholder="Enter your name (optional)"
+                maxLength={20}
+                className="w-full"
+              />
             </div>
-            <p className="text-slate-500 text-xs mt-2">
-              Selected:{" "}
-              <span className="text-white">
-                {PASTEL_COLORS.find((c) => c.hex === planeColor)?.name}
-              </span>
-            </p>
-          </div>
 
-          <div className="border-t border-slate-700/50 pt-4 flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="lyria"
-              checked={generativeEnabled}
-              onChange={(e) => setGenerativeEnabled(e.target.checked)}
-              className="w-4 h-4 rounded bg-slate-800 border-slate-600 text-fuchsia-500"
-            />
-            <label htmlFor="lyria" className="text-slate-300 text-sm">
-              Enable Lyria Generative Audio
-            </label>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <input
-              type="checkbox"
-              id="spatial"
-              checked={spatialAudioEnabled}
-              onChange={(e) => setSpatialAudioEnabled(e.target.checked)}
-              className="w-4 h-4 rounded bg-slate-800 border-slate-600 text-cyan-500"
-            />
-            <label htmlFor="spatial" className="text-slate-300 text-sm">
-              Enable Spatial Audio (ambient sounds)
-            </label>
-          </div>
-
-          <div className="bg-slate-800/50 p-3 rounded-lg text-xs space-y-1">
-            <p className="text-cyan-400 font-bold">CONTROLS</p>
-            <div className="grid grid-cols-2 gap-x-4 text-slate-400">
-              <span>
-                <span className="text-white font-mono">W/S</span> Pitch
-              </span>
-              <span>
-                <span className="text-white font-mono">A/D</span> Bank/Turn
-              </span>
-              <span>
-                <span className="text-white font-mono">SHIFT</span> Boost
-              </span>
-              <span>
-                <span className="text-white font-mono">SPACE</span> Freeze
-              </span>
+            <div className="space-y-2">
+              <div className="flex justify-center items-center gap-3">
+                {PASTEL_COLORS.map((color) => (
+                  <button
+                    key={color.hex}
+                    onClick={() => setPlaneColor(color.hex)}
+                    className={`size-8 rounded-full transition-all hover:scale-105 cursor-pointer ${
+                      planeColor === color.hex
+                        ? "ring-1 ring-white ring-offset-1 ring-offset-card scale-105"
+                        : "hover:ring-1 hover:ring-white/50"
+                    }`}
+                    style={{ backgroundColor: color.hex }}
+                    title={color.name}
+                    aria-label={`Select ${color.name} color`}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+            <Collapsible>
+              <CollapsibleTrigger className="flex items-center justify-between gap-2 w-full cursor-pointer">
+                <span>音声設定</span>
+                <ChevronDown className="size-4" />
+              </CollapsibleTrigger>
+              <CollapsibleContent className="pt-2 space-y-2">
+                <Label
+                  htmlFor="lyria"
+                  className="flex items-center gap-3 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    id="lyria"
+                    aria-label="Enable Lyria Generative Audio"
+                    checked={generativeEnabled}
+                    onChange={(e) => setGenerativeEnabled(e.target.checked)}
+                    className="size-4 focus:ring-offset-1"
+                  />
+                  <span>AI生成音楽を有効にする</span>
+                </Label>
+                <Label
+                  htmlFor="spatial"
+                  className="flex items-center gap-3 cursor-pointer"
+                >
+                  <input
+                    type="checkbox"
+                    id="spatial"
+                    aria-label="Enable Spatial Audio"
+                    checked={spatialAudioEnabled}
+                    onChange={(e) => setSpatialAudioEnabled(e.target.checked)}
+                    className="size-4 focus:ring-offset-1"
+                  />
+                  <span>空間音響を有効にする</span>
+                </Label>
+              </CollapsibleContent>
+            </Collapsible>
+          </CardContent>
 
-          <button
-            onClick={handleStart}
-            className="w-full px-6 py-3 bg-linear-to-r from-cyan-500 via-fuchsia-500 to-amber-500 text-white font-bold rounded-xl disabled:opacity-50 hover:opacity-90 transition-opacity"
-          >
-            Enter Tokyo
-          </button>
-        </div>
-      </div>
+          <CardFooter className="flex flex-col gap-4">
+            <Button
+              variant="outline"
+              size="lg"
+              onClick={handleStart}
+              className="group w-full text-white font-bold bg-transparent hover:bg-primary/40"
+            >
+              <SendHorizontal className="size-4 group-hover:translate-x-1 transition-all" />
+            </Button>
+          </CardFooter>
+        </Card>
+      </HomeHero>
     </div>
   );
 }

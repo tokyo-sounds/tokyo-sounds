@@ -380,7 +380,7 @@ export default function TokyoPage() {
 
   return (
     <AmbientBackgroundAudioProvider>
-      <div className="w-full h-dvh bg-black relative overflow-hidden">
+      <div className="w-full h-svh bg-black relative overflow-hidden">
         <Canvas
           shadows="soft"
           camera={{
