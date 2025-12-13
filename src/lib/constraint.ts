@@ -176,19 +176,14 @@ export const navigationLinks = [
     icon: InfoIcon,
   },
   {
-    label: {ja: "プレイ", en: "Play"},
-    slug: "play",
-    icon: PlayIcon,
+    label: {ja: "開発履歴", en: "Past Versions"},
+    slug: "patch",
+    icon: History,
   },
   {
     label: {ja: "ヘルプ", en: "Help"},
     slug: "chat",
     icon: MessageCircleQuestion,
-  },
-  {
-    label: {ja: "過去バージョン", en: "Past Versions"},
-    slug: "patch",
-    icon: History,
   },
 ];
 
