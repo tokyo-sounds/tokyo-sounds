@@ -471,12 +471,6 @@ export default function TokyoPage() {
             }
             operationManualOpen={operationManualOpen}
             setOperationManualOpen={setOperationManualOpen}
-            generativeEnabled={generativeEnabled}
-            lyriaStatus={lyriaStatus}
-            spatialAudioEnabled={spatialAudioEnabled}
-            spatialAudioStats={spatialAudioStats}
-            multiplayerConnected={multiplayerConnected}
-            playerCount={playerCount}
             heading={heading}
             speedoMeterSize={speedoMeterSize}
             isMobile={isMobile}
@@ -522,6 +516,13 @@ export default function TokyoPage() {
             }
             setDebugMenuOpen(open);
           }}
+          lyriaStatus={lyriaStatus}
+          spatialAudioEnabled={spatialAudioEnabled}
+          spatialAudioStats={spatialAudioStats}
+          pitch={pitch}
+          roll={roll}
+          multiplayerConnected={multiplayerConnected}
+          playerCount={playerCount}
         />
       </div>
     </AmbientBackgroundAudioProvider>

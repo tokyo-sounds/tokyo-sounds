@@ -54,6 +54,13 @@ export default function DebugMenu({
   onOpenChange,
   generativeEnabled,
   districts,
+  lyriaStatus,
+  spatialAudioEnabled,
+  spatialAudioStats,
+  pitch,
+  roll,
+  multiplayerConnected,
+  playerCount,
 }: {
   options: DebugOptions;
   onOptionsChange: (key: keyof DebugOptions, value: boolean) => void;
@@ -68,6 +75,17 @@ export default function DebugMenu({
   onOpenChange?: (open: boolean) => void;
   generativeEnabled: boolean;
   districts: DistrictDebugInfo[];
+  lyriaStatus: string;
+  spatialAudioEnabled: boolean;
+  spatialAudioStats: {
+    total: number;
+    active: number;
+    culled: number;
+  };
+  pitch: number;
+  roll: number;
+  multiplayerConnected?: boolean;
+  playerCount?: number;
 }) {
   const { currentTime, setTimeOfDay } = useTimeOfDayStore();
   const timeOptions: TimeOfDay[] = ["morning", "afternoon", "evening"];
@@ -85,16 +103,16 @@ export default function DebugMenu({
           </SheetTrigger>
         </TooltipTrigger>
         <TooltipContent>
-          <p>設置</p>
+          <p>メニュー</p>
         </TooltipContent>
       </Tooltip>
       <SheetContent className="bg-black/70 backdrop-blur-xs px-4 text-white border-none">
         <SheetHeader className="pl-0">
           <SheetTitle className="text-white/70 text-lg font-noto inline-flex items-center gap-2">
-            <Settings className="size-4" /> 設置
+            <Settings className="size-4" /> メニュー
           </SheetTitle>
         </SheetHeader>
-        <Tabs defaultValue="options" className="space-y-2 h-full">
+        <Tabs defaultValue="options" className="space-y-2 flex-1">
           <TabsList className="w-full">
             <TabsTrigger value="options" className="inline-flex gap-2 text-sm">
               <Settings className="size-4" />
@@ -105,7 +123,7 @@ export default function DebugMenu({
               開発者オプション
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="options" className="flex flex-col gap-2">
+          <TabsContent value="options" className="flex-1 flex flex-col gap-2">
             <div>
               <DebugMenuLabel>環境設定</DebugMenuLabel>
               <div className="bg-muted/40 text-muted-foreground inline-flex h-9 w-full gap-1 items-center justify-center rounded-lg p-[3px]">
@@ -140,7 +158,10 @@ export default function DebugMenu({
               )}
             </div>
           </TabsContent>
-          <TabsContent value="console" className="flex flex-col justify-between gap-2">
+          <TabsContent
+            value="console"
+            className="flex-1 flex flex-col justify-between gap-2"
+          >
             <div>
               <DebugMenuLabel>テレポート</DebugMenuLabel>
               <LocationSearch
@@ -154,7 +175,7 @@ export default function DebugMenu({
             </div>
             <div className="space-y-1">
               <DebugMenuLabel>描画設定</DebugMenuLabel>
-              <div className="grid grid-cols-2 space-y-1">
+              <div className="grid grid-cols-2 space-y-1 text-xs **:font-mono">
                 <label className="flex items-center gap-2 cursor-pointer px-2">
                   <input
                     type="checkbox"
@@ -204,9 +225,9 @@ export default function DebugMenu({
                 </label>
               </div>
             </div>
-            <div>
+            <div className="flex-1">
               <DebugMenuLabel>コンソール</DebugMenuLabel>
-              <div className="bg-neutral-950 p-3 rounded-md *:text-xs *:data-[status-value]:font-mono *:data-[status-value]:text-right *:data-[status-value]:text-accent/70 **:data-[status-label]:text-primary **:data-[status-label]:font-mono">
+              <div className="bg-neutral-950 px-3 py-2 rounded-md *:text-xs *:data-[status-value]:font-mono *:data-[status-value]:text-right *:data-[status-value]:text-accent/70 **:data-[status-label]:text-primary **:data-[status-label]:font-mono">
                 <h4>
                   状態 <span data-status-label>Status</span>
                 </h4>
@@ -219,28 +240,69 @@ export default function DebugMenu({
                   カメラ高さ <span data-status-label>Camera Y</span>
                 </h4>
                 <p data-status-value>{cameraY.toFixed(2)}</p>
+                {generativeEnabled && (
+                  <>
+                    <h4>
+                      AI生成音楽 <span data-status-label>Lyria</span>
+                    </h4>
+                    <p data-status-value>♪ {lyriaStatus}</p>
+                  </>
+                )}
+                {spatialAudioEnabled && spatialAudioStats.total > 0 && (
+                  <>
+                    <h4>
+                      空間音響 <span data-status-label>Spatial Audio</span>
+                    </h4>
+                    <p data-status-value>
+                      {spatialAudioStats.active}/{spatialAudioStats.total}{" "}
+                      (Culled: {spatialAudioStats.culled})
+                    </p>
+                  </>
+                )}
                 <h4>
+                  ピッチ <span data-status-label>Pitch</span>
+                </h4>
+                <p data-status-value>{pitch.toFixed(2)}°</p>
+                <h4>
+                  ロール <span data-status-label>Roll</span>
+                </h4>
+                <p data-status-value>{roll.toFixed(2)}°</p>
+                <h4>
+                  マルチプレイヤー <span data-status-label>Multiplayer</span>
+                </h4>
+                <p data-status-value>
+                  {multiplayerConnected ? (
+                    <span className="text-green-400/70">● {playerCount}</span>
+                  ) : (
+                    <span className="text-destructive">○</span>
+                  )}
+                </p>
+                {/* <h4>
                   衝突距離 <span data-status-label>Collision Distance</span>
                 </h4>
-                <p data-status-value>{collisionDistance?.toFixed(2)}m</p>
+                <p data-status-value>{collisionDistance?.toFixed(2)}m</p> */}
               </div>
             </div>
 
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => {
-                clearVisitedFlag();
-                window.location.reload();
-              }}
-              className="w-full space-x-2 hover:animate-pulse"
-            >
-              <Play className="size-4" />
-              デモプレイ
-            </Button>
-
-            <div className="flex-1 mt-1 text-sm text-muted/40 text-right">
-              <span className="text-xs font-mono border border-muted/40 rounded px-1.5 py-1">M</span> ドローンモード
+            <div className="space-y-2 pb-2">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={() => {
+                  clearVisitedFlag();
+                  window.location.reload();
+                }}
+                className="w-full space-x-2 hover:animate-pulse"
+              >
+                <Play className="size-4" />
+                デモプレイ
+              </Button>
+              <h6 className="text-sm text-muted/40 flex justify-end items-center gap-1">
+                <span className="text-[7pt] font-mono border border-muted/40 rounded px-1.5 py-1">
+                  M
+                </span>{" "}
+                ドローンモード
+              </h6>
             </div>
           </TabsContent>
         </Tabs>
@@ -296,4 +358,3 @@ function AmbientAudioControl() {
     </Button>
   );
 }
-

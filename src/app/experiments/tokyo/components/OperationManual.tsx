@@ -32,7 +32,7 @@ export default function OperationManual({
           <Kbd className="text-muted bg-transparent border font-mono">
             SPACE
           </Kbd>
-          <span className="text-muted">ポーズ</span>
+          <span className="text-muted">一時停止</span>
         </div>
         <div className="flex justify-between">
           <Kbd className="text-muted bg-transparent border font-mono">
@@ -46,7 +46,7 @@ export default function OperationManual({
         </div>
         <div className="flex justify-between">
           <Kbd className="text-muted bg-transparent border font-mono">ESC</Kbd>
-          <span className="text-muted">設定</span>
+          <span className="text-muted">メニュー</span>
         </div>
       </AccordionContent>
     </AccordionItem>

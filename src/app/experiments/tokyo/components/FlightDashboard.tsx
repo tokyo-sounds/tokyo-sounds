@@ -1,6 +1,5 @@
 "use client";
 
-import StatusBar from "./StatusBar";
 import SpeedoMeter from "./SpeedoMeter";
 import Compass from "./Compass";
 import CompassBar from "./CompassBar";
@@ -14,18 +13,8 @@ interface FlightDashboardProps {
   flightSpeed: number;
   heading: number;
   speedoMeterSize: number;
-  generativeEnabled: boolean;
-  lyriaStatus: string;
-  spatialAudioEnabled: boolean;
-  spatialAudioStats: {
-    total: number;
-    active: number;
-    culled: number;
-  };
   operationManualOpen: boolean;
   setOperationManualOpen: (open: boolean) => void;
-  multiplayerConnected?: boolean;
-  playerCount?: number;
   pitch: number;
   roll: number;
   cameraY: number;
@@ -46,10 +35,6 @@ export default function FlightDashboard({
   flightSpeed,
   heading,
   speedoMeterSize,
-  generativeEnabled,
-  lyriaStatus,
-  spatialAudioEnabled,
-  spatialAudioStats,
   pitch,
   roll,
   cameraY,
@@ -58,14 +43,12 @@ export default function FlightDashboard({
   demoState,
   gyroState,
   planeControllerRef,
-  playerCount,
-  multiplayerConnected,
   isMobile,
   operationManualOpen,
   setOperationManualOpen,
 }: FlightDashboardProps) {
   return (
-    <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none">
+    <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none select-none">
       <CompassBar
         heading={heading}
         pitch={pitch}
@@ -81,18 +64,6 @@ export default function FlightDashboard({
       />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <AttitudeIndicator pitch={pitch} roll={roll} cameraY={cameraY} />
-      </div>
-      <div className="hidden md:block absolute bottom-4 left-1/2 -translate-x-1/2">
-        <StatusBar
-          generativeEnabled={generativeEnabled}
-          lyriaStatus={lyriaStatus}
-          spatialAudioEnabled={spatialAudioEnabled}
-          spatialAudioStats={spatialAudioStats}
-          pitch={pitch}
-          roll={roll}
-          multiplayerConnected={multiplayerConnected}
-          playerCount={playerCount}
-        />
       </div>
       <div className="hidden md:block absolute top-4 left-4">
         <InformationContainer

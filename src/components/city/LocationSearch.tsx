@@ -111,7 +111,7 @@ export function LocationSearch({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="東京の地名を入力してテレポート"
+            placeholder="東京の地名を入力してテレポート、いってらっしゃい！"
             disabled={isLoading}
             autoComplete="off"
             data-1p-ignore="true"
@@ -137,10 +137,6 @@ export function LocationSearch({
       {lastResult && !error && (
         <div className="mt-2 text-white/50 truncate">Last: {lastResult}</div>
       )}
-
-      <p className="mt-2 text-muted/50 text-xs text-center">
-        シートベルトを締めて、いってらっしゃい！
-      </p>
     </div>
   );
 }
