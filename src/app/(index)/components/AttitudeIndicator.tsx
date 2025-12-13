@@ -54,8 +54,10 @@ export default function AttitudeIndicator({
   // Refs for RAF interpolation
   const targetRollRef = useRef(roll);
   const targetPitchRef = useRef(pitch);
+  const targetCameraYRef = useRef(cameraY);
   const currentRollRef = useRef(roll);
   const currentPitchRef = useRef(pitch);
+  const currentCameraYRef = useRef(cameraY);
   const rafIdRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(performance.now());
 
@@ -67,12 +69,14 @@ export default function AttitudeIndicator({
   const pitchFillNegativeRef = useRef<HTMLDivElement>(null);
   const rollValueRef = useRef<HTMLHeadingElement>(null);
   const pitchValueRef = useRef<HTMLHeadingElement>(null);
+  const cameraYValueRef = useRef<HTMLLabelElement>(null);
 
   // Update target values when props change
   useEffect(() => {
     targetRollRef.current = roll;
     targetPitchRef.current = pitch;
-  }, [roll, pitch]);
+    targetCameraYRef.current = cameraY;
+  }, [roll, pitch, cameraY]);
 
   // RAF interpolation loop
   useEffect(() => {
@@ -86,14 +90,17 @@ export default function AttitudeIndicator({
       // Lerp current values toward targets
       const rollDiff = targetRollRef.current - currentRollRef.current;
       const pitchDiff = targetPitchRef.current - currentPitchRef.current;
+      const cameraYDiff = targetCameraYRef.current - currentCameraYRef.current;
 
       // Exponential smoothing: alpha = 1 - exp(-k * dt)
       const alpha = 1 - Math.exp(-SMOOTHING_FACTOR * (deltaTime / 16.67));
       currentRollRef.current += rollDiff * alpha;
       currentPitchRef.current += pitchDiff * alpha;
+      currentCameraYRef.current += cameraYDiff * alpha;
 
       const currentRoll = currentRollRef.current;
       const currentPitch = currentPitchRef.current;
+      const currentCameraY = currentCameraYRef.current;
 
       // Update wings rotation via CSS variable
       if (wingsRef.current) {
@@ -162,6 +169,10 @@ export default function AttitudeIndicator({
         const roundedPitch = Math.round(currentPitch * 10) / 10;
         pitchValueRef.current.textContent = `${roundedPitch.toFixed(1)}°`;
       }
+      if (cameraYValueRef.current) {
+        const roundedCameraY = Math.round(currentCameraY * 10) / 10;
+        cameraYValueRef.current.textContent = `${roundedCameraY.toFixed(1)} m`;
+      }
 
       rafIdRef.current = requestAnimationFrame(animate);
     };
@@ -187,7 +198,7 @@ export default function AttitudeIndicator({
           ref={wingsRef}
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-between w-60 md:w-72 h-0 will-change-transform pointer-events-none"
           style={{
-            transform: `rotate(${-(roll)}deg)`,
+            transform: `rotate(${-roll}deg)`,
           }}
           aria-hidden="true"
         >
@@ -291,7 +302,10 @@ export default function AttitudeIndicator({
         >
           {pitch.toFixed(1)}°
         </h3>
-        <label className="absolute top-6 left-1/2 -translate-x-1/2 w-full text-xs md:text-sm text-muted text-shadow-sm text-shadow-black/50 font-mono">
+        <label
+          ref={cameraYValueRef}
+          className="absolute top-6 left-1/2 -translate-x-1/2 w-full text-xs md:text-sm text-muted text-shadow-sm text-shadow-black/50 font-mono"
+        >
           {cameraY.toFixed(1)} m
         </label>
       </div>
