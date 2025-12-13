@@ -6,9 +6,11 @@ import BackToHomeButton from "@/components/widget/BackToHomeButton";
 export default function CommonPageContainer({
   children,
   className,
+  innerClassName,
 }: Readonly<{
   children: React.ReactNode;
   className?: string;
+  innerClassName?: string;
 }>) {
   return (
     <div
@@ -18,7 +20,12 @@ export default function CommonPageContainer({
       )}
     >
       <Nav />
-      <main className="w-full max-w-4xl h-full min-h-0 flex-1 mx-auto p-4">
+      <main
+        className={cn(
+          "w-full max-w-4xl h-full min-h-0 flex-1 mx-auto p-4",
+          innerClassName
+        )}
+      >
         {children}
       </main>
       <BackToHomeButton />

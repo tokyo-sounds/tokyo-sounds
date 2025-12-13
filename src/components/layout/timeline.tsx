@@ -33,9 +33,9 @@ function formatDate(date: Date | string): string {
     return "Invalid Date";
   }
 
-  return dateObj.toLocaleDateString("en-US", {
+  return dateObj.toLocaleDateString("ja-JP", {
     year: "numeric",
-    month: "long",
+    month: "short",
     day: "numeric",
   });
 }
@@ -95,7 +95,7 @@ const TimelineItemComponent = memo(function TimelineItemComponent({
       <div className="flex-shrink-0 w-32 md:w-40">
         <div className="sticky top-4">
           <time
-            className="text-sm md:text-base font-medium text-muted-foreground"
+            className="text-md md:text-xl font-medium text-white"
             dateTime={
               typeof item.date === "string"
                 ? item.date
@@ -110,13 +110,13 @@ const TimelineItemComponent = memo(function TimelineItemComponent({
       {/* Vertical Line */}
       <div className="relative flex flex-col items-center flex-shrink-0 w-4">
         {/* Dot */}
-        <div className="relative z-10 flex items-center justify-center size-4 rounded-full bg-background border-3 border-primary" />
+        <div className="relative z-10 flex items-center justify-center size-4 rounded-full bg-secondary border-3 border-white" />
         {/* Line extending down to next item */}
         {!isLast && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 w-1 bottom-0 bg-border">
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 w-1 bottom-0 bg-secondary border-secondary">
             {/* Animated Progress Bar */}
             <motion.div
-              className="absolute top-0 left-0 w-full bg-primary origin-top"
+              className="absolute top-0 left-0 w-full rounded-full bg-white origin-top"
               style={{
                 height: progressHeight,
               }}

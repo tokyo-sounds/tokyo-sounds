@@ -35,7 +35,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body
-        className={`${robotoSans.variable} ${robotoMono.variable} ${notoSansJp.variable} antialiased`}
+        className={`${robotoSans.variable} ${robotoMono.variable} ${notoSansJp.variable} bg-linear-to-b from-primary to-secondary antialiased`}
       >
         <StackProvider app={stackClientApp}>
           <StackTheme>{children}</StackTheme>

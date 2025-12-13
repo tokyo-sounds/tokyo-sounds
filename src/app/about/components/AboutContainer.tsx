@@ -26,8 +26,6 @@ const tabs = [
 export default function AboutContainer() {
   return (
     <section className="w-full h-full flex flex-col items-center justify-center gap-8">
-      <h1 className="text-5xl font-black font-sans uppercase">About</h1>
-      <ConceptDescription />
       <Tabs defaultValue="design" className="w-full h-full">
         {/* <AboutTabs /> */}
         <TabsList className="w-full h-12 self-center">

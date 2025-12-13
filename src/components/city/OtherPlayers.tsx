@@ -2,9 +2,9 @@
 
 /**
  * OtherPlayers Component
- * 
+ *
  * Renders other players' planes in the 3D scene.
- * 
+ *
  * - Smooth interpolation between position updates
  * - Distance-based opacity (fade out 300-500m)
  * - Custom plane color per player
@@ -22,7 +22,7 @@ import {
 } from "@/types/multiplayer";
 
 const PLANE_SCALE = 0.1;
-const DEFAULT_MODEL_PATH = "/models/plane_blence.glb";
+const DEFAULT_MODEL_PATH = "/models/plane_balance.glb";
 const INTERPOLATION_SPEED = 10; // faster catch-up
 
 interface OtherPlayerPlaneProps {
@@ -30,23 +30,34 @@ interface OtherPlayerPlaneProps {
   localPlayerPosition: THREE.Vector3;
 }
 
-function OtherPlayerPlane({ player, localPlayerPosition }: OtherPlayerPlaneProps) {
+function OtherPlayerPlane({
+  player,
+  localPlayerPosition,
+}: OtherPlayerPlaneProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(DEFAULT_MODEL_PATH);
-  
-  const currentPos = useRef(new THREE.Vector3(player.position.x, player.position.y, player.position.z));
-  const currentQuat = useRef(new THREE.Quaternion(
-    player.quaternion.x,
-    player.quaternion.y,
-    player.quaternion.z,
-    player.quaternion.w
-  ));
+
+  const currentPos = useRef(
+    new THREE.Vector3(player.position.x, player.position.y, player.position.z)
+  );
+  const currentQuat = useRef(
+    new THREE.Quaternion(
+      player.quaternion.x,
+      player.quaternion.y,
+      player.quaternion.z,
+      player.quaternion.w
+    )
+  );
   const currentOpacity = useRef(1);
 
   const targetPos = useRef(new THREE.Vector3());
   const targetQuat = useRef(new THREE.Quaternion());
 
-  targetPos.current.set(player.position.x, player.position.y, player.position.z);
+  targetPos.current.set(
+    player.position.x,
+    player.position.y,
+    player.position.z
+  );
   targetQuat.current.set(
     player.quaternion.x,
     player.quaternion.y,
@@ -56,47 +67,53 @@ function OtherPlayerPlane({ player, localPlayerPosition }: OtherPlayerPlaneProps
 
   const coloredScene = useMemo(() => {
     const clone = scene.clone();
-    
+
     clone.traverse((child) => {
       if (child instanceof THREE.Mesh && child.material) {
         if (Array.isArray(child.material)) {
           child.material = child.material.map((mat) => {
             const newMat = mat.clone();
-            if ('color' in newMat) {
+            if ("color" in newMat) {
               newMat.color = new THREE.Color(player.color);
             }
-            if ('transparent' in newMat) {
+            if ("transparent" in newMat) {
               newMat.transparent = true;
             }
             return newMat;
           });
         } else {
           const newMat = child.material.clone();
-          if ('color' in newMat) {
+          if ("color" in newMat) {
             newMat.color = new THREE.Color(player.color);
           }
-          if ('transparent' in newMat) {
+          if ("transparent" in newMat) {
             newMat.transparent = true;
           }
           child.material = newMat;
         }
       }
     });
-    
+
     return clone;
   }, [scene, player.color]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
 
-    currentPos.current.lerp(targetPos.current, Math.min(1, delta * INTERPOLATION_SPEED));
+    currentPos.current.lerp(
+      targetPos.current,
+      Math.min(1, delta * INTERPOLATION_SPEED)
+    );
     groupRef.current.position.copy(currentPos.current);
 
-    currentQuat.current.slerp(targetQuat.current, Math.min(1, delta * INTERPOLATION_SPEED));
+    currentQuat.current.slerp(
+      targetQuat.current,
+      Math.min(1, delta * INTERPOLATION_SPEED)
+    );
     groupRef.current.quaternion.copy(currentQuat.current);
 
     const distance = currentPos.current.distanceTo(localPlayerPosition);
-    
+
     let targetOpacity = 1;
     if (distance > FADE_START_DISTANCE) {
       const fadeRange = VISIBILITY_RADIUS - FADE_START_DISTANCE;
@@ -104,17 +121,18 @@ function OtherPlayerPlane({ player, localPlayerPosition }: OtherPlayerPlaneProps
       targetOpacity = Math.max(0, 1 - fadeProgress);
     }
 
-    currentOpacity.current += (targetOpacity - currentOpacity.current) * Math.min(1, delta * 5);
+    currentOpacity.current +=
+      (targetOpacity - currentOpacity.current) * Math.min(1, delta * 5);
 
     groupRef.current.traverse((child) => {
       if (child instanceof THREE.Mesh && child.material) {
         if (Array.isArray(child.material)) {
           child.material.forEach((mat) => {
-            if ('opacity' in mat) {
+            if ("opacity" in mat) {
               mat.opacity = currentOpacity.current;
             }
           });
-        } else if ('opacity' in child.material) {
+        } else if ("opacity" in child.material) {
           child.material.opacity = currentOpacity.current;
         }
       }
@@ -134,7 +152,7 @@ function OtherPlayerPlane({ player, localPlayerPosition }: OtherPlayerPlaneProps
         scale={[PLANE_SCALE, PLANE_SCALE, PLANE_SCALE]}
         rotation={[0, -Math.PI / 2, 0]}
       />
-      
+
       <Html
         position={[0, 0.15, 0]}
         center
@@ -142,24 +160,24 @@ function OtherPlayerPlane({ player, localPlayerPosition }: OtherPlayerPlaneProps
         occlude={false}
         style={{
           opacity: currentOpacity.current,
-          transition: 'opacity 0.1s',
-          pointerEvents: 'none',
+          transition: "opacity 0.1s",
+          pointerEvents: "none",
         }}
       >
         <div
           style={{
-            background: 'rgba(0, 0, 0, 0.7)',
+            background: "rgba(0, 0, 0, 0.7)",
             color: player.color,
-            padding: '2px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontFamily: 'monospace',
-            fontWeight: 'bold',
-            whiteSpace: 'nowrap',
-            textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+            padding: "2px 8px",
+            borderRadius: "4px",
+            fontSize: "12px",
+            fontFamily: "monospace",
+            fontWeight: "bold",
+            whiteSpace: "nowrap",
+            textShadow: "0 1px 2px rgba(0,0,0,0.5)",
           }}
         >
-          {player.name || 'Anonymous'}
+          {player.name || "Anonymous"}
         </div>
       </Html>
     </group>
@@ -174,7 +192,10 @@ interface OtherPlayersProps {
 /**
  * Renders all nearby players in the 3D scene
  */
-export function OtherPlayers({ players, localPlayerPosition }: OtherPlayersProps) {
+export function OtherPlayers({
+  players,
+  localPlayerPosition,
+}: OtherPlayersProps) {
   return (
     <>
       {players.map((player) => (
