@@ -9,6 +9,20 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import { SendHorizontal } from "lucide-react";
 
+// Module constants - avoid re-allocation on every render
+const CARDINAL_DIRECTIONS = [
+  { label: "N", angle: 0 },
+  { label: "NE", angle: 45 },
+  { label: "E", angle: 90 },
+  { label: "SE", angle: 135 },
+  { label: "S", angle: 180 },
+  { label: "SW", angle: 225 },
+  { label: "W", angle: 270 },
+  { label: "NW", angle: 315 },
+] as const;
+
+const TICK_ANGLES = Array.from({ length: 12 }, (_, i) => i * 30);
+
 interface CompassProps {
   heading: number; // 0-360 degrees (from CompassBar)
   size?: number; // Diameter of the compass in pixels
@@ -49,48 +63,68 @@ export default function Compass({ heading, size = 240 }: CompassProps) {
     return "NW";
   };
 
-  // SVG constants
+  // SVG constants - computed once per size
   const centerX = size / 2;
   const centerY = size / 2;
   const radius = size * 0.33;
 
-  // Generate cardinal directions and tick marks
-  const cardinalDirections = [
-    { label: "N", angle: 0 },
-    { label: "NE", angle: 45 },
-    { label: "E", angle: 90 },
-    { label: "SE", angle: 135 },
-    { label: "S", angle: 180 },
-    { label: "SW", angle: 225 },
-    { label: "W", angle: 270 },
-    { label: "NW", angle: 315 },
-  ];
+  // Precompute tick mark geometry once - keyed by size (not heading)
+  // This avoids recalculating trig on every 60fps update
+  const ticksGeometry = useMemo(() => {
+    return TICK_ANGLES.map((angle) => {
+      const svgAngle = angle - 90;
+      const radian = (svgAngle * Math.PI) / 180;
+      const isCardinal = angle % 90 === 0;
+      const markLength = isCardinal ? 12 : 6;
+      
+      // Outer point (on circle)
+      const x = centerX + radius * Math.cos(radian);
+      const y = centerY + radius * Math.sin(radian);
+      
+      // Inner point (mark endpoint)
+      const innerX = centerX + (radius - markLength) * Math.cos(radian);
+      const innerY = centerY + (radius - markLength) * Math.sin(radian);
+      
+      return {
+        angle,
+        x1: innerX,
+        y1: innerY,
+        x2: x,
+        y2: y,
+        strokeWidth: isCardinal ? 2 : 1,
+      };
+    });
+  }, [size, centerX, centerY, radius]);
 
-  // Generate minor tick marks every 30 degrees
-  const tickMarks = useMemo(() => {
-    return Array.from({ length: 12 }, (_, i) => i * 30);
-  }, []);
+  // Precompute cardinal label positions once - keyed by size (not heading)
+  const labelsGeometry = useMemo(() => {
+    const labelRadius = radius * 1.2;
+    return CARDINAL_DIRECTIONS.map((dir) => {
+      const svgAngle = dir.angle - 90;
+      const radian = (svgAngle * Math.PI) / 180;
+      const labelX = centerX + labelRadius * Math.cos(radian);
+      const labelY = centerY + labelRadius * Math.sin(radian);
+      
+      return {
+        label: dir.label,
+        x: labelX,
+        y: labelY,
+      };
+    });
+  }, [size, centerX, centerY, radius]);
 
-  // Calculate position for a given angle (0° = North, clockwise)
-  const getPosition = (angle: number) => {
-    // SVG coordinates: 0° is right (3 o'clock), so we need to adjust
-    // For compass: 0° should be top (12 o'clock) = -90° in SVG
-    const svgAngle = angle - 90;
-    const radian = (svgAngle * Math.PI) / 180;
-    const x = centerX + radius * Math.cos(radian);
-    const y = centerY + radius * Math.sin(radian);
-    return { x, y, svgAngle };
-  };
-
-  // Format coordinates for display
-  const formatCoordinate = (coord: number | undefined) => {
-    if (coord === undefined) return null;
-    return coord.toFixed(6);
-  };
+  // Memoize plane style to avoid object allocation on every render
+  const planeStyle = useMemo(
+    () => ({
+      transform: `rotate(${displayAngle}deg)`,
+      transformOrigin: "center center" as const,
+    }),
+    [displayAngle]
+  );
 
   return (
     <div
-      className="relative rounded-full flight-dashboard-card afont-mono **:drop-shadow-lg **:drop-shadow-black/50"
+      className="relative rounded-full flight-dashboard-card font-mono drop-shadow-lg drop-shadow-black/50"
       style={{ width: size, height: size }}
     >
       <svg
@@ -117,67 +151,45 @@ export default function Compass({ heading, size = 240 }: CompassProps) {
           strokeWidth="1"
         />
 
-        {/* Minor tick marks (every 30 degrees) */}
-        {tickMarks.map((angle) => {
-          const { x, y, svgAngle } = getPosition(angle);
-          const isCardinal = angle % 90 === 0;
-          const markLength = isCardinal ? 12 : 6;
+        {/* Minor tick marks - rendered from precomputed geometry */}
+        {ticksGeometry.map((tick) => (
+          <line
+            key={`tick-${tick.angle}`}
+            x1={tick.x1}
+            y1={tick.y1}
+            x2={tick.x2}
+            y2={tick.y2}
+            stroke="rgba(255, 255, 255, 0.4)"
+            strokeWidth={tick.strokeWidth}
+          />
+        ))}
 
-          // Calculate mark endpoint (inner point)
-          const radian = (svgAngle * Math.PI) / 180;
-          const innerX = centerX + (radius - markLength) * Math.cos(radian);
-          const innerY = centerY + (radius - markLength) * Math.sin(radian);
-
-          return (
-            <line
-              key={`tick-${angle}`}
-              x1={innerX}
-              y1={innerY}
-              x2={x}
-              y2={y}
-              stroke="rgba(255, 255, 255, 0.4)"
-              strokeWidth={isCardinal ? 2 : 1}
-            />
-          );
-        })}
-
-        {/* Cardinal direction labels */}
-        {cardinalDirections.map((dir) => {
-          const { x, y } = getPosition(dir.angle);
-          const labelRadius = radius * 1.2;
-          const svgAngle = dir.angle - 90;
-          const radian = (svgAngle * Math.PI) / 180;
-          const labelX = centerX + labelRadius * Math.cos(radian);
-          const labelY = centerY + labelRadius * Math.sin(radian);
-
-          return (
-            <text
-              key={dir.label}
-              x={labelX}
-              y={labelY}
-              className={`${
-                dir.label === "N" ? "fill-primary" : "fill-muted/80"
-              } font-mono font-light`}
-              fontSize="10"
-              fontWeight={dir.label === "N" ? "bold" : "normal"}
-              textAnchor="middle"
-              dominantBaseline="middle"
-            >
-              {dir.label}
-            </text>
-          );
-        })}
+        {/* Cardinal direction labels - rendered from precomputed geometry */}
+        {labelsGeometry.map((label) => (
+          <text
+            key={label.label}
+            x={label.x}
+            y={label.y}
+            className={`${
+              label.label === "N" ? "fill-primary" : "fill-muted/80"
+            } font-mono font-light`}
+            fontSize="10"
+            fontWeight={label.label === "N" ? "bold" : "normal"}
+            textAnchor="middle"
+            dominantBaseline="middle"
+          >
+            {label.label}
+          </text>
+        ))}
       </svg>
 
       {/* Indicator - Lucide Icon with CSS rotation for reliable animation */}
       {/* Plane icon rotates to point in the direction of heading (0° = North) */}
       {/* Uses displayAngle (cumulative) instead of heading to handle 0°/360° boundary */}
+      {/* GPU-accelerated transform layer for smooth 60fps updates */}
       <div
-        className="absolute inset-0 pointer-events-none transition-transform duration-500 ease-out flex items-center justify-center"
-        style={{
-          transform: `rotate(${displayAngle}deg)`,
-          transformOrigin: "center center",
-        }}
+        className="absolute inset-0 pointer-events-none transition-transform duration-150 ease-linear motion-reduce:transition-none transform-gpu will-change-[transform] backface-hidden flex items-center justify-center"
+        style={planeStyle}
       >
         <SendHorizontal
           strokeWidth={1}

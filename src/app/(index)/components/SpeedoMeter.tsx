@@ -10,7 +10,6 @@ import { useMemo } from "react";
 import {
   speedToAngle,
   getSpeedColor,
-  getSpeedColorValue,
   generateSpeedMarks,
 } from "@/lib/speedometer-utils";
 import { MIN_SPEED, MAX_SPEED } from "@/lib/flight";
@@ -34,13 +33,7 @@ export default function SpeedoMeter({
     [flightSpeed, minSpeed, maxSpeed]
   );
 
-  // Generate speed marks
-  const speedMarks = useMemo(
-    () => generateSpeedMarks(minSpeed, maxSpeed, 10),
-    [minSpeed, maxSpeed]
-  );
-
-  // SVG constants
+  // SVG constants - computed once per size
   const centerX = size / 2;
   const centerY = size / 2;
   const radius = size * 0.33;
@@ -48,25 +41,65 @@ export default function SpeedoMeter({
   const needleWidth = 4; // Width of the triangle needle at its base
   const needleBaseOffset = 8; // Distance from center for the triangle base
 
-  // Calculate mark positions
-  // Needle starts pointing UP (-90° in SVG), then CSS rotates by speedToAngle
-  // So mark positions need the same transformation: -90° + speedToAngle
-  const getMarkPosition = (speed: number) => {
-    const rotationAngle = speedToAngle(speed, minSpeed, maxSpeed);
-    // SVG angle = needle's initial direction (-90° = up) + rotation angle
-    const svgAngle = -90 + rotationAngle;
-    const radian = (svgAngle * Math.PI) / 180;
-    const x = centerX + radius * Math.cos(radian);
-    const y = centerY + radius * Math.sin(radian);
-    return { x, y, svgAngle };
-  };
+  // Generate speed marks
+  const speedMarks = useMemo(
+    () => generateSpeedMarks(minSpeed, maxSpeed, 10),
+    [minSpeed, maxSpeed]
+  );
+
+  // Precompute all mark geometry once - keyed by size/minSpeed/maxSpeed (not flightSpeed)
+  // This avoids recalculating trig on every 60fps update
+  const marksGeometry = useMemo(() => {
+    const labelRadius = radius * 1.2;
+    return speedMarks.map((speed) => {
+      const rotationAngle = speedToAngle(speed, minSpeed, maxSpeed);
+      // SVG angle = needle's initial direction (-90° = up) + rotation angle
+      const svgAngle = -90 + rotationAngle;
+      const radian = (svgAngle * Math.PI) / 180;
+      
+      const isMajor = speed % 50 === 0;
+      const markLength = isMajor ? 12 : 6;
+      
+      // Outer point (on circle)
+      const x = centerX + radius * Math.cos(radian);
+      const y = centerY + radius * Math.sin(radian);
+      
+      // Inner point (mark endpoint)
+      const innerX = centerX + (radius - markLength) * Math.cos(radian);
+      const innerY = centerY + (radius - markLength) * Math.sin(radian);
+      
+      // Label position
+      const labelX = centerX + labelRadius * Math.cos(radian);
+      const labelY = centerY + labelRadius * Math.sin(radian);
+      
+      return {
+        speed,
+        isMajor,
+        x1: innerX,
+        y1: innerY,
+        x2: x,
+        y2: y,
+        labelX,
+        labelY,
+        strokeWidth: isMajor ? 2 : 1,
+      };
+    });
+  }, [size, minSpeed, maxSpeed, speedMarks, centerX, centerY, radius]);
 
   const speedColor = getSpeedColor(flightSpeed, minSpeed, maxSpeed);
-  // const speedColorValue = getSpeedColorValue(flightSpeed, minSpeed, maxSpeed);
+
+  // Memoize needle style to avoid object allocation on every render
+  const needleStyle = useMemo(
+    () => ({
+      transform: `rotate(${targetAngle}deg)`,
+      transformOrigin: "center center" as const,
+    }),
+    [targetAngle]
+  );
 
   return (
     <div
-      className="relative rounded-full flight-dashboard-card font-mono **:drop-shadow-lg **:drop-shadow-black/50"
+      className="relative rounded-full flight-dashboard-card font-mono drop-shadow-lg drop-shadow-black/50"
       style={{ width: size, height: size }}
     >
       <svg
@@ -93,50 +126,34 @@ export default function SpeedoMeter({
           strokeWidth="1"
         />
 
-        {/* Speed marks */}
-        {speedMarks.map((speed, index) => {
-          const { x, y, svgAngle } = getMarkPosition(speed);
-          const isMajor = speed % 50 === 0; // Show labels for every 50
-          const markLength = isMajor ? 12 : 6;
-
-          // Calculate mark endpoint (inner point) - same angle as outer point
-          const radian = (svgAngle * Math.PI) / 180;
-          const innerX = centerX + (radius - markLength) * Math.cos(radian);
-          const innerY = centerY + (radius - markLength) * Math.sin(radian);
-
-          // Calculate label position - extend further out from the mark
-          const labelRadius = radius * 1.2;
-          const labelX = centerX + labelRadius * Math.cos(radian);
-          const labelY = centerY + labelRadius * Math.sin(radian);
-
-          return (
-            <g key={`mark-${speed}`}>
-              {/* Mark line */}
-              <line
-                x1={innerX}
-                y1={innerY}
-                x2={x}
-                y2={y}
-                stroke="rgba(255, 255, 255, 0.4)"
-                strokeWidth={isMajor ? 2 : 1}
-              />
-              {/* Speed label for major marks */}
-              {isMajor && (
-                <text
-                  x={labelX}
-                  y={labelY}
-                  fill="rgba(255, 255, 255, 0.8)"
-                  fontSize="8"
-                  textAnchor="middle"
-                  dominantBaseline="middle"
-                  className="font-mono font-light"
-                >
-                  {speed}
-                </text>
-              )}
-            </g>
-          );
-        })}
+        {/* Speed marks - rendered from precomputed geometry */}
+        {marksGeometry.map((mark) => (
+          <g key={`mark-${mark.speed}`}>
+            {/* Mark line */}
+            <line
+              x1={mark.x1}
+              y1={mark.y1}
+              x2={mark.x2}
+              y2={mark.y2}
+              stroke="rgba(255, 255, 255, 0.4)"
+              strokeWidth={mark.strokeWidth}
+            />
+            {/* Speed label for major marks */}
+            {mark.isMajor && (
+              <text
+                x={mark.labelX}
+                y={mark.labelY}
+                fill="rgba(255, 255, 255, 0.8)"
+                fontSize="8"
+                textAnchor="middle"
+                dominantBaseline="middle"
+                className="font-mono font-light"
+              >
+                {mark.speed}
+              </text>
+            )}
+          </g>
+        ))}
 
         {/* Center dot */}
         <circle
@@ -148,12 +165,10 @@ export default function SpeedoMeter({
       </svg>
 
       {/* Needle - separate SVG with CSS rotation for reliable animation */}
+      {/* GPU-accelerated transform layer for smooth 60fps updates */}
       <div
-        className="absolute inset-0 pointer-events-none transition-transform duration-500 ease-out"
-        style={{
-          transform: `rotate(${targetAngle}deg)`,
-          transformOrigin: "center center",
-        }}
+        className="absolute inset-0 pointer-events-none transition-transform duration-150 ease-linear motion-reduce:transition-none transform-gpu will-change-[transform] backface-hidden"
+        style={needleStyle}
       >
         <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
           {/* Needle - thin triangular shape */}

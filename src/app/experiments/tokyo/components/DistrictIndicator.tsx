@@ -14,7 +14,7 @@ export default function DistrictIndicator({
   if (!district) return null;
 
   return (
-    <div className="w-4/5 max-w-7xl  h-[70svh] max-h-120 absolute top-30 md:top-26 left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
+    <div className="w-4/5 max-w-4xl h-[70svh] max-h-120 absolute top-30 md:top-26 left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
       <div className="text-white text-center space-y-1 *:text-shadow-lg *:text-shadow-black/50 *:animate-in *:slide-in-from-bottom *:animate-out *:fade-out">
         <h2 className="text-sm text-white/70 font-sans font-light uppercase">
           {district.name}
