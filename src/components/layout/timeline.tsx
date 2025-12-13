@@ -9,7 +9,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
 export interface TimelineItem {
@@ -82,8 +81,8 @@ const TimelineItemComponent = memo(function TimelineItemComponent({
 
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      initial={{ opacity: 0 }}
+      whileInView={{ opacity: 1 }}
       viewport={{ once: true, margin: "-100px" }}
       transition={{
         duration: 0.5,
@@ -131,7 +130,17 @@ const TimelineItemComponent = memo(function TimelineItemComponent({
       </div>
 
       {/* Content Section - Right Side */}
-      <div className="flex-1 pb-8 md:pb-12">
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{
+          duration: 0.5,
+          type: "spring",
+          delay: index * 0.1,
+        }}
+        className="flex-1 pb-8 md:pb-12"
+      >
         <Card className="hover:shadow-md transition-shadow duration-200">
           <CardHeader>
             <CardTitle className="text-lg md:text-xl">{item.title}</CardTitle>
@@ -142,7 +151,7 @@ const TimelineItemComponent = memo(function TimelineItemComponent({
             </CardDescription>
           </CardContent>
         </Card>
-      </div>
+      </motion.div>
     </motion.div>
   );
 });
