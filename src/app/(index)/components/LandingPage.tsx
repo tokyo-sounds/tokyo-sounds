@@ -44,7 +44,7 @@ export default function LandingPage({
     <div className="w-full h-full min-h-svh flex flex-col items-center justify-center bg-linear-to-tr from-orange-600 to-red-800 overflow-hidden">
       <Nav />
       <HomeHero>
-        <Card className="w-full max-w-sm absolute top-1/2 left-1/2 -translate-x-1/2 bg-transparent backdrop-blur-xs border-border/50 shadow-xl text-background/70 tracking-wider animate-in fade-in-0 slide-in-from-bottom duration-500">
+        <Card className="w-full max-w-sm absolute top-1/2 left-1/2 -translate-x-1/2 flight-dashboard-card backdrop-blur-xs border-border/50 shadow-xl text-background/70 tracking-wider animate-in fade-in-0 slide-in-from-bottom duration-500">
           <CardContent className="space-y-4 **:text-xs">
             <div className="space-y-2">
               <Label htmlFor="playerName">名前</Label>
@@ -56,6 +56,7 @@ export default function LandingPage({
                 placeholder="Enter your name (optional)"
                 maxLength={20}
                 className="w-full"
+                suppressHydrationWarning
               />
             </div>
 
