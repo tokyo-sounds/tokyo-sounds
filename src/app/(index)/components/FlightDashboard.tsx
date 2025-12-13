@@ -53,9 +53,6 @@ export default function FlightDashboard({
         heading={heading}
         pitch={pitch}
         roll={roll}
-        apiKey={mapsApiKey}
-        onTeleport={handleTeleport}
-        searchDisabled={demoState?.active}
         isGyroActive={gyroState.isActive}
         isGyroEnabled={gyroState.isEnabled}
         isGyroAvailable={gyroState.isAvailable}
