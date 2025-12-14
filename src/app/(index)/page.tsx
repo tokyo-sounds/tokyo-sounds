@@ -488,7 +488,7 @@ export default function TokyoPage() {
 
         {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
-        <AmbientBackgroundAudio cameraY={cameraY} enabled={started} />
+        <AmbientBackgroundAudio cameraY={cameraY} maxHeight={500} enabled={started} />
 
         <DebugMenu
           options={debugOptions}
