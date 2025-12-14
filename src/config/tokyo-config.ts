@@ -881,6 +881,9 @@ export function getDefaultPrompt(timeOfDay: TimeOfDay): string {
   }
 }
 
+// Maximum height for background ambient audio (meters)
+export const BACKGROUND_AMBIENT_MAX_HEIGHT = 400;
+
 // POI types to fetch from Places API for audio placement
 export const AUDIO_POI_TYPES = [
   "train_station",
@@ -956,7 +959,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.7105,
     alt: 25,
     src: "/audio/池袋/bilingual-train-annoucement.mp3",
-    volume: 0.7,
+    volume: 1.0,
     refDistance: 20,
     maxDistance: 300,
     loop: true,
@@ -1088,7 +1091,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.7731,
     alt: 25,
     src: "/audio/秋葉原/akihabara_train_departing.mp3",
-    volume: 0.7,
+    volume: 1.0,
     refDistance: 25,
     maxDistance: 350,
     loop: true,
@@ -1101,7 +1104,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.7735,
     alt: 25,
     src: "/audio/秋葉原/akihabara_train_entering.mp3",
-    volume: 0.7,
+    volume: 1.0,
     refDistance: 25,
     maxDistance: 350,
     loop: true,
@@ -1114,7 +1117,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.7728,
     alt: 25,
     src: "/audio/秋葉原/akihabara_train_entering2.mp3",
-    volume: 0.7,
+    volume: 1.0,
     refDistance: 25,
     maxDistance: 350,
     loop: true,
@@ -1127,7 +1130,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.7725,
     alt: 25,
     src: "/audio/秋葉原/akihabara_train_entering3.mp3",
-    volume: 0.7,
+    volume: 1.0,
     refDistance: 25,
     maxDistance: 350,
     loop: true,
@@ -1140,7 +1143,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.774,
     alt: 20,
     src: "/audio/秋葉原/gacha.mp3",
-    volume: 0.6,
+    volume: 0.8,
     refDistance: 15,
     maxDistance: 150,
     loop: true,
@@ -1155,7 +1158,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.7027,
     alt: 25,
     src: "/audio/原宿/harajuku_station.mp3",
-    volume: 0.7,
+    volume: 1.0,
     refDistance: 25,
     maxDistance: 350,
     loop: true,
@@ -1170,7 +1173,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.6656,
     alt: 25,
     src: "/audio/中野/中野站 东京 _ 中野站 北口前 90stereo_Freesound_[cut_12sec].mp3",
-    volume: 0.7,
+    volume: 1.0,
     refDistance: 25,
     maxDistance: 350,
     loop: true,
@@ -1183,7 +1186,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.6662,
     alt: 15,
     src: "/audio/中野/ramenya_slurping.mp3",
-    volume: 0.5,
+    volume: 0.8,
     refDistance: 10,
     maxDistance: 100,
     loop: true,
@@ -1198,7 +1201,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.7006,
     alt: 20,
     src: "/audio/tokyo-street.mp3",
-    volume: 0.4,
+    volume: 0.8,
     refDistance: 50,
     maxDistance: 500,
     loop: true,
@@ -1211,7 +1214,7 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     lng: 139.7016,
     alt: 20,
     src: "/audio/tokyo-street.mp3",
-    volume: 0.4,
+    volume: 0.8,
     refDistance: 50,
     maxDistance: 500,
     loop: true,
@@ -1394,36 +1397,36 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
     id: "afternoon",
     name: "Afternoon",
     nameJa: "昼",
-    sunElevation: 45,
-    sunAzimuth: 220, // Southwest
+    sunElevation: 60, // 太陽が地平線より下（真の夜）
+    sunAzimuth: 240, // 西
     sky: {
-      turbidity: 1.2, // より低い濁度で空をより青く
-      rayleigh: 1.2, // レイリー散乱を増やして青を強調
-      mieCoefficient: 0.005,
-      mieDirectionalG: 0.8,
+      turbidity: 2.0, // 夜間の大気はより濁っている
+      rayleigh: 0.5, // レイリー散乱を減らして暗く
+      mieCoefficient: 0.0001, // 太陽は見えない
+      mieDirectionalG: 0.9999,
     },
     ambient: {
-      intensity: 0.5, // より明るい環境光
-      color: "#e6f2ff", // わずかに青みがかった白
+      intensity: 0.1, // 非常に低い環境光（月明かりのみ）
+      color: "#1a1a2e", // 深い青紫
     },
     directional: {
-      intensity: 2.2, // わずかに強めの指向光
-      color: "#fff8e1", // わずかに暖かみのある白
+      intensity: 2, // 月明かり程度の弱い指向光
+      color: "#4a5568", // 冷たい青灰色（月の光）
     },
     hemisphere: {
-      skyColor: "#5B9BE5", // より鮮やかで明るい青（白くならない）
-      groundColor: "#8b7355",
-      intensity: 0.7, // より強い半球光
+      skyColor: "#0a0a1a", // 非常に暗い青黒の空
+      groundColor: "#000000", // 真っ黒な地面
+      intensity: 0.1, // 非常に弱い半球光
     },
     colorMultiplier: {
-      r: 1.0,
-      g: 1.0,
-      b: 1.05, // わずかに青を強調
+      r: 0.3, // 大幅に暗く、青みがかった色調
+      g: 0.4,
+      b: 0.6, // 青を強調
     },
     fog: {
-      color: "#7DB3E8", // より青みがかった霧色
-      near: 500,
-      far: 5000,
+      color: "#1a1a2e", // 深い青紫の霧
+      near: 100,
+      far: 2000,
     },
   },
   evening: {

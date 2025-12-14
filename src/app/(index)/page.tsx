@@ -10,7 +10,7 @@ import { Suspense, useRef, useState, useCallback, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 // Config
-import { TOKYO_CENTER, type District } from "@/config/tokyo-config";
+import { TOKYO_CENTER, type District, BACKGROUND_AMBIENT_MAX_HEIGHT } from "@/config/tokyo-config";
 import { DebugOptions } from "./type/FlightPageTypes";
 // Components
 import DashboardToggleButton from "./components/DashboardToggleButton";
@@ -488,7 +488,7 @@ export default function TokyoPage() {
 
         {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
-        <AmbientBackgroundAudio cameraY={cameraY} maxHeight={500} enabled={started} />
+        <AmbientBackgroundAudio cameraY={cameraY} maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT} enabled={started} />
 
         <DebugMenu
           options={debugOptions}

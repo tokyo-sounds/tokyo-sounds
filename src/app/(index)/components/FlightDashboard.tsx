@@ -8,6 +8,8 @@ import InformationContainer from "./InformationContainer";
 import TimeOfDayEffectsMenu from "./TimeOfDayEffectsMenu";
 import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { type PlaneControllerHandle } from "@/components/city/PlaneController";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 interface FlightDashboardProps {
   flightSpeed: number;
@@ -38,9 +40,6 @@ export default function FlightDashboard({
   pitch,
   roll,
   cameraY,
-  mapsApiKey,
-  handleTeleport,
-  demoState,
   gyroState,
   planeControllerRef,
   isMobile,
@@ -62,6 +61,18 @@ export default function FlightDashboard({
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <AttitudeIndicator pitch={pitch} roll={roll} cameraY={cameraY} />
       </div>
+      {cameraY < 100 && (
+        <Alert
+          variant="destructive"
+          className="absolute bottom-12 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-black/80 backdrop-blur-sm"
+        >
+          <AlertCircle className="size-4" />
+          <AlertTitle>地面接近警報</AlertTitle>
+          <AlertDescription>
+            プルアップ！飛行高度が低すぎます。墜落する危険性があります。高度を上げてください。
+          </AlertDescription>
+        </Alert>
+      )}
       <div className="hidden md:block absolute top-4 left-4">
         <InformationContainer
           operationManualOpen={operationManualOpen}
