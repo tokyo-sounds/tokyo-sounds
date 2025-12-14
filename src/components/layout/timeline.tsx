@@ -1,7 +1,7 @@
 "use client";
 
-import { memo, useMemo, useRef } from "react";
-import { motion, useScroll, useTransform, MotionValue } from "motion/react";
+import { memo, useMemo } from "react";
+import { motion } from "motion/react";
 import {
   Card,
   CardContent,
@@ -24,20 +24,21 @@ interface TimelineProps {
 }
 
 /**
- * Formats a date to a readable format (e.g., "January 15, 2024")
+ * 日付を年、月日を分離して返す
+ * 年と月日を別々のスタイルで表示するため
  */
-function formatDate(date: Date | string): string {
+function formatDate(date: Date | string): { year: string; monthDay: string } {
   const dateObj = typeof date === "string" ? new Date(date) : date;
 
   if (isNaN(dateObj.getTime())) {
-    return "Invalid Date";
+    return { year: "Invalid", monthDay: "Date" };
   }
 
-  return dateObj.toLocaleDateString("ja-JP", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
+  const year = String(dateObj.getFullYear());
+  const month = String(dateObj.getMonth() + 1);
+  const day = String(dateObj.getDate());
+
+  return { year, monthDay: `${month}月${day}日` };
 }
 
 /**
@@ -45,39 +46,12 @@ function formatDate(date: Date | string): string {
  */
 const TimelineItemComponent = memo(function TimelineItemComponent({
   item,
-  index,
   isLast,
-  totalItems,
-  scrollProgress,
 }: {
   item: TimelineItem;
-  index: number;
   isLast: boolean;
-  totalItems: number;
-  scrollProgress: MotionValue<number>;
 }) {
   const formattedDate = useMemo(() => formatDate(item.date), [item.date]);
-
-  // Calculate progress for this specific line segment
-  // Each segment fills based on its position in the timeline
-  const segmentProgress = useTransform(scrollProgress, (progress: number) => {
-    const totalSegments = totalItems - 1; // Number of line segments
-    if (totalSegments === 0) return 0;
-
-    const segmentStart = index / totalSegments;
-    const segmentEnd = (index + 1) / totalSegments;
-
-    if (progress <= segmentStart) return 0;
-    if (progress >= segmentEnd) return 1;
-
-    // Linear interpolation within this segment
-    return (progress - segmentStart) / (segmentEnd - segmentStart);
-  });
-
-  const progressHeight = useTransform(
-    segmentProgress,
-    (value: number) => `${value * 100}%`
-  );
 
   return (
     <motion.div
@@ -94,14 +68,21 @@ const TimelineItemComponent = memo(function TimelineItemComponent({
       <div className="flex-shrink-0 w-32 md:w-40">
         <div className="sticky top-4">
           <time
-            className="text-md md:text-xl font-medium text-white"
+            className="flex flex-col text-white"
             dateTime={
               typeof item.date === "string"
                 ? item.date
                 : item.date.toISOString()
             }
           >
-            {formattedDate}
+            {/* 年を第一行に表示 */}
+            <span className="text-4xl md:text-5xl font-light leading-tight">
+              {formattedDate.year}
+            </span>
+            {/* 月日を第二行に表示 */}
+            <span className="text-md md:text-lg font-thin tracking-widest leading-tight mt-1">
+              {formattedDate.monthDay}
+            </span>
           </time>
         </div>
       </div>
@@ -112,19 +93,7 @@ const TimelineItemComponent = memo(function TimelineItemComponent({
         <div className="relative z-10 flex items-center justify-center size-4 rounded-full bg-secondary border-3 border-white" />
         {/* Line extending down to next item */}
         {!isLast && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 w-1 bottom-0 bg-secondary border-secondary">
-            {/* Animated Progress Bar */}
-            <motion.div
-              className="absolute top-0 left-0 w-full bg-white origin-top"
-              style={{
-                height: progressHeight,
-              }}
-              transition={{
-                duration: 0.3,
-                ease: "easeOut",
-              }}
-            />
-          </div>
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 w-1 bottom-0 bg-secondary border-secondary" />
         )}
       </div>
 
@@ -163,25 +132,14 @@ TimelineItemComponent.displayName = "TimelineItemComponent";
  * Optimized for performance with memoization and viewport-based animations.
  */
 export function Timeline({ items, className }: TimelineProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // Track overall scroll progress of the entire timeline
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start end", "end start"],
-  });
-
   return (
-    <div ref={containerRef} className={cn("w-full", className)}>
+    <div className={cn("w-full", className)}>
       <div className="relative">
         {items.map((item, index) => (
           <TimelineItemComponent
             key={item.id || index}
             item={item}
-            index={index}
             isLast={index === items.length - 1}
-            totalItems={items.length}
-            scrollProgress={scrollYProgress}
           />
         ))}
       </div>
