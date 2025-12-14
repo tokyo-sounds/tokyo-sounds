@@ -1,33 +1,29 @@
-import AboutTabs from "./AboutTabs";
-import ConceptDescription from "./ConceptDescription";
-import MemberInro from "./MemberInro";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ArticleContainer from "@/components/layout/ArticleContainer";
-import { designConcepts, techConcepts, memberInro } from "@/lib/constraint";
-
+import designConcept from "@/docs/about-design-concept.json";
+import techStack from "@/docs/about-tech-stack.json";
+import memberList from "@/docs/about-member-list.json";
 const tabs = [
   {
-    label: "Tech",
-    value: "tech",
-    articles: techConcepts,
-  },
-  {
-    label: "Design",
+    label: "デザイン",
     value: "design",
-    articles: designConcepts,
+    articles: designConcept,
   },
   {
-    label: "Member",
+    label: "技術",
+    value: "tech",
+    articles: techStack,
+  },
+  {
+    label: "メンバー",
     value: "member",
-    articles: memberInro,
+    articles: memberList,
   },
 ];
 
 export default function AboutContainer() {
   return (
     <section className="w-full h-full flex flex-col items-center justify-center gap-8">
-      <h1 className="text-5xl font-black font-sans uppercase">About</h1>
-      <ConceptDescription />
       <Tabs defaultValue="design" className="w-full h-full">
         {/* <AboutTabs /> */}
         <TabsList className="w-full h-12 self-center">

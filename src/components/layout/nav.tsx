@@ -165,13 +165,13 @@ export default function Nav() {
                       <Button
                         asChild
                         size="icon"
-                        className="group size-12 rounded-full flight-dashboard-card shadow-lg hover:scale-110 hover:shadow-xl transition-all"
+                        className="group size-12 rounded-full flight-dashboard-card shadow-lg hover:scale-110 hover:shadow-xl transition-transform will-change-transform"
                         aria-label={link.label.ja}
                         role="menuitem"
                         onClick={handleItemClick}
                       >
                         <Link href={`/${link.slug}`}>
-                          <link.icon className="size-5 group-hover:text-accent" />
+                          <link.icon className="size-5" />
                           <span className="sr-only">{link.label.ja}</span>
                         </Link>
                       </Button>
@@ -207,7 +207,7 @@ export default function Nav() {
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <X className="size-6 group-hover:text-accent" />
+              <X className="size-6" />
             </motion.div>
           ) : (
             <motion.div
@@ -217,7 +217,7 @@ export default function Nav() {
               exit={{ rotate: -90, opacity: 0 }}
               transition={{ duration: 0.2 }}
             >
-              <MenuIcon className="size-6 group-hover:text-accent" />
+              <MenuIcon className="size-6" />
             </motion.div>
           )}
         </AnimatePresence>

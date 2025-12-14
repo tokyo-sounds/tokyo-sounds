@@ -5,21 +5,26 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ArrowLeft } from "lucide-react";
+import { SendHorizontal } from "lucide-react";
 
 export default function BackToHomeButton() {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <Button variant="outline" size="lg" className="group" asChild>
-          <Link href="/" className="flex items-center gap-2">
-            <ArrowLeft className="hidden md:block size-4 group-hover:-translate-x-1 transition-all" />
-            HOME
+        <Button
+          variant="outline"
+          size="lg"
+          className="group text-lg py-6 px-12 text-white bg-transparent hover:bg-accent/70"
+          asChild
+        >
+          <Link href="/">
+            <SendHorizontal className="size-4 mr-2 group-hover:translate-x-1 transition-all" />
+            <span>ホーム</span>
           </Link>
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>Go to Home</p>
+        <p>ホームに戻る</p>
       </TooltipContent>
     </Tooltip>
   );
