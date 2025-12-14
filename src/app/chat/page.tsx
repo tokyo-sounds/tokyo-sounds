@@ -29,7 +29,7 @@ export default function Page() {
   };
 
   return (
-    <CommonPageContainer>
+    <CommonPageContainer className="pt-8" innerClassName="bg-background rounded-3xl shadow-xl">
       <MessageContainer messages={messages} />
       <InputContainer handleSubmit={handleSubmit} status={status} />
     </CommonPageContainer>
