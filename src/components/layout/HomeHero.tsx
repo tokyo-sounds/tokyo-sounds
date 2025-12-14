@@ -3,7 +3,7 @@ import { App_Info } from "@/lib/constraint";
 
 export default function HomeHero({ children }: { children?: React.ReactNode }) {
   return (
-    <div className="relative h-svh w-full flex flex-col items-center justify-center bg-linear-to-tr from-orange-600 to-red-800 overflow-hidden">
+    <div className="absolute top-1/2 -translate-y-1/2 w-svw z-0">
       <TextHoverEffect text={App_Info.title} />
       {children}
     </div>

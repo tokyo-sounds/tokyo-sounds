@@ -116,7 +116,7 @@ const TimelineItemComponent = memo(function TimelineItemComponent({
           <div className="absolute top-4 left-1/2 -translate-x-1/2 w-1 bottom-0 bg-secondary border-secondary">
             {/* Animated Progress Bar */}
             <motion.div
-              className="absolute top-0 left-0 w-full rounded-full bg-white origin-top"
+              className="absolute top-0 left-0 w-full bg-white origin-top"
               style={{
                 height: progressHeight,
               }}
@@ -137,7 +137,6 @@ const TimelineItemComponent = memo(function TimelineItemComponent({
         transition={{
           duration: 0.5,
           type: "spring",
-          delay: index * 0.1,
         }}
         className="flex-1 pb-8 md:pb-12"
       >

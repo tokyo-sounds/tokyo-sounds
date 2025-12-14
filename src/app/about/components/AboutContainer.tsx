@@ -1,23 +1,20 @@
-import AboutTabs from "./AboutTabs";
-import ConceptDescription from "./ConceptDescription";
-import MemberInro from "./MemberInro";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ArticleContainer from "@/components/layout/ArticleContainer";
 import { designConcepts, techConcepts, memberInro } from "@/lib/constraint";
 
 const tabs = [
   {
-    label: "Tech",
+    label: "技術",
     value: "tech",
     articles: techConcepts,
   },
   {
-    label: "Design",
+    label: "デザイン",
     value: "design",
     articles: designConcepts,
   },
   {
-    label: "Member",
+    label: "メンバー",
     value: "member",
     articles: memberInro,
   },

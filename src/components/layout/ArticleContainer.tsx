@@ -12,13 +12,13 @@ export default function ArticleContainer({
   articles: articleProps[];
 }) {
   return (
-    <section className="w-full h-full flex flex-col gap-8 py-4 font-noto">
+    <section className="w-full h-full flex flex-col gap-8 py-4 font-noto text-primary-foreground">
       {children}
       {articles.map((article) => (
         <div key={article.title}>
-          <h3 className="text-3xl font-semibold mb-2">{article.title}</h3>
-          <h4 className="text-lg text-primary mb-4">{article.subtitle}</h4>
-          <p className="text-md font-light">{article.content}</p>
+          <h3 className="text-xl mb-1">{article.title}</h3>
+          <h4 className="text-md text-accent mb-4">{article.subtitle}</h4>
+          <p className="text-sm font-light">{article.content}</p>
         </div>
       ))}
     </section>

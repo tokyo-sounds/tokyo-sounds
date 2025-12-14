@@ -2,6 +2,7 @@ import { HomeIcon, InfoIcon, PlayIcon, MessageCircleQuestion, History } from "lu
 
 export const App_Info = {
   title: "Tokyo Sounds",
+  title_ja: "東京の音",
   subtitle: "Tokyo Sounds is a platform for creating and sharing sounds.",
   description: "Tokyo Sounds is a platform for creating and sharing sounds.",
   image: "./images/default.png",
