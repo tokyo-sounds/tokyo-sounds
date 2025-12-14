@@ -2,7 +2,6 @@
  * Tokyo Configuration
  * District definitions (station-centered with radii), Lyria prompts, and coordinate settings
  */
-import { LucideIcon } from "lucide-react";
 export const TOKYO_CENTER = {
   lat: 35.6762,
   lng: 139.6503,
@@ -53,7 +52,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Intense neon-soaked electronic, pulsing Shinjuku nightlife energy, vibrant synth leads, bustling izakaya atmosphere, electric Tokyo night fever",
     color: "#ff00ff",
-    descriptionJa: "日本最大の繁華街、都庁展望台から富士山も見える！ネオン輝く不夜城の魅力",
+    descriptionJa:
+      "日本最大の繁華街、都庁展望台から富士山も見える！ネオン輝く不夜城の魅力",
   },
   {
     id: "shibuya",
@@ -68,7 +68,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "High-energy J-pop dance beats, Shibuya 109 shopping fever, youthful electronic anthems, crowded crossing excitement, vibrant nighttime fashion scene",
     color: "#00ffff",
-    descriptionJa: "若者文化の発信地、世界一忙しいスクランブル交差点で東京の鼓動を感じよう",
+    descriptionJa:
+      "若者文化の発信地、世界一忙しいスクランブル交差点で東京の鼓動を感じよう",
   },
   {
     id: "tokyo",
@@ -83,7 +84,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Dramatic orchestral swells, rush hour energy, powerful brass and strings, busy station announcements, evening commuter symphony",
     color: "#dc143c",
-    descriptionJa: "赤レンガの歴史ある駅、大正時代の美しい建築が復元された丸の内のシンボル",
+    descriptionJa:
+      "赤レンガの歴史ある駅、大正時代の美しい建築が復元された丸の内のシンボル",
   },
   {
     id: "ikebukuro",
@@ -98,7 +100,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Intense arcade game soundtrack, blazing chiptune energy, anime battle theme vibes, crowded game center excitement, Ikebukuro night fever",
     color: "#ffaa00",
-    descriptionJa: "アニメ・ゲームの聖地、サンシャイン60の展望台は緑あふれる空中公園に変身",
+    descriptionJa:
+      "アニメ・ゲームの聖地、サンシャイン60の展望台は緑あふれる空中公園に変身",
   },
   {
     id: "ginza",
@@ -113,7 +116,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Swinging jazz ensemble, lively Ginza cocktail hour, energetic saxophone solos, bustling upscale nightlife, champagne celebration vibes",
     color: "#ffd700",
-    descriptionJa: "高級ブランド街、1872年の大火後に誕生したレンガ街が今も輝く洗練の銀座",
+    descriptionJa:
+      "高級ブランド街、1872年の大火後に誕生したレンガ街が今も輝く洗練の銀座",
   },
   {
     id: "akihabara",
@@ -128,7 +132,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Maximum chiptune intensity, blazing Akihabara electric night, anime opening theme energy, crowded maid cafe excitement, neon sensory overload",
     color: "#ff6b6b",
-    descriptionJa: "電気街・オタク文化のメッカ、最新ガジェットから懐かしのゲーム機まで揃う聖地",
+    descriptionJa:
+      "電気街・オタク文化のメッカ、最新ガジェットから懐かしのゲーム機まで揃う聖地",
   },
   {
     id: "asakusa",
@@ -143,7 +148,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively matsuri festival drums, energetic Asakusa night market, cheerful shamisen melodies, lantern-lit celebration, traditional Tokyo nightlife",
     color: "#8b4513",
-    descriptionJa: "浅草寺と下町情緒、東京最古の寺で江戸時代の風情を今に伝える伝統の街",
+    descriptionJa:
+      "浅草寺と下町情緒、東京最古の寺で江戸時代の風情を今に伝える伝統の街",
   },
   {
     id: "roppongi",
@@ -158,7 +164,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Peak-time club bangers, Roppongi nightclub fever, driving house beats, international party energy, VIP lounge excitement",
     color: "#9400d3",
-    descriptionJa: "国際的なナイトライフ、六本木ヒルズの展望台から東京タワーと街を一望できる",
+    descriptionJa:
+      "国際的なナイトライフ、六本木ヒルズの展望台から東京タワーと街を一望できる",
   },
   {
     id: "shinagawa",
@@ -173,7 +180,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Exciting Shinkansen departure energy, busy platform rush, dramatic travel anticipation, evening business class atmosphere, gateway to adventure",
     color: "#20b2aa",
-    descriptionJa: "新幹線の玄関口、品川水族館や天王洲の運河でビジネスとレジャーが融合",
+    descriptionJa:
+      "新幹線の玄関口、品川水族館や天王洲の運河でビジネスとレジャーが融合",
   },
   {
     id: "ueno",
@@ -188,7 +196,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively Ameyoko market energy, bustling shitamachi nightlife, cheerful vendor calls, nostalgic evening atmosphere, old Tokyo charm",
     color: "#228b22",
-    descriptionJa: "上野公園とアメ横、パンダで有名な動物園と博物館が集まる文化の宝庫",
+    descriptionJa:
+      "上野公園とアメ横、パンダで有名な動物園と博物館が集まる文化の宝庫",
   },
   {
     id: "harajuku",
@@ -203,7 +212,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Ultra-kawaii pop explosion, Takeshita street maximum energy, colorful fashion parade beats, sweet electronic candy rush, Harajuku night sparkle",
     color: "#ff69b4",
-    descriptionJa: "カワイイ文化の聖地、竹下通りで週末にはコスプレイヤーが集まる若者の楽園",
+    descriptionJa:
+      "カワイイ文化の聖地、竹下通りで週末にはコスプレイヤーが集まる若者の楽園",
   },
   {
     id: "ebisu",
@@ -218,7 +228,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively gastropub jazz, Ebisu craft beer celebration, upbeat fusion grooves, sophisticated dinner party energy, trendy Tokyo nightlife",
     color: "#daa520",
-    descriptionJa: "おしゃれなガストロパブ街、恵比寿ビール発祥の地でクラフトビールとジャズを楽しむ",
+    descriptionJa:
+      "おしゃれなガストロパブ街、恵比寿ビール発祥の地でクラフトビールとジャズを楽しむ",
   },
   {
     id: "okubo",
@@ -233,7 +244,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively Asian street food festival energy, bustling Korean and Thai restaurant atmosphere, vibrant multicultural nightlife, diverse community celebration, warm evening gathering vibes",
     color: "#ff8c00",
-    descriptionJa: "多国籍料理が楽しめる、韓国・タイなどアジア各国の本格料理が味わえる国際色豊かな街",
+    descriptionJa:
+      "多国籍料理が楽しめる、韓国・タイなどアジア各国の本格料理が味わえる国際色豊かな街",
   },
   {
     id: "shin-okubo",
@@ -248,7 +260,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "High-energy K-pop dance beats, Shin-Okubo Korea town nightlife explosion, vibrant K-POP club energy, crowded Korean restaurant excitement, electric Seoul-in-Tokyo night fever",
     color: "#ff1493",
-    descriptionJa: "韓国タウン、K-POPグッズや韓国料理が満載！東京にいながらソウル気分を味わえる",
+    descriptionJa:
+      "韓国タウン、K-POPグッズや韓国料理が満載！東京にいながらソウル気分を味わえる",
   },
   {
     id: "nakano",
@@ -263,7 +276,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Intense anime opening theme energy, blazing Nakano Broadway nightlife, maximum chiptune intensity, crowded game center and anime shop excitement, nostalgic otaku night adventure",
     color: "#9370db",
-    descriptionJa: "中野ブロードウェイ、アニメ・アイドルグッズの宝庫！オタク文化の聖地として名高い",
+    descriptionJa:
+      "中野ブロードウェイ、アニメ・アイドルグッズの宝庫！オタク文化の聖地として名高い",
   },
   {
     id: "yoyogi",
@@ -278,7 +292,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively park gathering energy, Yoyogi evening festival vibes, nature sounds blending with urban beats, Meiji Shrine lantern-lit atmosphere, vibrant green space nightlife",
     color: "#32cd32",
-    descriptionJa: "代々木公園と明治神宮、都会の真ん中で自然と都市が調和する緑のオアシス",
+    descriptionJa:
+      "代々木公園と明治神宮、都会の真ん中で自然と都市が調和する緑のオアシス",
   },
   {
     id: "takanawa-gateway",
@@ -293,7 +308,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Dynamic electronic pulse, Takanawa Gateway night energy, vibrant LED-lit architecture, bustling modern transit hub, electric future city atmosphere",
     color: "#00ced1",
-    descriptionJa: "最新の駅、2020年開業の未来型アーキテクチャが光る次世代の交通ハブ",
+    descriptionJa:
+      "最新の駅、2020年開業の未来型アーキテクチャが光る次世代の交通ハブ",
   },
   {
     id: "tamachi",
@@ -308,7 +324,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively business district energy, Tamachi evening rush, vibrant student nightlife, bustling office and campus fusion, dynamic professional-social atmosphere",
     color: "#4169e1",
-    descriptionJa: "慶應大学とビジネス街、学生の活気とビジネスマンの知性が交わる知的エリア",
+    descriptionJa:
+      "慶應大学とビジネス街、学生の活気とビジネスマンの知性が交わる知的エリア",
   },
   {
     id: "hamamatsucho",
@@ -323,7 +340,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Sophisticated business district nightlife, Hamamatsucho evening elegance, vibrant corporate social scene, Tokyo Tower illuminated atmosphere, refined urban night energy",
     color: "#1e90ff",
-    descriptionJa: "東京タワー近く、増上寺と現代ビルが共存する歴史と未来が交わるエレガントな街",
+    descriptionJa:
+      "東京タワー近く、増上寺と現代ビルが共存する歴史と未来が交わるエレガントな街",
   },
   {
     id: "shimbashi",
@@ -338,7 +356,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively izakaya nightlife explosion, Shimbashi salaryman celebration, vibrant after-work drinking culture, crowded traditional alley atmosphere, electric working-class Tokyo night",
     color: "#cd5c5c",
-    descriptionJa: "サラリーマンの街、新橋の居酒屋横丁で終電まで飲み明かす昭和の風情が残る",
+    descriptionJa:
+      "サラリーマンの街、新橋の居酒屋横丁で終電まで飲み明かす昭和の風情が残る",
   },
   {
     id: "yurakucho",
@@ -353,7 +372,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Sophisticated business district nightlife, Yurakucho evening elegance, vibrant upscale dining scene, luxury shopping district energy, polished metropolitan night",
     color: "#b8860b",
-    descriptionJa: "銀座に隣接、有楽町マリオンや日比谷公園が近く上品なビジネス街として知られる",
+    descriptionJa:
+      "銀座に隣接、有楽町マリオンや日比谷公園が近く上品なビジネス街として知られる",
   },
   {
     id: "kanda",
@@ -368,7 +388,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively bookstore and electronics energy, Kanda evening intellectual buzz, vibrant traditional izakaya scene, classic Tokyo culture nightlife, scholarly urban night",
     color: "#8b008b",
-    descriptionJa: "古書店街と電子部品街、神田古書祭で知られる学問と技術が融合する知的エリア",
+    descriptionJa:
+      "古書店街と電子部品街、神田古書祭で知られる学問と技術が融合する知的エリア",
   },
   {
     id: "okachimachi",
@@ -383,7 +404,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively Ameyoko market energy, Okachimachi evening shopping fever, vibrant street food celebration, bustling traditional market nightlife, electric market atmosphere",
     color: "#ff4500",
-    descriptionJa: "アメ横の活気、戦後の闇市から発展した庶民的な商店街で活気あふれる市場を体験",
+    descriptionJa:
+      "アメ横の活気、戦後の闇市から発展した庶民的な商店街で活気あふれる市場を体験",
   },
   {
     id: "uguisudani",
@@ -398,7 +420,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Nostalgic traditional district evening, Uguisudani ryokan street atmosphere, gentle historic neighborhood nightlife, peaceful traditional Tokyo night, serene heritage ambiance",
     color: "#6b8e23",
-    descriptionJa: "旅館街の情緒、上野と谷中を結ぶ静かな下町で歴史ある旅館が並ぶ風情ある街",
+    descriptionJa:
+      "旅館街の情緒、上野と谷中を結ぶ静かな下町で歴史ある旅館が並ぶ風情ある街",
   },
   {
     id: "nippori",
@@ -413,7 +436,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively fabric district energy, Nippori evening shopping buzz, vibrant traditional market nightlife, nostalgic shitamachi street culture, artisan district celebration",
     color: "#d2691e",
-    descriptionJa: "布地問屋街、谷中銀座の「夕日階段」が有名な下町散策にぴったりの懐かしい街",
+    descriptionJa:
+      "布地問屋街、谷中銀座の「夕日階段」が有名な下町散策にぴったりの懐かしい街",
   },
   {
     id: "tabata",
@@ -428,7 +452,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Peaceful residential evening, Tabata neighborhood night, gentle local community atmosphere, serene family district nightlife, calm residential Tokyo night",
     color: "#9acd32",
-    descriptionJa: "閑静な住宅街、公園に囲まれた家族向けの落ち着いた住環境が自慢のエリア",
+    descriptionJa:
+      "閑静な住宅街、公園に囲まれた家族向けの落ち着いた住環境が自慢のエリア",
   },
   {
     id: "komagome",
@@ -443,7 +468,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Peaceful garden district evening, Komagome neighborhood night, gentle traditional garden atmosphere, serene residential nightlife, calm elegant Tokyo night",
     color: "#2e8b57",
-    descriptionJa: "六義園の庭園、江戸時代の大名庭園が残る上品な住宅街で四季の美しさを楽しむ",
+    descriptionJa:
+      "六義園の庭園、江戸時代の大名庭園が残る上品な住宅街で四季の美しさを楽しむ",
   },
   {
     id: "sugamo",
@@ -458,7 +484,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively traditional shopping street energy, Sugamo evening shopping buzz, vibrant Jizo-dori nightlife, nostalgic community celebration, traditional Tokyo night",
     color: "#a0522d",
-    descriptionJa: "地蔵通り商店街、赤いパンツが縁起物として人気！お年寄りに優しい下町の温かさ",
+    descriptionJa:
+      "地蔵通り商店街、赤いパンツが縁起物として人気！お年寄りに優しい下町の温かさ",
   },
   {
     id: "otsuka",
@@ -473,7 +500,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Peaceful residential evening, Otsuka neighborhood night, gentle local shopping district atmosphere, serene community nightlife, calm authentic Tokyo night",
     color: "#bc8f8f",
-    descriptionJa: "都電荒川線沿い、路面電車が走る懐かしい下町で温かみあるコミュニティが息づく",
+    descriptionJa:
+      "都電荒川線沿い、路面電車が走る懐かしい下町で温かみあるコミュニティが息づく",
   },
   {
     id: "mejiro",
@@ -488,7 +516,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Peaceful upscale residential evening, Mejiro neighborhood night, gentle refined district atmosphere, serene academic community nightlife, calm elegant Tokyo night",
     color: "#c0c0c0",
-    descriptionJa: "学習院大学、皇室ゆかりの学び舎がある上品な住宅街で落ち着いた雰囲気を満喫",
+    descriptionJa:
+      "学習院大学、皇室ゆかりの学び舎がある上品な住宅街で落ち着いた雰囲気を満喫",
   },
   {
     id: "takadanobaba",
@@ -503,7 +532,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively student district nightlife, Takadanobaba evening student energy, vibrant affordable dining scene, crowded student entertainment, electric youthful Tokyo night",
     color: "#ff6347",
-    descriptionJa: "早稲田大学、学生街の活気あふれる高田馬場でリーズナブルなグルメと青春を満喫",
+    descriptionJa:
+      "早稲田大学、学生街の活気あふれる高田馬場でリーズナブルなグルメと青春を満喫",
   },
   {
     id: "meguro",
@@ -518,7 +548,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Sophisticated upscale residential evening, Meguro neighborhood night, vibrant high-end dining scene, elegant gallery district nightlife, polished metropolitan night",
     color: "#4682b4",
-    descriptionJa: "目黒川の桜、春には桜のトンネルが美しいおしゃれな住宅街で高級グルメも楽しめる",
+    descriptionJa:
+      "目黒川の桜、春には桜のトンネルが美しいおしゃれな住宅街で高級グルメも楽しめる",
   },
   {
     id: "gotanda",
@@ -533,7 +564,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively business and residential evening, Gotanda nightlife energy, vibrant diverse dining scene, bustling commercial district night, dynamic Tokyo neighborhood night",
     color: "#708090",
-    descriptionJa: "ビジネスと住宅の融合、多様な飲食店が集まる五反田で働く人と住む人が交わる街",
+    descriptionJa:
+      "ビジネスと住宅の融合、多様な飲食店が集まる五反田で働く人と住む人が交わる街",
   },
   {
     id: "osaki",
@@ -548,7 +580,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Sophisticated business district evening, Osaki corporate night energy, vibrant office district nightlife, modern business center atmosphere, polished commercial night",
     color: "#2f4f4f",
-    descriptionJa: "オフィスビルが林立、大崎駅周辺に集まる現代的なビジネス街で未来の東京を体感",
+    descriptionJa:
+      "オフィスビルが林立、大崎駅周辺に集まる現代的なビジネス街で未来の東京を体感",
   },
   {
     id: "ochanomizu",
@@ -563,7 +596,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively musical instrument district energy, Ochanomizu evening music scene, vibrant university nightlife, academic and musical fusion, intellectual Tokyo night",
     color: "#9932cc",
-    descriptionJa: "楽器店街、御茶ノ水は楽器の聖地！大学と音楽が融合する知的で文化的なエリア",
+    descriptionJa:
+      "楽器店街、御茶ノ水は楽器の聖地！大学と音楽が融合する知的で文化的なエリア",
   },
   {
     id: "suidobashi",
@@ -578,7 +612,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively Tokyo Dome energy, Suidobashi evening event excitement, vibrant sports and concert atmosphere, dynamic entertainment hub nightlife, electric event district night",
     color: "#c71585",
-    descriptionJa: "東京ドーム、プロ野球やコンサートが楽しめるスポーツとエンタメの一大エンターテインメント拠点",
+    descriptionJa:
+      "東京ドーム、プロ野球やコンサートが楽しめるスポーツとエンタメの一大エンターテインメント拠点",
   },
   {
     id: "iidabashi",
@@ -593,7 +628,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Sophisticated French quarter evening, Iidabashi Kagurazaka nightlife, vibrant European dining scene, elegant cultural district night, refined Tokyo charm night",
     color: "#da70d6",
-    descriptionJa: "神楽坂のフランス風、石畳の坂道に料亭が並ぶ「東京の小パリ」と呼ばれるおしゃれな街",
+    descriptionJa:
+      "神楽坂のフランス風、石畳の坂道に料亭が並ぶ「東京の小パリ」と呼ばれるおしゃれな街",
   },
   {
     id: "ichigaya",
@@ -608,7 +644,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Peaceful moat district evening, Ichigaya recreational night, gentle fishing and leisure atmosphere, serene historical district nightlife, calm unique Tokyo night",
     color: "#87ceeb",
-    descriptionJa: "お堀と釣り場、市ヶ谷の堀で釣りができる珍しい都市のオアシスでリラックス",
+    descriptionJa:
+      "お堀と釣り場、市ヶ谷の堀で釣りができる珍しい都市のオアシスでリラックス",
   },
   {
     id: "yotsuya",
@@ -623,7 +660,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Sophisticated mixed district evening, Yotsuya neighborhood night, vibrant historical and modern fusion, elegant residential nightlife, refined Tokyo district night",
     color: "#b0c4de",
-    descriptionJa: "赤坂御所近く、四ツ谷怪談で知られる歴史と現代が融合する上品な住宅エリア",
+    descriptionJa:
+      "赤坂御所近く、四ツ谷怪談で知られる歴史と現代が融合する上品な住宅エリア",
   },
   {
     id: "shinanomachi",
@@ -638,7 +676,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Peaceful historical district evening, Shinanomachi neighborhood night, gentle cultural heritage atmosphere, serene memorial district nightlife, calm refined Tokyo night",
     color: "#778899",
-    descriptionJa: "明治記念館、静かな文化の街で歴史を感じながら上品な住宅街の雰囲気を満喫",
+    descriptionJa:
+      "明治記念館、静かな文化の街で歴史を感じながら上品な住宅街の雰囲気を満喫",
   },
   {
     id: "sendagaya",
@@ -653,7 +692,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively National Stadium energy, Sendagaya evening sports excitement, vibrant athletic district nightlife, dynamic sports hub atmosphere, electric sports center night",
     color: "#ff7f50",
-    descriptionJa: "国立競技場、オリンピックの舞台となったスポーツの聖地で熱い戦いを観戦できる",
+    descriptionJa:
+      "国立競技場、オリンピックの舞台となったスポーツの聖地で熱い戦いを観戦できる",
   },
   {
     id: "koenji",
@@ -668,7 +708,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively vintage fashion and music energy, Koenji evening indie scene, vibrant thrift shop nightlife, bohemian district celebration, electric alternative Tokyo night",
     color: "#ba55d3",
-    descriptionJa: "古着と音楽文化、ライブハウスや古着店が集まるボヘミアンな雰囲気のアンダーグラウンド文化の拠点",
+    descriptionJa:
+      "古着と音楽文化、ライブハウスや古着店が集まるボヘミアンな雰囲気のアンダーグラウンド文化の拠点",
   },
   {
     id: "asagaya",
@@ -683,7 +724,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively Tanabata festival energy, Asagaya evening shopping street buzz, vibrant nostalgic market nightlife, Showa-era celebration, traditional Tokyo culture night",
     color: "#ffb6c1",
-    descriptionJa: "七夕祭り、阿佐ヶ谷で毎年盛大に開催される七夕まつりで昭和レトロな商店街を満喫",
+    descriptionJa:
+      "七夕祭り、阿佐ヶ谷で毎年盛大に開催される七夕まつりで昭和レトロな商店街を満喫",
   },
   {
     id: "ogikubo",
@@ -698,7 +740,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively ramen shop district energy, Ogikubo evening dining scene, vibrant traditional noodle culture, literary neighborhood nightlife, authentic Tokyo dining night",
     color: "#dda0dd",
-    descriptionJa: "ラーメン店街、文豪たちが愛した荻窪でラーメン激戦区と文学の香りが交わる街",
+    descriptionJa:
+      "ラーメン店街、文豪たちが愛した荻窪でラーメン激戦区と文学の香りが交わる街",
   },
   {
     id: "kichijoji",
@@ -713,7 +756,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively most livable district energy, Kichijoji evening shopping and dining, vibrant park and urban fusion, perfect balance nightlife, ideal Tokyo living night",
     color: "#98fb98",
-    descriptionJa: "井の頭公園、住みたい街No.1の吉祥寺で自然と都市が調和する理想的なライフスタイルを体験",
+    descriptionJa:
+      "井の頭公園、住みたい街No.1の吉祥寺で自然と都市が調和する理想的なライフスタイルを体験",
   },
   {
     id: "tokyo-tower",
@@ -728,7 +772,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Romantic tower illumination, Tokyo Tower evening magic, warm nostalgic lights, iconic landmark night glow, timeless Tokyo romance atmosphere",
     color: "#dc143c",
-    descriptionJa: "東京のシンボル、1958年完成の赤白タワー！展望台から見る夜景は絶景、恋人の聖地としても有名",
+    descriptionJa:
+      "東京のシンボル、1958年完成の赤白タワー！展望台から見る夜景は絶景、恋人の聖地としても有名",
   },
   {
     id: "tokyo-skytree",
@@ -743,7 +788,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Dynamic LED illumination, Skytree evening spectacle, vibrant modern tower lights, futuristic landmark night energy, electric Tokyo skyline atmosphere",
     color: "#00bfff",
-    descriptionJa: "世界一高い電波塔、634メートルの高さから見る東京は圧巻！天気が良ければ富士山も見える絶景スポット",
+    descriptionJa:
+      "世界一高い電波塔、634メートルの高さから見る東京は圧巻！天気が良ければ富士山も見える絶景スポット",
   },
   {
     id: "imperial-palace",
@@ -758,7 +804,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Elegant palace evening atmosphere, Imperial Palace sunset serenity, gentle traditional district night, peaceful royal grounds, refined Tokyo heritage night",
     color: "#2e8b57",
-    descriptionJa: "天皇陛下のお住まい、都心の真ん中にある緑豊かなオアシス！二重橋と桜のコラボが美しい",
+    descriptionJa:
+      "天皇陛下のお住まい、都心の真ん中にある緑豊かなオアシス！二重橋と桜のコラボが美しい",
   },
   {
     id: "ueno-park",
@@ -773,7 +820,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Lively park evening energy, Ueno Park cultural nightlife, vibrant museum district atmosphere, cherry blossom lantern ambiance, dynamic park celebration",
     color: "#ff69b4",
-    descriptionJa: "日本初の公園、パンダで有名な動物園と博物館が集まる文化の宝庫！春の桜は圧巻の美しさ",
+    descriptionJa:
+      "日本初の公園、パンダで有名な動物園と博物館が集まる文化の宝庫！春の桜は圧巻の美しさ",
   },
   {
     id: "meiji-shrine",
@@ -788,7 +836,8 @@ export const TOKYO_DISTRICTS: District[] = [
     promptEvening:
       "Peaceful shrine evening atmosphere, Meiji Shrine lantern-lit serenity, gentle traditional night ambiance, serene forest sanctuary, calm spiritual Tokyo night",
     color: "#228b22",
-    descriptionJa: "都心の森、原宿の喧騒から一歩入れば別世界！日本最大の木造鳥居と伝統的な結婚式が見られる",
+    descriptionJa:
+      "都心の森、原宿の喧騒から一歩入れば別世界！日本最大の木造鳥居と伝統的な結婚式が見られる",
   },
 ];
 
@@ -1348,31 +1397,31 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
     sunElevation: 45,
     sunAzimuth: 220, // Southwest
     sky: {
-      turbidity: 2,
-      rayleigh: 1,
+      turbidity: 1.2, // より低い濁度で空をより青く
+      rayleigh: 1.2, // レイリー散乱を増やして青を強調
       mieCoefficient: 0.005,
       mieDirectionalG: 0.8,
     },
     ambient: {
-      intensity: 0.6,
-      color: "#ffffff",
+      intensity: 0.5, // より明るい環境光
+      color: "#e6f2ff", // わずかに青みがかった白
     },
     directional: {
-      intensity: 2.0,
-      color: "#fff5e6",
+      intensity: 2.2, // わずかに強めの指向光
+      color: "#fff8e1", // わずかに暖かみのある白
     },
     hemisphere: {
-      skyColor: "#87CEEB",
+      skyColor: "#5B9BE5", // より鮮やかで明るい青（白くならない）
       groundColor: "#8b7355",
-      intensity: 0.5,
+      intensity: 0.7, // より強い半球光
     },
     colorMultiplier: {
       r: 1.0,
       g: 1.0,
-      b: 1.0,
+      b: 1.05, // わずかに青を強調
     },
     fog: {
-      color: "#a8c8e8",
+      color: "#7DB3E8", // より青みがかった霧色
       near: 500,
       far: 5000,
     },
@@ -1403,7 +1452,7 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
       intensity: 0.25,
     },
     colorMultiplier: {
-      r: 1.4, // Very strong orange/red bake
+      r: 1.8, // Very strong orange/red bake
       g: 0.6,
       b: 0.35,
     },
