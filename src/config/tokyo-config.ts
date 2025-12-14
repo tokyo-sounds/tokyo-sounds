@@ -1394,36 +1394,36 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
     id: "afternoon",
     name: "Afternoon",
     nameJa: "昼",
-    sunElevation: 45,
-    sunAzimuth: 220, // Southwest
+    sunElevation: 60, // 太陽が地平線より下（真の夜）
+    sunAzimuth: 240, // 西
     sky: {
-      turbidity: 1.2, // より低い濁度で空をより青く
-      rayleigh: 1.2, // レイリー散乱を増やして青を強調
-      mieCoefficient: 0.005,
-      mieDirectionalG: 0.8,
+      turbidity: 2.0, // 夜間の大気はより濁っている
+      rayleigh: 0.5, // レイリー散乱を減らして暗く
+      mieCoefficient: 0.0001, // 太陽は見えない
+      mieDirectionalG: 0.9999,
     },
     ambient: {
-      intensity: 0.5, // より明るい環境光
-      color: "#e6f2ff", // わずかに青みがかった白
+      intensity: 0.1, // 非常に低い環境光（月明かりのみ）
+      color: "#1a1a2e", // 深い青紫
     },
     directional: {
-      intensity: 2.2, // わずかに強めの指向光
-      color: "#fff8e1", // わずかに暖かみのある白
+      intensity: 2, // 月明かり程度の弱い指向光
+      color: "#4a5568", // 冷たい青灰色（月の光）
     },
     hemisphere: {
-      skyColor: "#5B9BE5", // より鮮やかで明るい青（白くならない）
-      groundColor: "#8b7355",
-      intensity: 0.7, // より強い半球光
+      skyColor: "#0a0a1a", // 非常に暗い青黒の空
+      groundColor: "#000000", // 真っ黒な地面
+      intensity: 0.1, // 非常に弱い半球光
     },
     colorMultiplier: {
-      r: 1.0,
-      g: 1.0,
-      b: 1.05, // わずかに青を強調
+      r: 0.3, // 大幅に暗く、青みがかった色調
+      g: 0.4,
+      b: 0.6, // 青を強調
     },
     fog: {
-      color: "#7DB3E8", // より青みがかった霧色
-      near: 500,
-      far: 5000,
+      color: "#1a1a2e", // 深い青紫の霧
+      near: 100,
+      far: 2000,
     },
   },
   evening: {
