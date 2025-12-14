@@ -212,19 +212,23 @@ export function useFlight({
       }
 
       switch (e.code) {
-        case "KeyS":
+        case "KeyW":
+        case "ArrowUp":
           keysRef.current.pitchUp = true;
           keysRef.current.forward = true;
           break;
-        case "KeyW":
+        case "KeyS":
+        case "ArrowDown":
           keysRef.current.pitchDown = true;
           keysRef.current.backward = true;
           break;
         case "KeyA":
+        case "ArrowLeft":
           keysRef.current.bankLeft = true;
           keysRef.current.left = true;
           break;
         case "KeyD":
+        case "ArrowRight":
           keysRef.current.bankRight = true;
           keysRef.current.right = true;
           break;
@@ -261,21 +265,25 @@ export function useFlight({
 
       switch (e.code) {
         case "KeyW":
-          keysRef.current.pitchDown = false;
-          keysRef.current.backward = false;
-          pitchHoldTimeRef.current = 0;
-          break;
-        case "KeyS":
+        case "ArrowUp":
           keysRef.current.pitchUp = false;
           keysRef.current.forward = false;
           pitchHoldTimeRef.current = 0;
           break;
+        case "KeyS":
+        case "ArrowDown":
+          keysRef.current.pitchDown = false;
+          keysRef.current.backward = false;
+          pitchHoldTimeRef.current = 0;
+          break;
         case "KeyA":
+        case "ArrowLeft":
           keysRef.current.bankLeft = false;
           keysRef.current.left = false;
           if (!keysRef.current.bankRight) bankHoldTimeRef.current = 0;
           break;
         case "KeyD":
+        case "ArrowRight":
           keysRef.current.bankRight = false;
           keysRef.current.right = false;
           if (!keysRef.current.bankLeft) bankHoldTimeRef.current = 0;
@@ -477,7 +485,7 @@ export function useFlight({
         return;
       }
 
-      let rawPitchInput = (keys.pitchDown ? 1 : 0) - (keys.pitchUp ? 1 : 0);
+      let rawPitchInput = (keys.pitchUp ? 1 : 0) - (keys.pitchDown ? 1 : 0);
       let rawBankInput = (keys.bankRight ? 1 : 0) - (keys.bankLeft ? 1 : 0);
 
       if (

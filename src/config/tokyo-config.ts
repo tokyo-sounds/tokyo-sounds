@@ -881,6 +881,9 @@ export function getDefaultPrompt(timeOfDay: TimeOfDay): string {
   }
 }
 
+// Maximum height for background ambient audio (meters)
+export const BACKGROUND_AMBIENT_MAX_HEIGHT = 400;
+
 // POI types to fetch from Places API for audio placement
 export const AUDIO_POI_TYPES = [
   "train_station",
