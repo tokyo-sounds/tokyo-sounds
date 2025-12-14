@@ -484,7 +484,7 @@ export default function TokyoPage() {
           />
         </div>
 
-        {currentDistrict && <DistrictIndicator district={currentDistrict} />}
+        {currentDistrict && cameraY < 900 && <DistrictIndicator district={currentDistrict} />}
 
         {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
