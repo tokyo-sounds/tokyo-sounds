@@ -1,4 +1,10 @@
-import { HomeIcon, InfoIcon, PlayIcon, MessageCircleQuestion, History } from "lucide-react";
+import {
+  HomeIcon,
+  InfoIcon,
+  PlayIcon,
+  MessageCircleQuestion,
+  History,
+} from "lucide-react";
 
 export const App_Info = {
   title: "Tokyo Sounds",
@@ -167,22 +173,22 @@ export const common = {
 // Navigation text
 export const navigationLinks = [
   {
-    label: {ja: "ホーム", en: "Home"},
+    label: { ja: "ホーム", en: "Home" },
     slug: "",
     icon: HomeIcon,
   },
   {
-    label: {ja: "コンセプト", en: "About"},
+    label: { ja: "コンセプト", en: "About" },
     slug: "about",
     icon: InfoIcon,
   },
   {
-    label: {ja: "開発履歴", en: "Past Versions"},
+    label: { ja: "開発履歴", en: "Past Versions" },
     slug: "patch",
     icon: History,
   },
   {
-    label: {ja: "ヘルプ", en: "Help"},
+    label: { ja: "ヘルプ", en: "Help" },
     slug: "chat",
     icon: MessageCircleQuestion,
   },
@@ -369,83 +375,5 @@ export const MEMBER_LIST = [
     image: "./images/default.png",
     portfolio: "./images/default.png",
     github: "https://github.com/default",
-  },
-];
-
-export const designConcepts = [
-  {
-    title: "視覚イメージ",
-    subtitle: "紙飛行機が紡ぐ自由な旅",
-    content:
-      "『音で巡る東京』というコンセプトを表現するため、「紙飛行機」を主な視覚イメージとして採用いたしました。ユーザーは東京の空を自由に舞う紙飛行機となり、自由で軽やか、そして心地よい感覚を体験していただけます。",
-  },
-  {
-    title: "色彩設計",
-    subtitle: "温かみのある色彩が奏でる東京の物語",
-    content:
-      "色彩においては、「オレンジ」と「イエロー」を主なトーンとして用いています。これらは暖色系であり、温かみと安らぎ、そして心地よさを感じていただけると同時に、東京の活力と情熱を象徴しています。",
-  },
-  {
-    title: "ユーザー体験",
-    subtitle: "没入感のある探索体験",
-    content:
-      "ユーザー体験の面では、「飛翔」と「3D街景」を核となる要素として、ユーザーが東京の街並みや路地裏を自由に探索できるようにすることで、あたかも実際にその場にいるかのような、臨場感あふれる体験を実現しています。",
-  },
-];
-
-export const techConcepts = [
-  {
-    title: "3D都市ビジュアライゼーション",
-    subtitle: "Google Tiles + Three.js",
-    content:
-      "Google Tiles統合を活用し、Three.jsによって東京の3D都市景観を再現します。",
-  },
-  {
-    title: "リアルタイム生成音声",
-    subtitle: "Gemini Lyria Realtime API",
-    content: "Gemini Lyria Realtime APIによる音声生成",
-  },
-];
-
-export const memberInro = [
-  {
-    title: "ナカガワ　ハンター",
-    subtitle: "Full Stack Developer",
-    content: "Google Tiles 統合、Three.js 実装、音声生成API連携",
-  },
-  {
-    title: "ゼブカーン",
-    subtitle: "Full Stack Developer",
-    content: "Google Tiles 統合、Three.js 実装",
-  },
-  {
-    title: "リュウ　チャーウェイ",
-    subtitle: "Project Manager",
-    content: "プロジェクトマネージャー、フロントエンド開発、コード管理",
-  },
-  {
-    title: "鍾承翰",
-    subtitle: "3D Artist",
-    content: "3Dモデリング",
-  },
-  {
-    title: "有薗　柊哉",
-    subtitle: "Frontend Developer",
-    content: "発表資料の作成、プレゼンテーション、業者との連絡",
-  },
-  {
-    title: "李　澤彬",
-    subtitle: "Designer",
-    content: "グラフィックデザイン",
-  },
-  {
-    title: "李　簡行",
-    subtitle: "Audio Samppler",
-    content: "東京の街頭の日常音を収録・整理",
-  },
-  {
-    title: "李　森",
-    subtitle: "Designer",
-    content: "チラシデザイン",
   },
 ];

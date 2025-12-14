@@ -1,7 +1,7 @@
 import AboutContainer from "./components/AboutContainer";
 import CommonPageContainer from "@/components/layout/CommonPageContainer";
 import SectionHeader from "@/components/layout/SectionHeader";
-import aboutSectionHeader from "../../../docs/about-section-header.json";
+import aboutSectionHeader from "@/docs/about-section-header.json";
 
 export default function AboutPage() {
   return (

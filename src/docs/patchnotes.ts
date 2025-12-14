@@ -1,4 +1,6 @@
-export const patchNotes = [
+import { type TimelineItem } from "@/components/layout/timeline";
+
+export const patchNotes: TimelineItem[] = [
   {
     id: "v0.0.1",
     date: new Date("2025-09-22"),

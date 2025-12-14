@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import CommonPageContainer from "@/components/layout/CommonPageContainer";
-import { Timeline, type TimelineItem } from "@/components/layout/timeline";
-import { patchNotes } from "../../../docs/patchnotes";
+import { Timeline } from "@/components/layout/timeline";
+import { patchNotes } from "@/docs/patchnotes";
 import SectionHeader from "@/components/layout/SectionHeader";
-import patchSectionHeader from "../../../docs/patch-section-header.json";
+import patchSectionHeader from "@/docs/patch-section-header.json";
 export default function PatchPage() {
   return (
     <CommonPageContainer>
