@@ -935,6 +935,150 @@ export const TOKYO_DISTRICTS: District[] = [
     descriptionJa:
       "歌舞伎町の真ん中のオアシス！小泉八雲（ラフカディオ・ハーン）終焉の地でギリシャ風デザインが特徴",
   },
+  {
+    id: "sumida",
+    name: "Sumida",
+    nameJa: "墨田区",
+    center: { lat: 35.6964, lng: 139.7931 }, // Ryogoku Station
+    radius: 1000,
+    prompt:
+      "Traditional sumo wrestling district energy, Ryogoku Kokugikan arena atmosphere, historic Edo culture vibes, traditional festival sounds, nostalgic shitamachi heritage",
+    promptMorning:
+      "Gentle sumo district awakening, peaceful Ryogoku dawn, soft traditional ambiance, quiet historic neighborhood morning, serene Edo culture atmosphere",
+    promptEvening:
+      "Lively sumo district evening, Ryogoku Kokugikan excitement, vibrant traditional festival energy, bustling historic district nightlife, electric sumo culture night",
+    color: "#8b4513",
+    descriptionJa:
+      "相撲の聖地・両国！国技館で大相撲を観戦できる。隅田川花火大会は江戸時代から続く夏の風物詩で約2万発が打ち上がる",
+  },
+  {
+    id: "koto",
+    name: "Koto",
+    nameJa: "江東区",
+    center: { lat: 35.6588, lng: 139.7964 }, // Toyosu Station
+    radius: 800,
+    prompt:
+      "Modern waterfront district energy, Toyosu Market fresh seafood atmosphere, cutting-edge urban development, waterway and canal vibes, contemporary Tokyo innovation",
+    promptMorning:
+      "Gentle waterfront awakening, peaceful Toyosu dawn, soft market preparation sounds, quiet modern district morning, serene canal-side atmosphere",
+    promptEvening:
+      "Lively waterfront evening, Toyosu Market night energy, vibrant modern development atmosphere, bustling canal district nightlife, electric contemporary Tokyo night",
+    color: "#00bfff",
+    descriptionJa:
+      "豊洲市場とお台場、築地から移転した日本最大級の魚市場！お台場は1853年の黒船来航を防ぐために作られた人工島が起源",
+  },
+  {
+    id: "ota",
+    name: "Ota",
+    nameJa: "大田区",
+    center: { lat: 35.5624, lng: 139.716 }, // Kamata Station
+    radius: 1000,
+    prompt:
+      "Airport gateway district energy, Haneda Airport proximity vibes, manufacturing and industry atmosphere, traditional working-class neighborhood, authentic Tokyo suburbia",
+    promptMorning:
+      "Gentle airport district awakening, peaceful Kamata dawn, soft industrial ambient, quiet working neighborhood morning, serene gateway atmosphere",
+    promptEvening:
+      "Lively airport district evening, Kamata nightlife energy, vibrant manufacturing district atmosphere, bustling working-class neighborhood, authentic Tokyo suburbia night",
+    color: "#708090",
+    descriptionJa:
+      "羽田空港の玄関口、東京23区で最も面積が広い！町工場が多く「ものづくりの街」として知られ、職人技が光るエリア",
+  },
+  {
+    id: "setagaya",
+    name: "Setagaya",
+    nameJa: "世田谷区",
+    center: { lat: 35.6436, lng: 139.6684 }, // Sangenjaya Station
+    radius: 1000,
+    prompt:
+      "Residential district charm, trendy Sangenjaya cafe culture, youthful neighborhood energy, relaxed suburban atmosphere, comfortable Tokyo living vibes",
+    promptMorning:
+      "Gentle residential awakening, peaceful Sangenjaya dawn, soft cafe district ambiance, quiet neighborhood morning, serene suburban atmosphere",
+    promptEvening:
+      "Lively residential evening, Sangenjaya nightlife energy, vibrant cafe and bar scene, bustling trendy neighborhood, comfortable Tokyo living night",
+    color: "#90ee90",
+    descriptionJa:
+      "東京23区で最も人口が多い！三軒茶屋は若者に人気のエリア。駒沢オリンピック公園は1964年東京五輪の会場で今もスポーツの聖地",
+  },
+  {
+    id: "itabashi",
+    name: "Itabashi",
+    nameJa: "板橋区",
+    center: { lat: 35.7515, lng: 139.709 }, // Itabashi Station
+    radius: 1000,
+    prompt:
+      "Quiet residential district atmosphere, traditional neighborhood vibes, peaceful suburban living, local community energy, authentic Tokyo suburbia",
+    promptMorning:
+      "Serene residential awakening, peaceful Itabashi dawn, gentle neighborhood ambiance, quiet suburban morning, tranquil community atmosphere",
+    promptEvening:
+      "Peaceful residential evening, Itabashi neighborhood night, gentle local community atmosphere, serene suburban nightlife, calm authentic Tokyo night",
+    color: "#9acd32",
+    descriptionJa:
+      "板橋という名前の橋が区名の由来！江戸時代から続く歴史ある街。東京大仏がある乗蓮寺は高さ13メートルの巨大な仏像で有名",
+  },
+  {
+    id: "nerima",
+    name: "Nerima",
+    nameJa: "練馬区",
+    center: { lat: 35.7356, lng: 139.651 }, // Nerima Station
+    radius: 1000,
+    prompt:
+      "Anime production district energy, green residential area atmosphere, agricultural heritage vibes, creative industry hub, peaceful suburban Tokyo living",
+    promptMorning:
+      "Gentle anime district awakening, peaceful Nerima dawn, soft creative industry ambiance, quiet green neighborhood morning, serene suburban atmosphere",
+    promptEvening:
+      "Lively anime district evening, Nerima creative energy, vibrant residential nightlife, bustling green suburbia, peaceful creative Tokyo night",
+    color: "#98fb98",
+    descriptionJa:
+      "アニメ制作会社が多く「アニメの聖地」！農地も多く都市農業が盛ん。としまえん跡地には新しいテーマパークが建設中で注目を集める",
+  },
+  {
+    id: "adachi",
+    name: "Adachi",
+    nameJa: "足立区",
+    center: { lat: 35.7504, lng: 139.8049 }, // Kitasenju Station
+    radius: 1000,
+    prompt:
+      "Major transportation hub energy, Kitasenju station district atmosphere, traditional shitamachi vibes, bustling commuter center, authentic Tokyo working-class district",
+    promptMorning:
+      "Gentle transportation hub awakening, peaceful Kitasenju dawn, soft commuter station ambiance, quiet traditional district morning, serene hub atmosphere",
+    promptEvening:
+      "Lively transportation hub evening, Kitasenju nightlife energy, vibrant commuter district atmosphere, bustling traditional neighborhood, electric working-class Tokyo night",
+    color: "#ff8c00",
+    descriptionJa:
+      "北千住は5路線が交わる交通の要所！江戸時代から宿場町として栄えた歴史ある街。毎年7月の足立の花火大会は約1万3000発が打ち上がる夏の風物詩",
+  },
+  {
+    id: "katsushika",
+    name: "Katsushika",
+    nameJa: "葛飾区",
+    center: { lat: 35.7433, lng: 139.8476 }, // Kameari Station
+    radius: 1000,
+    prompt:
+      "Nostalgic movie district energy, Shibamata Taishakuten temple atmosphere, traditional shitamachi culture, film heritage vibes, authentic Tokyo nostalgia",
+    promptMorning:
+      "Gentle nostalgic district awakening, peaceful Kameari dawn, soft traditional temple ambiance, quiet movie heritage morning, serene shitamachi atmosphere",
+    promptEvening:
+      "Lively nostalgic district evening, Kameari traditional nightlife, vibrant movie heritage energy, bustling shitamachi culture, authentic Tokyo nostalgia night",
+    color: "#ffa500",
+    descriptionJa:
+      "映画「男はつらいよ」の舞台・柴又！寅さん記念館で映画の世界を体感できる。亀有駅前には「こち亀」の両さんの銅像が立つ",
+  },
+  {
+    id: "edogawa",
+    name: "Edogawa",
+    nameJa: "江戸川区",
+    center: { lat: 35.7064, lng: 139.868 }, // Koiwa Station
+    radius: 1000,
+    prompt:
+      "Riverside residential district atmosphere, Edogawa River natural beauty, family-friendly neighborhood vibes, peaceful suburban living, green Tokyo suburbia",
+    promptMorning:
+      "Serene riverside awakening, peaceful Koiwa dawn, gentle river ambiance, quiet residential morning, tranquil natural atmosphere",
+    promptEvening:
+      "Peaceful riverside evening, Koiwa neighborhood night, gentle family-friendly atmosphere, serene residential nightlife, calm green Tokyo suburbia night",
+    color: "#87ceeb",
+    descriptionJa:
+      "江戸川と自然豊かな環境、葛西臨海公園には水族館や観覧車があり家族連れに人気！江戸川花火大会は毎年8月に開催され約1万4000発が打ち上がる",
+  },
 ];
 
 // Basic district data - lightweight, loaded immediately
