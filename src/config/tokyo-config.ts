@@ -92,7 +92,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Shinjuku",
     nameJa: "新宿",
     center: { lat: 35.6896, lng: 139.7006 }, // Shinjuku Station
-    radius: 800,
+    radius: 1200,
     prompt:
       "Pulsing electronic beats, neon-soaked synths, late night Tokyo energy, Shinjuku nightlife vibes, dense urban soundscape with distant train announcements",
     promptMorning:
@@ -108,7 +108,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Shibuya",
     nameJa: "渋谷",
     center: { lat: 35.658, lng: 139.7016 }, // Shibuya Station
-    radius: 700,
+    radius: 1200,
     prompt:
       "Trendy J-pop influenced electronic, upbeat and youthful, Shibuya crossing energy, fashion district vibes, bright and colorful synth melodies",
     promptMorning:
@@ -140,7 +140,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Ikebukuro",
     nameJa: "池袋",
     center: { lat: 35.7295, lng: 139.7109 }, // Ikebukuro Station
-    radius: 700,
+    radius: 800,
     prompt:
       "Energetic arcade game inspired music, anime soundtrack vibes, playful chiptune elements, otaku culture energy, Ikebukuro night adventure",
     promptMorning:
@@ -156,7 +156,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Ginza",
     nameJa: "銀座",
     center: { lat: 35.6717, lng: 139.7649 }, // Ginza Station
-    radius: 500,
+    radius: 600,
     prompt:
       "Sophisticated jazz lounge, upscale metropolitan elegance, smooth saxophone melodies, luxury shopping district ambiance, refined Tokyo nightlife",
     promptMorning:
@@ -172,7 +172,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Akihabara",
     nameJa: "秋葉原",
     center: { lat: 35.6984, lng: 139.7731 }, // Akihabara Station
-    radius: 500,
+    radius: 600,
     prompt:
       "Intense 8-bit chiptune energy, electronic otaku paradise, anime theme song influences, bustling tech district sounds, neon electric atmosphere",
     promptMorning:
@@ -220,7 +220,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Shinagawa",
     nameJa: "品川",
     center: { lat: 35.6284, lng: 139.7387 }, // Shinagawa Station
-    radius: 600,
+    radius: 700,
     prompt:
       "Shinkansen station energy, travel hub ambiance, modern transit sounds, business traveler atmosphere, gateway to Tokyo vibes",
     promptMorning:
@@ -252,7 +252,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Harajuku",
     nameJa: "原宿",
     center: { lat: 35.6702, lng: 139.7027 }, // Harajuku Station
-    radius: 400,
+    radius: 600,
     prompt:
       "Kawaii pop culture beats, colorful Takeshita street energy, youth fashion vibes, sweet and playful electronic melodies, Meiji shrine serenity nearby",
     promptMorning:
@@ -268,7 +268,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Ebisu",
     nameJa: "恵比寿",
     center: { lat: 35.6467, lng: 139.7101 }, // Ebisu Station
-    radius: 400,
+    radius: 500,
     prompt:
       "Trendy gastropub atmosphere, craft beer and jazz fusion, sophisticated nightlife, Yebisu garden place elegance, relaxed urban vibes",
     promptMorning:
@@ -316,7 +316,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Nakano",
     nameJa: "中野",
     center: { lat: 35.7056, lng: 139.6656 }, // Nakano Station
-    radius: 600,
+    radius: 1200,
     prompt:
       "Retro anime soundtrack vibes, Nakano Broadway otaku paradise, nostalgic chiptune and synthwave fusion, vintage game center energy, classic anime culture atmosphere",
     promptMorning:
@@ -780,7 +780,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Ogikubo",
     nameJa: "荻窪",
     center: { lat: 35.7048, lng: 139.6201 }, // Ogikubo Station
-    radius: 600,
+    radius: 800,
     prompt:
       "Ramen shop district literary atmosphere, traditional noodle culture, bookish neighborhood vibes, authentic local dining scene, cultural Tokyo suburbia",
     promptMorning:
@@ -796,7 +796,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Kichijoji",
     nameJa: "吉祥寺",
     center: { lat: 35.7031, lng: 139.5795 }, // Kichijoji Station
-    radius: 700,
+    radius: 800,
     prompt:
       "Most livable Tokyo district, Inokashira Park natural beauty, vibrant shopping streets, perfect urban-nature balance, ideal Tokyo living atmosphere",
     promptMorning:
@@ -876,7 +876,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Meiji Shrine",
     nameJa: "明治神宮",
     center: { lat: 35.6764, lng: 139.6993 }, // Meiji Shrine
-    radius: 600,
+    radius: 800,
     prompt:
       "Sacred forest sanctuary, traditional Shinto shrine atmosphere, peaceful nature escape in the city, spiritual tranquility, massive torii gates, serene temple grounds",
     promptMorning:
@@ -940,7 +940,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Sumida",
     nameJa: "墨田区",
     center: { lat: 35.6964, lng: 139.7931 }, // Ryogoku Station
-    radius: 1000,
+    radius: 1800,
     prompt:
       "Traditional sumo wrestling district energy, Ryogoku Kokugikan arena atmosphere, historic Edo culture vibes, traditional festival sounds, nostalgic shitamachi heritage",
     promptMorning:
@@ -956,7 +956,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Koto",
     nameJa: "江東区",
     center: { lat: 35.6588, lng: 139.7964 }, // Toyosu Station
-    radius: 800,
+    radius: 1800,
     prompt:
       "Modern waterfront district energy, Toyosu Market fresh seafood atmosphere, cutting-edge urban development, waterway and canal vibes, contemporary Tokyo innovation",
     promptMorning:
@@ -972,7 +972,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Ota",
     nameJa: "大田区",
     center: { lat: 35.5624, lng: 139.716 }, // Kamata Station
-    radius: 1000,
+    radius: 2000,
     prompt:
       "Airport gateway district energy, Haneda Airport proximity vibes, manufacturing and industry atmosphere, traditional working-class neighborhood, authentic Tokyo suburbia",
     promptMorning:
@@ -988,7 +988,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Setagaya",
     nameJa: "世田谷区",
     center: { lat: 35.6436, lng: 139.6684 }, // Sangenjaya Station
-    radius: 1000,
+    radius: 2000,
     prompt:
       "Residential district charm, trendy Sangenjaya cafe culture, youthful neighborhood energy, relaxed suburban atmosphere, comfortable Tokyo living vibes",
     promptMorning:
@@ -1004,7 +1004,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Itabashi",
     nameJa: "板橋区",
     center: { lat: 35.7515, lng: 139.709 }, // Itabashi Station
-    radius: 1000,
+    radius: 2000,
     prompt:
       "Quiet residential district atmosphere, traditional neighborhood vibes, peaceful suburban living, local community energy, authentic Tokyo suburbia",
     promptMorning:
@@ -1020,7 +1020,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Nerima",
     nameJa: "練馬区",
     center: { lat: 35.7356, lng: 139.651 }, // Nerima Station
-    radius: 1000,
+    radius: 1500,
     prompt:
       "Anime production district energy, green residential area atmosphere, agricultural heritage vibes, creative industry hub, peaceful suburban Tokyo living",
     promptMorning:
@@ -1036,7 +1036,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Adachi",
     nameJa: "足立区",
     center: { lat: 35.7504, lng: 139.8049 }, // Kitasenju Station
-    radius: 1000,
+    radius: 1800,
     prompt:
       "Major transportation hub energy, Kitasenju station district atmosphere, traditional shitamachi vibes, bustling commuter center, authentic Tokyo working-class district",
     promptMorning:
@@ -1052,7 +1052,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Katsushika",
     nameJa: "葛飾区",
     center: { lat: 35.7433, lng: 139.8476 }, // Kameari Station
-    radius: 1000,
+    radius: 1800,
     prompt:
       "Nostalgic movie district energy, Shibamata Taishakuten temple atmosphere, traditional shitamachi culture, film heritage vibes, authentic Tokyo nostalgia",
     promptMorning:
@@ -1068,7 +1068,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Edogawa",
     nameJa: "江戸川区",
     center: { lat: 35.7064, lng: 139.868 }, // Koiwa Station
-    radius: 1000,
+    radius: 1500,
     prompt:
       "Riverside residential district atmosphere, Edogawa River natural beauty, family-friendly neighborhood vibes, peaceful suburban living, green Tokyo suburbia",
     promptMorning:
@@ -1078,6 +1078,22 @@ export const TOKYO_DISTRICTS: District[] = [
     color: "#87ceeb",
     descriptionJa:
       "江戸川と自然豊かな環境、葛西臨海公園には水族館や観覧車があり家族連れに人気！江戸川花火大会は毎年8月に開催され約1万4000発が打ち上がる",
+  },
+  {
+    id: "minato",
+    name: "Minato",
+    nameJa: "港区",
+    center: { lat: 35.6581, lng: 139.7516 }, // Minato Ward Center (Toranomon area)
+    radius: 1500,
+    prompt:
+      "International business district elegance, embassy district sophistication, high-rise towers and luxury atmosphere, cosmopolitan Tokyo energy, refined metropolitan vibes",
+    promptMorning:
+      "Serene business district awakening, peaceful Minato dawn, gentle embassy district ambiance, quiet high-rise morning, tranquil international atmosphere",
+    promptEvening:
+      "Sophisticated international district evening, Minato nightlife elegance, vibrant embassy and business scene, bustling luxury district, refined cosmopolitan Tokyo night",
+    color: "#9400d3",
+    descriptionJa:
+      "国際的なビジネス街、大使館が多く外国人居住者も多い！東京タワーや六本木ヒルズがあり、夜景が美しい高層ビルが立ち並ぶ洗練されたエリア",
   },
 ];
 
