@@ -73,7 +73,7 @@ export default function FlightDashboard({
           </AlertDescription>
         </Alert>
       )}
-      <div className="hidden md:block absolute top-4 left-4">
+      <div className="hidden md:block absolute top-18 left-4">
         <InformationContainer
           operationManualOpen={operationManualOpen}
           setOperationManualOpen={setOperationManualOpen}
