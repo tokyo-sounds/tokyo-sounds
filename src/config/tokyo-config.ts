@@ -24,20 +24,68 @@ export const ALTITUDE_BOUNDS = {
 // Earth radius in meters (WGS84)
 export const EARTH_RADIUS = 6378137;
 
-export interface District {
+// Basic district data - loaded immediately (lightweight, ~100 bytes each)
+// Only contains data needed for distance calculations
+export interface DistrictBasic {
   id: string;
   name: string;
   nameJa: string;
   center: { lat: number; lng: number }; // station/landmark coordinates
   radius: number; // district radius in meters
+  color: string;
+}
+
+// Detailed district data - loaded on demand (heavyweight, ~800-1200 bytes each)
+// Contains prompts and descriptions, only loaded when district is nearby
+export interface DistrictDetails {
   prompt: string; // default/afternoon prompt
   promptMorning?: string; // calm, tranquil morning variant
   promptEvening?: string; // energetic, lively evening variant
-  color: string;
   descriptionJa: string; // 40-50 character Japanese description
 }
 
+// Full district - combines basic + details (for backward compatibility)
+export interface District extends DistrictBasic {
+  prompt: string;
+  promptMorning?: string;
+  promptEvening?: string;
+  descriptionJa: string;
+}
+
+// Cache for loaded district details (lazy loading)
+// Details are already in memory, but we cache them for faster access
+const districtDetailsCache = new Map<string, DistrictDetails>();
+
+// Load district details on demand (synchronous - data is already in memory)
+// Only loads details when district is nearby (weight > threshold)
+export function getDistrictDetails(id: string): DistrictDetails {
+  if (districtDetailsCache.has(id)) {
+    return districtDetailsCache.get(id)!;
+  }
+
+  const details = DISTRICT_DETAILS[id];
+  if (!details) {
+    throw new Error(`District details not found: ${id}`);
+  }
+
+  districtDetailsCache.set(id, details);
+  return details;
+}
+
+// Get full district data (combines basic + details)
+export function getDistrictFull(id: string): District {
+  const basic = TOKYO_DISTRICTS_BASIC.find((d) => d.id === id);
+  if (!basic) {
+    throw new Error(`District not found: ${id}`);
+  }
+
+  const details = getDistrictDetails(id);
+  return { ...basic, ...details };
+}
+
 // Districts centered on actual train station coordinates with realistic radii
+// NOTE: This is kept for backward compatibility but uses lazy loading internally
+// For better performance, use TOKYO_DISTRICTS_BASIC for calculations
 export const TOKYO_DISTRICTS: District[] = [
   {
     id: "shinjuku",
@@ -821,7 +869,7 @@ export const TOKYO_DISTRICTS: District[] = [
       "Lively park evening energy, Ueno Park cultural nightlife, vibrant museum district atmosphere, cherry blossom lantern ambiance, dynamic park celebration",
     color: "#ff69b4",
     descriptionJa:
-      "日本初の公園、パンダで有名な動物園と博物館が集まる文化の宝庫！春の桜は圧巻の美しさ",
+      "日本初の公園！西郷隆盛像は有名な待ち合わせスポット。パンダで有名な動物園と博物館が集まる文化の宝庫",
   },
   {
     id: "meiji-shrine",
@@ -839,7 +887,84 @@ export const TOKYO_DISTRICTS: District[] = [
     descriptionJa:
       "都心の森、原宿の喧騒から一歩入れば別世界！日本最大の木造鳥居と伝統的な結婚式が見られる",
   },
+  {
+    id: "shinjuku-gyoen",
+    name: "Shinjuku Gyoen",
+    nameJa: "新宿御苑",
+    center: { lat: 35.6852, lng: 139.7101 }, // Shinjuku Gyoen
+    radius: 800,
+    prompt:
+      "Tranquil imperial garden atmosphere, diverse garden styles fusion, peaceful urban oasis, traditional Japanese and European garden harmony, serene nature escape",
+    promptMorning:
+      "Gentle garden awakening, peaceful Shinjuku Gyoen dawn, soft bird songs and rustling leaves, quiet traditional garden meditation, serene imperial garden morning",
+    promptEvening:
+      "Peaceful garden evening ambiance, Shinjuku Gyoen sunset serenity, gentle garden paths illuminated, tranquil imperial garden night, serene nature escape",
+    color: "#90ee90",
+    descriptionJa:
+      "皇室庭園の一般公開！明治時代に日本初のプラタナス約200本を植えた歴史ある美しい庭園、3つの庭園様式が楽しめる",
+  },
+  {
+    id: "akasaka-palace",
+    name: "Akasaka Palace",
+    nameJa: "赤坂離宮",
+    center: { lat: 35.6781, lng: 139.7264 }, // Akasaka Palace
+    radius: 500,
+    prompt:
+      "Grand neo-baroque palace elegance, royal reception atmosphere, luxurious architectural splendor, refined ceremonial ambiance, stately imperial architecture",
+    promptMorning:
+      "Serene palace grounds awakening, peaceful Akasaka Palace dawn, gentle neo-baroque architecture glow, quiet royal residence morning, tranquil imperial elegance",
+    promptEvening:
+      "Sophisticated palace evening atmosphere, Akasaka Palace illuminated grandeur, elegant neo-baroque night beauty, refined royal reception ambiance, stately imperial night",
+    color: "#dda0dd",
+    descriptionJa:
+      "日本唯一のネオバロック宮殿！国宝の迎賓館で正面玄関のフランス製大理石が圧巻、1909年完成の東宮御所が起源",
+  },
+  {
+    id: "okubo-park",
+    name: "Okubo Park",
+    nameJa: "大久保公園",
+    center: { lat: 35.6934, lng: 139.7031 }, // Okubo Park
+    radius: 300,
+    prompt:
+      "Urban oasis in entertainment district, peaceful park atmosphere amidst neon lights, local community gathering space, contrast of nature and city vibrancy",
+    promptMorning:
+      "Gentle park awakening, peaceful Okubo Park dawn, soft morning light through trees, quiet neighborhood park morning, serene urban oasis",
+    promptEvening:
+      "Peaceful park evening atmosphere, Okubo Park night serenity, gentle contrast with surrounding neon, tranquil local gathering space, calm urban green escape",
+    color: "#98fb98",
+    descriptionJa:
+      "歌舞伎町の真ん中のオアシス！小泉八雲（ラフカディオ・ハーン）終焉の地でギリシャ風デザインが特徴",
+  },
 ];
+
+// Basic district data - lightweight, loaded immediately
+// Contains only data needed for distance calculations (~100 bytes each)
+export const TOKYO_DISTRICTS_BASIC: DistrictBasic[] = TOKYO_DISTRICTS.map(
+  (d) => ({
+    id: d.id,
+    name: d.name,
+    nameJa: d.nameJa,
+    center: d.center,
+    radius: d.radius,
+    color: d.color,
+  })
+);
+
+// District details - heavyweight, loaded on demand
+// Contains prompts and descriptions (~800-1200 bytes each)
+// Only loaded when district is nearby (weight > threshold)
+export const DISTRICT_DETAILS: Record<string, DistrictDetails> =
+  Object.fromEntries(
+    TOKYO_DISTRICTS.map((d) => [
+      d.id,
+      {
+        prompt: d.prompt,
+        promptMorning: d.promptMorning,
+        promptEvening: d.promptEvening,
+        descriptionJa: d.descriptionJa,
+      },
+    ])
+  );
 
 export const DEFAULT_DISTRICT_PROMPT =
   "Ambient Tokyo cityscape, gentle urban hum, distant traffic sounds, modern Japanese metropolis atmosphere, calm urban exploration";
@@ -850,9 +975,10 @@ export const DEFAULT_DISTRICT_PROMPT_EVENING =
 
 /**
  * Get the appropriate prompt for a district based on time of day
+ * Works with both full District and DistrictDetails
  */
 export function getDistrictPrompt(
-  district: District,
+  district: District | DistrictDetails,
   timeOfDay: TimeOfDay
 ): string {
   switch (timeOfDay) {
