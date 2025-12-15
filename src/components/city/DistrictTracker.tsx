@@ -9,7 +9,7 @@ import { useRef } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import {
-  TOKYO_DISTRICTS,
+  TOKYO_DISTRICTS_BASIC,
   TOKYO_CENTER,
   type District,
 } from "@/config/tokyo-config";
@@ -41,7 +41,7 @@ export function DistrictTracker({
   const frameCountRef = useRef(0);
   const currentDistrictRef = useRef<District | null>(null);
   const lastDebugInfoRef = useRef<DistrictDebugInfo[]>(
-    TOKYO_DISTRICTS.map((d) => ({
+    TOKYO_DISTRICTS_BASIC.map((d) => ({
       name: d.name,
       nameJa: d.nameJa,
       weight: 0,
@@ -64,7 +64,7 @@ export function DistrictTracker({
       0
     );
 
-    // Detect current district
+    // Detect current district (lazy loads details only if found)
     const currentDistrict = getDistrictAtPosition(geo.lat, geo.lng);
     if (currentDistrict !== currentDistrictRef.current) {
       currentDistrictRef.current = currentDistrict;
@@ -77,19 +77,21 @@ export function DistrictTracker({
       );
     }
 
-    // Update debug info periodically
+    // Update debug info periodically (lazy loads details only for significant districts)
     if (onDebugUpdate && frameCountRef.current % 30 === 0) {
       const districtWeights = calculateDistrictWeights(geo.lat, geo.lng);
       districtWeights.forEach((dw, i) => {
-        lastDebugInfoRef.current[i] = {
-          name: dw.district.name,
-          nameJa: dw.district.nameJa,
-          weight: dw.weight,
-          distance: dw.distance,
-          color: dw.district.color,
-          cameraLat: geo.lat,
-          cameraLng: geo.lng,
-        };
+        if (i < lastDebugInfoRef.current.length) {
+          lastDebugInfoRef.current[i] = {
+            name: dw.district.name,
+            nameJa: dw.district.nameJa,
+            weight: dw.weight,
+            distance: dw.distance,
+            color: dw.district.color,
+            cameraLat: geo.lat,
+            cameraLng: geo.lng,
+          };
+        }
       });
       onDebugUpdate(lastDebugInfoRef.current);
     }
