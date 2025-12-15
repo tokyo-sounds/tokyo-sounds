@@ -36,6 +36,7 @@ import {
   type GyroState,
 } from "@/components/city/PlaneController";
 import { OtherPlayers } from "@/components/city/OtherPlayers";
+import VirtualController from "@/components/widget/VirtualController";
 // Hooks
 import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
@@ -487,6 +488,8 @@ export default function TokyoPage() {
         {currentDistrict && cameraY < 900 && <DistrictIndicator district={currentDistrict} />}
 
         {demoState?.active && <DemoTourGuide demoState={demoState} />}
+
+        {isMobile && <VirtualController enabled={started} />}
 
         <AmbientBackgroundAudio cameraY={cameraY} maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT} enabled={started} />
 

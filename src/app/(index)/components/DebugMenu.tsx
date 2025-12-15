@@ -22,7 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CodeXml, Play, Pause, Settings, RotateCcw } from "lucide-react";
+import { CodeXml, Play, Pause, Settings } from "lucide-react";
 
 /** DebugMenu
  *
@@ -96,7 +96,7 @@ export default function DebugMenu({
           <SheetTrigger asChild>
             <Button
               variant="ghost"
-              className="absolute bottom-4 right-4 text-white/70 text-shadow-sm hover:text-white text-xs font-mono"
+              className="absolute top-4 left-4 text-white/70 text-shadow-sm hover:text-white text-xs font-mono"
             >
               <Settings className="size-4" />
             </Button>
