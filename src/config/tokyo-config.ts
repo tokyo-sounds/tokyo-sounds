@@ -24,20 +24,68 @@ export const ALTITUDE_BOUNDS = {
 // Earth radius in meters (WGS84)
 export const EARTH_RADIUS = 6378137;
 
-export interface District {
+// Basic district data - loaded immediately (lightweight, ~100 bytes each)
+// Only contains data needed for distance calculations
+export interface DistrictBasic {
   id: string;
   name: string;
   nameJa: string;
   center: { lat: number; lng: number }; // station/landmark coordinates
   radius: number; // district radius in meters
+  color: string;
+}
+
+// Detailed district data - loaded on demand (heavyweight, ~800-1200 bytes each)
+// Contains prompts and descriptions, only loaded when district is nearby
+export interface DistrictDetails {
   prompt: string; // default/afternoon prompt
   promptMorning?: string; // calm, tranquil morning variant
   promptEvening?: string; // energetic, lively evening variant
-  color: string;
   descriptionJa: string; // 40-50 character Japanese description
 }
 
+// Full district - combines basic + details (for backward compatibility)
+export interface District extends DistrictBasic {
+  prompt: string;
+  promptMorning?: string;
+  promptEvening?: string;
+  descriptionJa: string;
+}
+
+// Cache for loaded district details (lazy loading)
+// Details are already in memory, but we cache them for faster access
+const districtDetailsCache = new Map<string, DistrictDetails>();
+
+// Load district details on demand (synchronous - data is already in memory)
+// Only loads details when district is nearby (weight > threshold)
+export function getDistrictDetails(id: string): DistrictDetails {
+  if (districtDetailsCache.has(id)) {
+    return districtDetailsCache.get(id)!;
+  }
+
+  const details = DISTRICT_DETAILS[id];
+  if (!details) {
+    throw new Error(`District details not found: ${id}`);
+  }
+
+  districtDetailsCache.set(id, details);
+  return details;
+}
+
+// Get full district data (combines basic + details)
+export function getDistrictFull(id: string): District {
+  const basic = TOKYO_DISTRICTS_BASIC.find((d) => d.id === id);
+  if (!basic) {
+    throw new Error(`District not found: ${id}`);
+  }
+
+  const details = getDistrictDetails(id);
+  return { ...basic, ...details };
+}
+
 // Districts centered on actual train station coordinates with realistic radii
+// NOTE: This is kept for backward compatibility but uses lazy loading internally
+// For better performance, use TOKYO_DISTRICTS_BASIC for calculations
 export const TOKYO_DISTRICTS: District[] = [
   {
     id: "shinjuku",
@@ -821,7 +869,7 @@ export const TOKYO_DISTRICTS: District[] = [
       "Lively park evening energy, Ueno Park cultural nightlife, vibrant museum district atmosphere, cherry blossom lantern ambiance, dynamic park celebration",
     color: "#ff69b4",
     descriptionJa:
-      "日本初の公園、パンダで有名な動物園と博物館が集まる文化の宝庫！春の桜は圧巻の美しさ",
+      "日本初の公園！西郷隆盛像は有名な待ち合わせスポット。パンダで有名な動物園と博物館が集まる文化の宝庫",
   },
   {
     id: "meiji-shrine",
@@ -839,7 +887,228 @@ export const TOKYO_DISTRICTS: District[] = [
     descriptionJa:
       "都心の森、原宿の喧騒から一歩入れば別世界！日本最大の木造鳥居と伝統的な結婚式が見られる",
   },
+  {
+    id: "shinjuku-gyoen",
+    name: "Shinjuku Gyoen",
+    nameJa: "新宿御苑",
+    center: { lat: 35.6852, lng: 139.7101 }, // Shinjuku Gyoen
+    radius: 800,
+    prompt:
+      "Tranquil imperial garden atmosphere, diverse garden styles fusion, peaceful urban oasis, traditional Japanese and European garden harmony, serene nature escape",
+    promptMorning:
+      "Gentle garden awakening, peaceful Shinjuku Gyoen dawn, soft bird songs and rustling leaves, quiet traditional garden meditation, serene imperial garden morning",
+    promptEvening:
+      "Peaceful garden evening ambiance, Shinjuku Gyoen sunset serenity, gentle garden paths illuminated, tranquil imperial garden night, serene nature escape",
+    color: "#90ee90",
+    descriptionJa:
+      "皇室庭園の一般公開！明治時代に日本初のプラタナス約200本を植えた歴史ある美しい庭園、3つの庭園様式が楽しめる",
+  },
+  {
+    id: "akasaka-palace",
+    name: "Akasaka Palace",
+    nameJa: "赤坂離宮",
+    center: { lat: 35.6781, lng: 139.7264 }, // Akasaka Palace
+    radius: 500,
+    prompt:
+      "Grand neo-baroque palace elegance, royal reception atmosphere, luxurious architectural splendor, refined ceremonial ambiance, stately imperial architecture",
+    promptMorning:
+      "Serene palace grounds awakening, peaceful Akasaka Palace dawn, gentle neo-baroque architecture glow, quiet royal residence morning, tranquil imperial elegance",
+    promptEvening:
+      "Sophisticated palace evening atmosphere, Akasaka Palace illuminated grandeur, elegant neo-baroque night beauty, refined royal reception ambiance, stately imperial night",
+    color: "#dda0dd",
+    descriptionJa:
+      "日本唯一のネオバロック宮殿！国宝の迎賓館で正面玄関のフランス製大理石が圧巻、1909年完成の東宮御所が起源",
+  },
+  {
+    id: "okubo-park",
+    name: "Okubo Park",
+    nameJa: "大久保公園",
+    center: { lat: 35.6934, lng: 139.7031 }, // Okubo Park
+    radius: 300,
+    prompt:
+      "Urban oasis in entertainment district, peaceful park atmosphere amidst neon lights, local community gathering space, contrast of nature and city vibrancy",
+    promptMorning:
+      "Gentle park awakening, peaceful Okubo Park dawn, soft morning light through trees, quiet neighborhood park morning, serene urban oasis",
+    promptEvening:
+      "Peaceful park evening atmosphere, Okubo Park night serenity, gentle contrast with surrounding neon, tranquil local gathering space, calm urban green escape",
+    color: "#98fb98",
+    descriptionJa:
+      "歌舞伎町の真ん中のオアシス！小泉八雲（ラフカディオ・ハーン）終焉の地でギリシャ風デザインが特徴",
+  },
+  {
+    id: "sumida",
+    name: "Sumida",
+    nameJa: "墨田区",
+    center: { lat: 35.6964, lng: 139.7931 }, // Ryogoku Station
+    radius: 1000,
+    prompt:
+      "Traditional sumo wrestling district energy, Ryogoku Kokugikan arena atmosphere, historic Edo culture vibes, traditional festival sounds, nostalgic shitamachi heritage",
+    promptMorning:
+      "Gentle sumo district awakening, peaceful Ryogoku dawn, soft traditional ambiance, quiet historic neighborhood morning, serene Edo culture atmosphere",
+    promptEvening:
+      "Lively sumo district evening, Ryogoku Kokugikan excitement, vibrant traditional festival energy, bustling historic district nightlife, electric sumo culture night",
+    color: "#8b4513",
+    descriptionJa:
+      "相撲の聖地・両国！国技館で大相撲を観戦できる。隅田川花火大会は江戸時代から続く夏の風物詩で約2万発が打ち上がる",
+  },
+  {
+    id: "koto",
+    name: "Koto",
+    nameJa: "江東区",
+    center: { lat: 35.6588, lng: 139.7964 }, // Toyosu Station
+    radius: 800,
+    prompt:
+      "Modern waterfront district energy, Toyosu Market fresh seafood atmosphere, cutting-edge urban development, waterway and canal vibes, contemporary Tokyo innovation",
+    promptMorning:
+      "Gentle waterfront awakening, peaceful Toyosu dawn, soft market preparation sounds, quiet modern district morning, serene canal-side atmosphere",
+    promptEvening:
+      "Lively waterfront evening, Toyosu Market night energy, vibrant modern development atmosphere, bustling canal district nightlife, electric contemporary Tokyo night",
+    color: "#00bfff",
+    descriptionJa:
+      "豊洲市場とお台場、築地から移転した日本最大級の魚市場！お台場は1853年の黒船来航を防ぐために作られた人工島が起源",
+  },
+  {
+    id: "ota",
+    name: "Ota",
+    nameJa: "大田区",
+    center: { lat: 35.5624, lng: 139.716 }, // Kamata Station
+    radius: 1000,
+    prompt:
+      "Airport gateway district energy, Haneda Airport proximity vibes, manufacturing and industry atmosphere, traditional working-class neighborhood, authentic Tokyo suburbia",
+    promptMorning:
+      "Gentle airport district awakening, peaceful Kamata dawn, soft industrial ambient, quiet working neighborhood morning, serene gateway atmosphere",
+    promptEvening:
+      "Lively airport district evening, Kamata nightlife energy, vibrant manufacturing district atmosphere, bustling working-class neighborhood, authentic Tokyo suburbia night",
+    color: "#708090",
+    descriptionJa:
+      "羽田空港の玄関口、東京23区で最も面積が広い！町工場が多く「ものづくりの街」として知られ、職人技が光るエリア",
+  },
+  {
+    id: "setagaya",
+    name: "Setagaya",
+    nameJa: "世田谷区",
+    center: { lat: 35.6436, lng: 139.6684 }, // Sangenjaya Station
+    radius: 1000,
+    prompt:
+      "Residential district charm, trendy Sangenjaya cafe culture, youthful neighborhood energy, relaxed suburban atmosphere, comfortable Tokyo living vibes",
+    promptMorning:
+      "Gentle residential awakening, peaceful Sangenjaya dawn, soft cafe district ambiance, quiet neighborhood morning, serene suburban atmosphere",
+    promptEvening:
+      "Lively residential evening, Sangenjaya nightlife energy, vibrant cafe and bar scene, bustling trendy neighborhood, comfortable Tokyo living night",
+    color: "#90ee90",
+    descriptionJa:
+      "東京23区で最も人口が多い！三軒茶屋は若者に人気のエリア。駒沢オリンピック公園は1964年東京五輪の会場で今もスポーツの聖地",
+  },
+  {
+    id: "itabashi",
+    name: "Itabashi",
+    nameJa: "板橋区",
+    center: { lat: 35.7515, lng: 139.709 }, // Itabashi Station
+    radius: 1000,
+    prompt:
+      "Quiet residential district atmosphere, traditional neighborhood vibes, peaceful suburban living, local community energy, authentic Tokyo suburbia",
+    promptMorning:
+      "Serene residential awakening, peaceful Itabashi dawn, gentle neighborhood ambiance, quiet suburban morning, tranquil community atmosphere",
+    promptEvening:
+      "Peaceful residential evening, Itabashi neighborhood night, gentle local community atmosphere, serene suburban nightlife, calm authentic Tokyo night",
+    color: "#9acd32",
+    descriptionJa:
+      "板橋という名前の橋が区名の由来！江戸時代から続く歴史ある街。東京大仏がある乗蓮寺は高さ13メートルの巨大な仏像で有名",
+  },
+  {
+    id: "nerima",
+    name: "Nerima",
+    nameJa: "練馬区",
+    center: { lat: 35.7356, lng: 139.651 }, // Nerima Station
+    radius: 1000,
+    prompt:
+      "Anime production district energy, green residential area atmosphere, agricultural heritage vibes, creative industry hub, peaceful suburban Tokyo living",
+    promptMorning:
+      "Gentle anime district awakening, peaceful Nerima dawn, soft creative industry ambiance, quiet green neighborhood morning, serene suburban atmosphere",
+    promptEvening:
+      "Lively anime district evening, Nerima creative energy, vibrant residential nightlife, bustling green suburbia, peaceful creative Tokyo night",
+    color: "#98fb98",
+    descriptionJa:
+      "アニメ制作会社が多く「アニメの聖地」！農地も多く都市農業が盛ん。としまえん跡地には新しいテーマパークが建設中で注目を集める",
+  },
+  {
+    id: "adachi",
+    name: "Adachi",
+    nameJa: "足立区",
+    center: { lat: 35.7504, lng: 139.8049 }, // Kitasenju Station
+    radius: 1000,
+    prompt:
+      "Major transportation hub energy, Kitasenju station district atmosphere, traditional shitamachi vibes, bustling commuter center, authentic Tokyo working-class district",
+    promptMorning:
+      "Gentle transportation hub awakening, peaceful Kitasenju dawn, soft commuter station ambiance, quiet traditional district morning, serene hub atmosphere",
+    promptEvening:
+      "Lively transportation hub evening, Kitasenju nightlife energy, vibrant commuter district atmosphere, bustling traditional neighborhood, electric working-class Tokyo night",
+    color: "#ff8c00",
+    descriptionJa:
+      "北千住は5路線が交わる交通の要所！江戸時代から宿場町として栄えた歴史ある街。毎年7月の足立の花火大会は約1万3000発が打ち上がる夏の風物詩",
+  },
+  {
+    id: "katsushika",
+    name: "Katsushika",
+    nameJa: "葛飾区",
+    center: { lat: 35.7433, lng: 139.8476 }, // Kameari Station
+    radius: 1000,
+    prompt:
+      "Nostalgic movie district energy, Shibamata Taishakuten temple atmosphere, traditional shitamachi culture, film heritage vibes, authentic Tokyo nostalgia",
+    promptMorning:
+      "Gentle nostalgic district awakening, peaceful Kameari dawn, soft traditional temple ambiance, quiet movie heritage morning, serene shitamachi atmosphere",
+    promptEvening:
+      "Lively nostalgic district evening, Kameari traditional nightlife, vibrant movie heritage energy, bustling shitamachi culture, authentic Tokyo nostalgia night",
+    color: "#ffa500",
+    descriptionJa:
+      "映画「男はつらいよ」の舞台・柴又！寅さん記念館で映画の世界を体感できる。亀有駅前には「こち亀」の両さんの銅像が立つ",
+  },
+  {
+    id: "edogawa",
+    name: "Edogawa",
+    nameJa: "江戸川区",
+    center: { lat: 35.7064, lng: 139.868 }, // Koiwa Station
+    radius: 1000,
+    prompt:
+      "Riverside residential district atmosphere, Edogawa River natural beauty, family-friendly neighborhood vibes, peaceful suburban living, green Tokyo suburbia",
+    promptMorning:
+      "Serene riverside awakening, peaceful Koiwa dawn, gentle river ambiance, quiet residential morning, tranquil natural atmosphere",
+    promptEvening:
+      "Peaceful riverside evening, Koiwa neighborhood night, gentle family-friendly atmosphere, serene residential nightlife, calm green Tokyo suburbia night",
+    color: "#87ceeb",
+    descriptionJa:
+      "江戸川と自然豊かな環境、葛西臨海公園には水族館や観覧車があり家族連れに人気！江戸川花火大会は毎年8月に開催され約1万4000発が打ち上がる",
+  },
 ];
+
+// Basic district data - lightweight, loaded immediately
+// Contains only data needed for distance calculations (~100 bytes each)
+export const TOKYO_DISTRICTS_BASIC: DistrictBasic[] = TOKYO_DISTRICTS.map(
+  (d) => ({
+    id: d.id,
+    name: d.name,
+    nameJa: d.nameJa,
+    center: d.center,
+    radius: d.radius,
+    color: d.color,
+  })
+);
+
+// District details - heavyweight, loaded on demand
+// Contains prompts and descriptions (~800-1200 bytes each)
+// Only loaded when district is nearby (weight > threshold)
+export const DISTRICT_DETAILS: Record<string, DistrictDetails> =
+  Object.fromEntries(
+    TOKYO_DISTRICTS.map((d) => [
+      d.id,
+      {
+        prompt: d.prompt,
+        promptMorning: d.promptMorning,
+        promptEvening: d.promptEvening,
+        descriptionJa: d.descriptionJa,
+      },
+    ])
+  );
 
 export const DEFAULT_DISTRICT_PROMPT =
   "Ambient Tokyo cityscape, gentle urban hum, distant traffic sounds, modern Japanese metropolis atmosphere, calm urban exploration";
@@ -850,9 +1119,10 @@ export const DEFAULT_DISTRICT_PROMPT_EVENING =
 
 /**
  * Get the appropriate prompt for a district based on time of day
+ * Works with both full District and DistrictDetails
  */
 export function getDistrictPrompt(
-  district: District,
+  district: District | DistrictDetails,
   timeOfDay: TimeOfDay
 ): string {
   switch (timeOfDay) {
