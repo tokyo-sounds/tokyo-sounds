@@ -8,7 +8,15 @@
 import { useEffect, useRef, useState } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
-import { TOKYO_DISTRICTS, TOKYO_CENTER, type District, getDistrictPrompt } from "@/config/tokyo-config";
+import {
+  TOKYO_DISTRICTS,
+  TOKYO_DISTRICTS_BASIC,
+  TOKYO_CENTER,
+  getDistrictDetails,
+  type District,
+  type DistrictBasic,
+  getDistrictPrompt,
+} from "@/config/tokyo-config";
 import {
   calculateDistrictWeights,
   enuToLatLngAlt,
@@ -104,10 +112,26 @@ export function DistrictLyriaAudio({
     if (previousTime !== currentTime && sessionRef.current) {
       console.log(`[DistrictLyria] Time of day changed: ${previousTime} -> ${currentTime}, updating prompts`);
       
-      const weightedPrompts = TOKYO_DISTRICTS.map((district) => ({
-        text: getDistrictPrompt(district, currentTime),
-        weight: Math.max(0.01, smoothedWeightsRef.current.get(district.id) || 0.01),
+      // Load details for districts with significant weight (synchronous - data in memory)
+      const significantIds = Array.from(smoothedWeightsRef.current.entries())
+        .filter(([_, weight]) => weight > 0.01)
+        .map(([id]) => id);
+
+      if (significantIds.length === 0) return;
+
+      const detailsArray = significantIds.map((id) => getDistrictDetails(id));
+      const weightedPrompts = detailsArray.map((details, idx) => ({
+        text: getDistrictPrompt(details, currentTime),
+        weight: Math.max(0.01, smoothedWeightsRef.current.get(significantIds[idx]) || 0.01),
       }));
+
+      try {
+        sessionRef.current?.setWeightedPrompts({
+          weightedPrompts,
+        });
+      } catch (err) {
+        console.warn("[DistrictLyria] Failed to update prompts on time change:", err);
+      }
       
       try {
         sessionRef.current.setWeightedPrompts({
@@ -120,9 +144,10 @@ export function DistrictLyriaAudio({
   }, [currentTime]);
 
   useEffect(() => {
-    TOKYO_DISTRICTS.forEach((d) => {
-      previousWeightsRef.current.set(d.id, 1 / TOKYO_DISTRICTS.length);
-      smoothedWeightsRef.current.set(d.id, 1 / TOKYO_DISTRICTS.length);
+    // Initialize weights using basic data (lightweight)
+    TOKYO_DISTRICTS_BASIC.forEach((d) => {
+      previousWeightsRef.current.set(d.id, 1 / TOKYO_DISTRICTS_BASIC.length);
+      smoothedWeightsRef.current.set(d.id, 1 / TOKYO_DISTRICTS_BASIC.length);
     });
   }, []);
 
@@ -443,9 +468,23 @@ export function DistrictLyriaAudio({
 
       const weightsToUse = savedWeightsRef.current || smoothedWeightsRef.current;
       const timeOfDay = currentTimeRef.current;
-      const initialPrompts = TOKYO_DISTRICTS.map((district) => ({
-        text: getDistrictPrompt(district, timeOfDay),
-        weight: weightsToUse.get(district.id) || 1 / TOKYO_DISTRICTS.length,
+      
+      // Load details only for districts with significant weight
+      const significantIds = Array.from(weightsToUse.entries())
+        .filter(([_, weight]) => weight > 0.01)
+        .map(([id]) => id);
+
+      // If no significant districts, use all basic districts
+      const idsToLoad = significantIds.length > 0 
+        ? significantIds 
+        : TOKYO_DISTRICTS_BASIC.map(d => d.id);
+
+      // Load details synchronously (data is in memory)
+      const detailsArray = idsToLoad.map(id => getDistrictDetails(id));
+      
+      const initialPrompts = detailsArray.map((details, idx) => ({
+        text: getDistrictPrompt(details, timeOfDay),
+        weight: weightsToUse.get(idsToLoad[idx]) || 1 / TOKYO_DISTRICTS_BASIC.length,
       }));
 
       console.log("[DistrictLyria] Setting prompts with weights:", initialPrompts);
@@ -467,7 +506,7 @@ export function DistrictLyriaAudio({
       savedWeightsRef.current = null;
 
       console.log(
-        `[DistrictLyria] ${isReconnect ? "Reconnected" : "Started"} with ${TOKYO_DISTRICTS.length} district prompts`
+        `[DistrictLyria] ${isReconnect ? "Reconnected" : "Started"} with ${TOKYO_DISTRICTS_BASIC.length} district prompts (lazy loaded)`
       );
     } catch (err) {
       console.error("[DistrictLyria] Failed to initialize:", err);
@@ -552,10 +591,10 @@ export function DistrictLyriaAudio({
   const cameraPosRef = useRef(new THREE.Vector3());
   const frameCountRef = useRef(0);
   const lastDebugInfoRef = useRef<DistrictDebugInfo[]>(
-    TOKYO_DISTRICTS.map((d) => ({
+    TOKYO_DISTRICTS_BASIC.map((d) => ({
       name: d.name,
       nameJa: d.nameJa,
-      weight: 1 / TOKYO_DISTRICTS.length,
+      weight: 1 / TOKYO_DISTRICTS_BASIC.length,
       distance: 0,
       color: d.color,
     }))
@@ -575,6 +614,7 @@ export function DistrictLyriaAudio({
       0
     );
 
+    // Calculate weights (lazy loads details only for significant districts)
     const districtWeights = calculateDistrictWeights(geo.lat, geo.lng);
 
     smoothedWeightsRef.current = smoothWeights(
@@ -583,16 +623,19 @@ export function DistrictLyriaAudio({
       0.3
     );
 
+    // Get current district (lazy loads details only if found)
     const currentDistrict = getDistrictAtPosition(geo.lat, geo.lng);
     if (currentDistrict !== currentDistrictRef.current) {
       currentDistrictRef.current = currentDistrict;
       onCurrentDistrictChange?.(currentDistrict);
-      
-      console.log(`[DistrictLyria] Position: ${geo.lat.toFixed(4)}, ${geo.lng.toFixed(4)} → ${currentDistrict?.name || "none"}`);
+
+      console.log(
+        `[DistrictLyria] Position: ${geo.lat.toFixed(4)}, ${geo.lng.toFixed(4)} → ${currentDistrict?.name || "none"}`
+      );
     }
 
+    // Update debug info if callback provided
     if (onDebugUpdate && frameCountRef.current % debugUpdateInterval === 0) {
-      // Create new array to ensure React detects the change
       const newDebugInfo: DistrictDebugInfo[] = districtWeights.map((dw) => ({
         name: dw.district.name,
         nameJa: dw.district.nameJa,
@@ -616,10 +659,26 @@ export function DistrictLyriaAudio({
       previousWeightsRef.current = new Map(smoothedWeightsRef.current);
 
       const timeOfDay = currentTimeRef.current;
-      const weightedPrompts = TOKYO_DISTRICTS.map((district) => ({
-        text: getDistrictPrompt(district, timeOfDay),
-        weight: Math.max(0.01, smoothedWeightsRef.current.get(district.id) || 0.01),
+      // Load details for districts with significant weight (synchronous - data in memory)
+      const significantIds = Array.from(smoothedWeightsRef.current.entries())
+        .filter(([_, weight]) => weight > 0.01)
+        .map(([id]) => id);
+
+      if (significantIds.length === 0) return;
+
+      const detailsArray = significantIds.map((id) => getDistrictDetails(id));
+      const weightedPrompts = detailsArray.map((details, idx) => ({
+        text: getDistrictPrompt(details, timeOfDay),
+        weight: Math.max(0.01, smoothedWeightsRef.current.get(significantIds[idx]) || 0.01),
       }));
+
+      try {
+        sessionRef.current?.setWeightedPrompts({
+          weightedPrompts,
+        });
+      } catch (err) {
+        console.warn("[DistrictLyria] Failed to update prompts:", err);
+      }
 
       try {
         sessionRef.current.setWeightedPrompts({
