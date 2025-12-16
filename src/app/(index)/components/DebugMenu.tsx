@@ -95,8 +95,9 @@ export default function DebugMenu({
         <TooltipTrigger asChild>
           <SheetTrigger asChild>
             <Button
+              aria-label="メニュー"
               variant="ghost"
-              className="absolute top-4 left-4 text-white/70 text-shadow-sm hover:text-white text-xs font-mono"
+              className="absolute top-4 left-4 text-white/70 text-shadow-sm hover:text-white text-xs font-mono pointer-events-auto"
             >
               <Settings className="size-4" />
             </Button>
