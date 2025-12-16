@@ -4,10 +4,13 @@
  * Compass Component
  * Circular compass with rotating needle showing heading direction
  * Displays user's heading, cardinal direction, and geographic position
+ * Shows nearby players as colored dots positioned by their relative direction
  */
 
 import { useMemo, useState, useEffect, useRef } from "react";
 import { SendHorizontal } from "lucide-react";
+import { type PlayerState } from "@/types/multiplayer";
+import * as THREE from "three";
 
 // Module constants - avoid re-allocation on every render
 const CARDINAL_DIRECTIONS = [
@@ -23,12 +26,22 @@ const CARDINAL_DIRECTIONS = [
 
 const TICK_ANGLES = Array.from({ length: 12 }, (_, i) => i * 30);
 
+const PLAYER_DOT_RADIUS = 4; // Size of player indicator dots
+const PLAYER_DOT_DISTANCE_RATIO = 0.85; // Position dots at 85% of compass radius
+
 interface CompassProps {
   heading: number; // 0-360 degrees (from CompassBar)
   size?: number; // Diameter of the compass in pixels
+  nearbyPlayers?: PlayerState[];
+  localPlayerPosition?: THREE.Vector3;
 }
 
-export default function Compass({ heading, size = 240 }: CompassProps) {
+export default function Compass({
+  heading,
+  size = 240,
+  nearbyPlayers,
+  localPlayerPosition,
+}: CompassProps) {
   // Track cumulative rotation to handle 0°/360° boundary crossing
   // This allows the rotation to take the shortest path instead of the long way
   const [displayAngle, setDisplayAngle] = useState(heading);
@@ -113,6 +126,44 @@ export default function Compass({ heading, size = 240 }: CompassProps) {
     });
   }, [size, centerX, centerY, radius]);
 
+  // Compute player dot positions based on relative bearing from local player
+  const playerDots = useMemo(() => {
+    if (!nearbyPlayers || !localPlayerPosition || nearbyPlayers.length === 0) {
+      return [];
+    }
+
+    const dotRadius = radius * PLAYER_DOT_DISTANCE_RATIO;
+
+    return nearbyPlayers.map((player) => {
+      // Calculate direction from local player to this player (in XZ plane)
+      const dx = player.position.x - localPlayerPosition.x;
+      const dz = player.position.z - localPlayerPosition.z;
+
+      // Calculate world bearing (0° = North/+Z, 90° = East/+X)
+      // atan2 gives angle from +X axis, so we adjust for compass convention
+      const worldBearing = (Math.atan2(dx, -dz) * 180) / Math.PI;
+
+      // Convert to relative bearing (relative to player's heading)
+      // Subtract heading so dots rotate with the compass
+      const relativeBearing = worldBearing - heading;
+
+      // Convert to SVG angle (0° = top/North = -90° in SVG coords)
+      const svgAngle = relativeBearing - 90;
+      const radian = (svgAngle * Math.PI) / 180;
+
+      const dotX = centerX + dotRadius * Math.cos(radian);
+      const dotY = centerY + dotRadius * Math.sin(radian);
+
+      return {
+        id: player.id,
+        color: player.color,
+        x: dotX,
+        y: dotY,
+        name: player.name,
+      };
+    });
+  }, [nearbyPlayers, localPlayerPosition, heading, radius, centerX, centerY]);
+
   // Memoize plane style to avoid object allocation on every render
   const planeStyle = useMemo(
     () => ({
@@ -180,6 +231,29 @@ export default function Compass({ heading, size = 240 }: CompassProps) {
           >
             {label.label}
           </text>
+        ))}
+
+        {/* Nearby player dots - positioned by relative bearing */}
+        {playerDots.map((dot) => (
+          <g key={dot.id}>
+            {/* Outer glow effect */}
+            <circle
+              cx={dot.x}
+              cy={dot.y}
+              r={PLAYER_DOT_RADIUS + 2}
+              fill={dot.color}
+              opacity={0.3}
+            />
+            {/* Main dot */}
+            <circle
+              cx={dot.x}
+              cy={dot.y}
+              r={PLAYER_DOT_RADIUS}
+              fill={dot.color}
+              stroke="rgba(0, 0, 0, 0.5)"
+              strokeWidth={1}
+            />
+          </g>
         ))}
       </svg>
 
