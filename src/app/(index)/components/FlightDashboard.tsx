@@ -10,6 +10,8 @@ import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { type PlaneControllerHandle } from "@/components/city/PlaneController";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { type PlayerState } from "@/types/multiplayer";
+import * as THREE from "three";
 
 interface FlightDashboardProps {
   flightSpeed: number;
@@ -31,6 +33,8 @@ interface FlightDashboardProps {
   };
   isMobile: boolean;
   planeControllerRef: React.RefObject<PlaneControllerHandle>;
+  nearbyPlayers?: PlayerState[];
+  localPlayerPosition?: THREE.Vector3;
 }
 
 export default function FlightDashboard({
@@ -45,6 +49,8 @@ export default function FlightDashboard({
   isMobile,
   operationManualOpen,
   setOperationManualOpen,
+  nearbyPlayers,
+  localPlayerPosition,
 }: FlightDashboardProps) {
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none select-none">
@@ -87,7 +93,12 @@ export default function FlightDashboard({
       </div>
 
       <div className="hidden md:block absolute bottom-6 md:bottom-10 right-6 md:right-10">
-        <Compass heading={heading} size={speedoMeterSize} />
+        <Compass
+          heading={heading}
+          size={speedoMeterSize}
+          nearbyPlayers={nearbyPlayers}
+          localPlayerPosition={localPlayerPosition}
+        />
       </div>
     </div>
   );

@@ -11,7 +11,7 @@
  * - Small name label above each plane
  */
 
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF, Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -24,18 +24,65 @@ import {
 const PLANE_SCALE = 0.1;
 const DEFAULT_MODEL_PATH = "/models/plane_balance.glb";
 const INTERPOLATION_SPEED = 10; // faster catch-up
+const HALO_RADIUS = 1.2;
+const HALO_OPACITY = 0.6;
+const HALO_Y_OFFSET = -0.3; // slightly below the plane
 
 interface OtherPlayerPlaneProps {
   player: PlayerState;
   localPlayerPosition: THREE.Vector3;
 }
 
+/**
+ * PlayerHalo Component
+ *
+ * Renders an emissive halo beneath the plane for visibility.
+ * 
+ * @param color - The color of the halo.
+ * @param opacity - The opacity of the halo.
+ * @returns A React component that renders a halo beneath the plane.
+ */
+function PlayerHalo({ color, opacity }: { color: string; opacity: number }) {
+  const materialRef = useRef<THREE.MeshBasicMaterial>(null);
+
+  useFrame(() => {
+    if (materialRef.current) {
+      materialRef.current.opacity = opacity * HALO_OPACITY;
+    }
+  });
+
+  return (
+    <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, HALO_Y_OFFSET, 0]}>
+      <ringGeometry args={[HALO_RADIUS * 0.3, HALO_RADIUS, 32]} />
+      <meshBasicMaterial
+        ref={materialRef}
+        color={color}
+        transparent
+        opacity={opacity * HALO_OPACITY}
+        side={THREE.DoubleSide}
+        depthWrite={false}
+        blending={THREE.AdditiveBlending}
+      />
+    </mesh>
+  );
+}
+
+/**
+ * OtherPlayerPlane Component
+ *
+ * Renders a plane for a nearby player.
+ *
+ * @param player - The player state.
+ * @param localPlayerPosition - The position of the local player.
+ * @returns A React component that renders a plane for a nearby player.
+ */
 function OtherPlayerPlane({
   player,
   localPlayerPosition,
 }: OtherPlayerPlaneProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(DEFAULT_MODEL_PATH);
+  const [haloOpacity, setHaloOpacity] = useState(1);
 
   const currentPos = useRef(
     new THREE.Vector3(player.position.x, player.position.y, player.position.z)
@@ -124,6 +171,8 @@ function OtherPlayerPlane({
     currentOpacity.current +=
       (targetOpacity - currentOpacity.current) * Math.min(1, delta * 5);
 
+    setHaloOpacity(currentOpacity.current);
+
     groupRef.current.traverse((child) => {
       if (child instanceof THREE.Mesh && child.material) {
         if (Array.isArray(child.material)) {
@@ -147,6 +196,8 @@ function OtherPlayerPlane({
 
   return (
     <group ref={groupRef}>
+      <PlayerHalo color={player.color} opacity={haloOpacity} />
+
       <primitive
         object={coloredScene}
         scale={[PLANE_SCALE, PLANE_SCALE, PLANE_SCALE]}

@@ -70,9 +70,13 @@ function Loader() {
 }
 
 function getMultiplayerUrl(): string {
+  const configuredUrl = process.env.NEXT_PUBLIC_MULTIPLAYER_URL || "";
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+
   if (typeof window === "undefined") return "ws://localhost:3001";
 
-  const configuredUrl = process.env.NEXT_PUBLIC_MULTIPLAYER_URL || "";
   const isLocalhost =
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1";
@@ -81,10 +85,6 @@ function getMultiplayerUrl(): string {
 
   if (isLocalhost) {
     return `${wsProtocol}//localhost:3001`;
-  }
-
-  if (configuredUrl) {
-    return configuredUrl;
   }
 
   return `${wsProtocol}//${window.location.hostname}:3001`;
