@@ -145,21 +145,8 @@ export function DistrictLyriaAudio({
 
   // Update master gain when volume prop changes
   useEffect(() => {
-    console.log(`[DistrictLyria] Lyria volume prop changed to: ${volume}, masterGain exists: ${!!masterGainRef.current}`);
-
     if (masterGainRef.current && typeof volume !== 'undefined') {
-      const previousValue = masterGainRef.current.gain.value;
       masterGainRef.current.gain.value = volume;
-      console.log(`[DistrictLyria] Master gain updated from ${previousValue} to: ${volume}`);
-
-      // Verify the change was applied
-      setTimeout(() => {
-        if (masterGainRef.current) {
-          console.log(`[DistrictLyria] Verified master gain is now: ${masterGainRef.current.gain.value}`);
-        }
-      }, 10);
-    } else {
-      console.log(`[DistrictLyria] Cannot update master gain - masterGain exists: ${!!masterGainRef.current}, volume defined: ${typeof volume !== 'undefined'}`);
     }
   }, [volume]);
 

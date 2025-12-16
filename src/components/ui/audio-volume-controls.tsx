@@ -16,17 +16,14 @@ export function AudioVolumeControls() {
   } = useVolume();
 
   const handleSpatialVolumeChange = (value: number[]) => {
-    console.log(`[AudioVolumeControls] Setting spatial volume to: ${value[0]}`);
     setSpatialVolume(value[0]);
   };
 
   const handleLyriaVolumeChange = (value: number[]) => {
-    console.log(`[AudioVolumeControls] Setting lyria volume to: ${value[0]}`);
     setLyriaVolume(value[0]);
   };
 
   const handleAmbientVolumeChange = (value: number[]) => {
-    console.log(`[AudioVolumeControls] Setting ambient volume to: ${value[0]}`);
     setAmbientVolume(value[0]);
   };
 

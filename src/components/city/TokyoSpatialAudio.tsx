@@ -428,28 +428,17 @@ export function TokyoSpatialAudio({
 
   // Update volume when volume prop changes for all playing audio
   useEffect(() => {
-    console.log(`[SpatialAudio] Volume prop changed to: ${volume}, enabled: ${enabled}, contextResumed: ${contextResumed}`);
-
     if (!enabled || !contextResumed) {
-      console.log(`[SpatialAudio] Skipping volume update - enabled: ${enabled}, contextResumed: ${contextResumed}`);
       return;
     }
 
     const states = audioStatesRef.current;
-    console.log(`[SpatialAudio] Updating volume for ${states.length} audio states, volume: ${volume}`);
 
     for (const state of states) {
-      console.log(`[SpatialAudio] Checking state for ${state.source.id}, isPlaying: ${state.isPlaying}, hasAudio: ${!!state.audio}`);
       if (state.isPlaying && state.audio) {
         // Update the volume of currently playing audio
         const effectiveVolume = typeof volume !== 'undefined' ? volume : state.source.volume;
-        // For Three.js PositionalAudio, we don't have a direct way to get the current volume
-        // but we can access the gain node through the .filter or .gain property if available
-        console.log(`[SpatialAudio] About to set volume for ${state.source.id} to: ${effectiveVolume}`);
         state.audio.setVolume(effectiveVolume);
-        console.log(`[SpatialAudio] Updated volume for ${state.source.id} to: ${effectiveVolume}`);
-      } else {
-        console.log(`[SpatialAudio] Skipped ${state.source.id} - isPlaying: ${state.isPlaying}, hasAudio: ${!!state.audio}`);
       }
     }
   }, [volume, enabled, contextResumed]);

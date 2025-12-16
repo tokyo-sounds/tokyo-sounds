@@ -408,8 +408,6 @@ export function AmbientBackgroundAudio({
 
   // Effect to handle master volume changes specifically
   useEffect(() => {
-    console.log(`[AmbientBackgroundAudio] Master volume changed to: ${masterVolume}, audio exists: ${!!audioRef.current}`);
-
     // Update the ref to track the current master volume
     masterVolumeRef.current = masterVolume;
 
@@ -426,15 +424,6 @@ export function AmbientBackgroundAudio({
       const previousVolume = audioRef.current.volume;
       audioRef.current.volume = finalVolume;
       lastVolumeRef.current = finalVolume;
-
-      console.log(`[AmbientBackgroundAudio] Master volume change: ${previousVolume} → ${finalVolume} (height-based: ${heightBasedVolume})`);
-
-      // Verify the change was applied
-      setTimeout(() => {
-        if (audioRef.current) {
-          console.log(`[AmbientBackgroundAudio] Verified volume after master volume change: ${audioRef.current.volume}`);
-        }
-      }, 10);
     }
   }, [masterVolume]);
 

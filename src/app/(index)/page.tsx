@@ -152,18 +152,6 @@ export default function TokyoPage() {
   const [lyriaVolume, setLyriaVolume] = useState(1.0);
   const [ambientVolume, setAmbientVolume] = useState(1.0);
 
-  // Log volume changes
-  useEffect(() => {
-    console.log(`[TokyoPage] Spatial Volume changed to: ${spatialVolume}`);
-  }, [spatialVolume]);
-
-  useEffect(() => {
-    console.log(`[TokyoPage] Lyria Volume changed to: ${lyriaVolume}`);
-  }, [lyriaVolume]);
-
-  useEffect(() => {
-    console.log(`[TokyoPage] Ambient Volume changed to: ${ambientVolume}`);
-  }, [ambientVolume]);
 
   const [debugOptions, setDebugOptions] = useState<DebugOptions>({
     showMeshes: true,
