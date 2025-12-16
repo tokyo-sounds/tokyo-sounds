@@ -147,7 +147,7 @@ export default function DebugMenu({
               <AmbientAudioControl />
             </div>
             <div className="flex-1">
-              <DebugMenuLabel>AI生成音楽</DebugMenuLabel>
+              <DebugMenuLabel>地域パラメーター</DebugMenuLabel>
               {/* District Debug Panel Section */}
               {generativeEnabled && districts.length > 0 ? (
                 <DistrictDebugContent districts={districts} />
