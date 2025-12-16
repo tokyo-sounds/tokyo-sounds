@@ -201,6 +201,9 @@ export interface AudioSession {
     dispose(): void;
     on(event: AudioSessionEvent, handler: (...args: any[]) => void): void;
     off(event: AudioSessionEvent, handler: (...args: any[]) => void): void;
+    getSpatialVolume(): number;
+    getLyriaVolume(): number;
+    getAmbientVolume(): number;
 }
 
 interface ParamConstraint {
@@ -833,11 +836,29 @@ class AudioSessionImpl implements AudioSession {
     private previewNodes: Set<string> = new Set();
     private bufferCache: Map<string, { buffer: AudioBuffer; timestamp: number; size: number }> = new Map();
     private maxCacheSize = 200 * 1024 * 1024; // 200MB max cache
+    private spatialGainNode: GainNode;
+    private lyriaGainNode: GainNode;
+    private ambientGainNode: GainNode;
 
     constructor(spec: GraphSpec, registry: Map<string, RuntimeNode>, context: BaseAudioContext) {
         this.spec = spec;
         this.registry = registry;
         this.context = context;
+
+        // Create dedicated gain nodes for different audio types
+        this.spatialGainNode = context.createGain();
+        this.lyriaGainNode = context.createGain();
+        this.ambientGainNode = context.createGain();
+
+        // Set default volume levels
+        this.spatialGainNode.gain.value = 1.0;
+        this.lyriaGainNode.gain.value = 1.0;
+        this.ambientGainNode.gain.value = 1.0;
+
+        // Connect all gain nodes to destination
+        this.spatialGainNode.connect(context.destination);
+        this.lyriaGainNode.connect(context.destination);
+        this.ambientGainNode.connect(context.destination);
     }
 
     serialize(): GraphSpec {
@@ -2095,6 +2116,69 @@ class AudioSessionImpl implements AudioSession {
                 this.removeNode(change.id);
             }
         }
+    }
+
+    /**
+     * Set the spatial audio volume
+     * @param volume - Volume level between 0.0 (muted) and 1.0 (full volume)
+     */
+    setSpatialVolume(volume: number): void {
+        // Clamp the volume between 0 and a reasonable maximum (4.0 to match existing gain constraints)
+        const clampedVolume = Math.max(0, Math.min(4, volume));
+        this.spatialGainNode.gain.value = clampedVolume;
+        if (DEBUG_AUDIO) {
+            console.log(`[lib/audio.ts/setSpatialVolume] Spatial volume set to ${clampedVolume}`);
+        }
+    }
+
+    /**
+     * Set the Lyria audio volume
+     * @param volume - Volume level between 0.0 (muted) and 1.0 (full volume)
+     */
+    setLyriaVolume(volume: number): void {
+        // Clamp the volume between 0 and a reasonable maximum (4.0 to match existing gain constraints)
+        const clampedVolume = Math.max(0, Math.min(4, volume));
+        this.lyriaGainNode.gain.value = clampedVolume;
+        if (DEBUG_AUDIO) {
+            console.log(`[lib/audio.ts/setLyriaVolume] Lyria volume set to ${clampedVolume}`);
+        }
+    }
+
+    /**
+     * Set the ambient audio volume
+     * @param volume - Volume level between 0.0 (muted) and 1.0 (full volume)
+     */
+    setAmbientVolume(volume: number): void {
+        // Clamp the volume between 0 and a reasonable maximum (4.0 to match existing gain constraints)
+        const clampedVolume = Math.max(0, Math.min(4, volume));
+        this.ambientGainNode.gain.value = clampedVolume;
+        if (DEBUG_AUDIO) {
+            console.log(`[lib/audio.ts/setAmbientVolume] Ambient volume set to ${clampedVolume}`);
+        }
+    }
+
+    /**
+     * Get the current spatial audio volume
+     * @returns Current spatial audio volume level
+     */
+    getSpatialVolume(): number {
+        return this.spatialGainNode.gain.value;
+    }
+
+    /**
+     * Get the current Lyria audio volume
+     * @returns Current Lyria audio volume level
+     */
+    getLyriaVolume(): number {
+        return this.lyriaGainNode.gain.value;
+    }
+
+    /**
+     * Get the current ambient audio volume
+     * @returns Current ambient audio volume level
+     */
+    getAmbientVolume(): number {
+        return this.ambientGainNode.gain.value;
     }
 }
 
