@@ -39,7 +39,7 @@ export interface DistrictDebugInfo {
 interface DistrictLyriaAudioProps {
   apiKey: string;
   enabled?: boolean;
-  volume?: number;
+  volume?: number; // Master volume for Lyria audio
   onStatusUpdate?: (status: string) => void;
   onDebugUpdate?: (districts: DistrictDebugInfo[]) => void;
   onCurrentDistrictChange?: (district: District | null) => void;
@@ -143,6 +143,26 @@ export function DistrictLyriaAudio({
     }
   }, [currentTime]);
 
+  // Update master gain when volume prop changes
+  useEffect(() => {
+    console.log(`[DistrictLyria] Lyria volume prop changed to: ${volume}, masterGain exists: ${!!masterGainRef.current}`);
+
+    if (masterGainRef.current && typeof volume !== 'undefined') {
+      const previousValue = masterGainRef.current.gain.value;
+      masterGainRef.current.gain.value = volume;
+      console.log(`[DistrictLyria] Master gain updated from ${previousValue} to: ${volume}`);
+
+      // Verify the change was applied
+      setTimeout(() => {
+        if (masterGainRef.current) {
+          console.log(`[DistrictLyria] Verified master gain is now: ${masterGainRef.current.gain.value}`);
+        }
+      }, 10);
+    } else {
+      console.log(`[DistrictLyria] Cannot update master gain - masterGain exists: ${!!masterGainRef.current}, volume defined: ${typeof volume !== 'undefined'}`);
+    }
+  }, [volume]);
+
   useEffect(() => {
     // Initialize weights using basic data (lightweight)
     TOKYO_DISTRICTS_BASIC.forEach((d) => {
@@ -181,13 +201,16 @@ export function DistrictLyriaAudio({
   const initAudioRouting = (audioContext: AudioContext) => {
     if (!masterGainRef.current) {
       masterGainRef.current = audioContext.createGain();
-      masterGainRef.current.gain.value = volume;
+      // Use the volume prop if provided, otherwise default to 0.5
+      masterGainRef.current.gain.value = typeof volume !== 'undefined' ? volume : 0.5;
       masterGainRef.current.connect(audioContext.destination);
+      console.log(`[DistrictLyria] Master gain initialized to: ${masterGainRef.current.gain.value}`);
     }
 
     const newGain = audioContext.createGain();
     newGain.gain.value = isFirstSessionRef.current ? 1.0 : 0.0;
     newGain.connect(masterGainRef.current);
+    console.log(`[DistrictLyria] Initial gain set to: ${newGain.gain.value}`);
 
     if (newGainRef.current && !isFirstSessionRef.current) {
       oldGainRef.current = newGainRef.current;

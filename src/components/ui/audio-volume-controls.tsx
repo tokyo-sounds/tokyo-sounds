@@ -1,24 +1,32 @@
 "use client";
 
 import React from "react";
-import { useSpatialVolume, useLyriaVolume, useAmbientVolume } from "@/hooks/useAudio";
+import { useVolume } from "@/app/(index)/page"; // Import from the main page
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 
 export function AudioVolumeControls() {
-  const [spatialVolume, setSpatialVolume] = useSpatialVolume();
-  const [lyriaVolume, setLyriaVolume] = useLyriaVolume();
-  const [ambientVolume, setAmbientVolume] = useAmbientVolume();
+  const {
+    spatialVolume,
+    lyriaVolume,
+    ambientVolume,
+    setSpatialVolume,
+    setLyriaVolume,
+    setAmbientVolume
+  } = useVolume();
 
   const handleSpatialVolumeChange = (value: number[]) => {
+    console.log(`[AudioVolumeControls] Setting spatial volume to: ${value[0]}`);
     setSpatialVolume(value[0]);
   };
 
   const handleLyriaVolumeChange = (value: number[]) => {
+    console.log(`[AudioVolumeControls] Setting lyria volume to: ${value[0]}`);
     setLyriaVolume(value[0]);
   };
 
   const handleAmbientVolumeChange = (value: number[]) => {
+    console.log(`[AudioVolumeControls] Setting ambient volume to: ${value[0]}`);
     setAmbientVolume(value[0]);
   };
 
