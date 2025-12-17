@@ -201,6 +201,9 @@ export interface AudioSession {
     dispose(): void;
     on(event: AudioSessionEvent, handler: (...args: any[]) => void): void;
     off(event: AudioSessionEvent, handler: (...args: any[]) => void): void;
+    setSpatialVolume(volume: number): void;
+    setLyriaVolume(volume: number): void;
+    setAmbientVolume(volume: number): void;
     getSpatialVolume(): number;
     getLyriaVolume(): number;
     getAmbientVolume(): number;
