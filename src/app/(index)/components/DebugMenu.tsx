@@ -96,8 +96,9 @@ export default function DebugMenu({
         <TooltipTrigger asChild>
           <SheetTrigger asChild>
             <Button
+              aria-label="メニュー"
               variant="ghost"
-              className="absolute top-4 left-4 text-white/70 text-shadow-sm hover:text-white text-xs font-mono"
+              className="absolute top-4 left-4 text-white/70 text-shadow-sm hover:text-white text-xs font-mono pointer-events-auto"
             >
               <Settings className="size-4" />
             </Button>
@@ -152,7 +153,7 @@ export default function DebugMenu({
               <AudioVolumeControls />
             </div>
             <div className="flex-1">
-              <DebugMenuLabel>AI生成音楽</DebugMenuLabel>
+              <DebugMenuLabel>地域パラメーター</DebugMenuLabel>
               {/* District Debug Panel Section */}
               {generativeEnabled && districts.length > 0 ? (
                 <DistrictDebugContent districts={districts} />

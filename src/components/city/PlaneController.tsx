@@ -93,6 +93,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   onCollision,
   localPlayerPositionRef,
   localPlayerQuaternionRef,
+  onPlanePositionChange,
   demoEnabled = true,
   onDemoStateChange,
   onDemoWaypointReached,
@@ -310,6 +311,8 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     if (localPlayerQuaternionRef?.current) {
       localPlayerQuaternionRef.current.copy(virtualCam.quaternion);
     }
+
+    onPlanePositionChange?.(virtualCam.position, virtualCam.quaternion);
 
     const isSimpleMode = currentMode === "simple";
 

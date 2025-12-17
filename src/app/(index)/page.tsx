@@ -91,9 +91,16 @@ function Loader() {
 }
 
 function getMultiplayerUrl(): string {
+  // Check env var first - it's available on both server and client
+  const configuredUrl = process.env.NEXT_PUBLIC_MULTIPLAYER_URL || "";
+  if (configuredUrl) {
+    return configuredUrl;
+  }
+
+  // Fallback for SSR when no env var is set
   if (typeof window === "undefined") return "ws://localhost:3001";
 
-  const configuredUrl = process.env.NEXT_PUBLIC_MULTIPLAYER_URL || "";
+  // Fallback: use localhost for local dev, else hostname
   const isLocalhost =
     window.location.hostname === "localhost" ||
     window.location.hostname === "127.0.0.1";
@@ -102,10 +109,6 @@ function getMultiplayerUrl(): string {
 
   if (isLocalhost) {
     return `${wsProtocol}//localhost:3001`;
-  }
-
-  if (configuredUrl) {
-    return configuredUrl;
   }
 
   return `${wsProtocol}//${window.location.hostname}:3001`;
@@ -181,6 +184,11 @@ export default function TokyoPage() {
   const planeControllerRef = useRef<PlaneControllerHandle | null>(null);
   const localPlayerPositionRef = useRef(new THREE.Vector3(0, 200, 100));
   const localPlayerQuaternionRef = useRef(new THREE.Quaternion());
+  
+  const [localPlayerPositionState, setLocalPlayerPositionState] = useState(
+    () => new THREE.Vector3(0, 200, 100)
+  );
+  const lastPositionUpdateRef = useRef(0);
 
   const {
     enabled: generativeEnabled,
@@ -319,6 +327,12 @@ export default function TokyoPage() {
     (position: THREE.Vector3, quaternion: THREE.Quaternion) => {
       localPlayerPositionRef.current.copy(position);
       localPlayerQuaternionRef.current.copy(quaternion);
+
+      const now = Date.now();
+      if (now - lastPositionUpdateRef.current > 100) {
+        lastPositionUpdateRef.current = now;
+        setLocalPlayerPositionState(position.clone());
+      }
 
       sendMultiplayerUpdate({
         position: { x: position.x, y: position.y, z: position.z },
@@ -509,6 +523,8 @@ export default function TokyoPage() {
             heading={heading}
             speedoMeterSize={speedoMeterSize}
             isMobile={isMobile}
+            nearbyPlayers={nearbyPlayers}
+            localPlayerPosition={localPlayerPositionState}
           />
         )}
 
