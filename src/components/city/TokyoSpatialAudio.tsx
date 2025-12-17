@@ -4,6 +4,9 @@
  * TokyoSpatialAudio Component
  * Places spatial audio sources around Tokyo based on real-world coordinates
  * Uses distance-based culling to only play nearby sounds
+ * 
+ * Supports both hand-placed sources (from config) and procedural sources
+ * when enableProcedural is true.
  */
 
 import { useRef, useEffect, useState, useMemo, useCallback } from "react";
@@ -15,16 +18,33 @@ import {
   type SpatialAudioSource,
 } from "@/config/tokyo-config";
 import { latLngAltToENU } from "@/lib/geo-utils";
+import { useProceduralSources } from "@/hooks/useProceduralSources";
 
-const CULL_DISTANCE_MULTIPLIER = 1.5; // Start playing when within maxDistance * this
-const HYSTERESIS = 0.8; // Resume distance = cull distance * this (prevents rapid on/off)
+const CULL_DISTANCE_MULTIPLIER = 3.0; // maxDistance * this
+const HYSTERESIS = 0.6; // Resume distance = cull distance * this
+const FADE_OUT_DURATION_MS = 2000; // 2 seconds
+
+// Gain-based culling thresholds
+// With refDistance=20, rolloff=8.0, volume=0.6:
+//   - 50m  → gain ~4.6%
+//   - 100m → gain ~1.8%
+//   - 150m → gain ~1.1%
+//   - 200m → gain ~0.8%
+const CULL_GAIN_THRESHOLD = 0.008; // Cull when gain drops below 0.8% (~200m)
+const RESUME_GAIN_THRESHOLD = 0.015; // Resume when gain above 1.5% (~120m)
+const ROLLOFF_FACTOR = 8.0;
+
+const MIN_PLAY_DURATION_MS = 3000; // 3 secs
+const HIGH_SPEED_THRESHOLD = 50; // m/s (~180 km/h)
+const HIGH_SPEED_MIN_PLAY_DURATION_MS = 5000; // 5 secs
 
 // Lazy loading configuration
 const PRELOAD_DISTANCE_MULTIPLIER = 2.0; // Load audio when within maxDistance * this
-const UNLOAD_DISTANCE_MULTIPLIER = 3.0; // Unload audio when beyond maxDistance * this
+const UNLOAD_DISTANCE_MULTIPLIER = 4.0; // Unload audio when beyond maxDistance * this
 const MAX_CONCURRENT_LOADS = 3; // Maximum simultaneous audio file downloads
-const MAX_BUFFER_CACHE_SIZE_MB = 50; // Maximum total buffer cache size in MB
-const BUFFER_UNLOAD_IDLE_TIME_MS = 60000; // Unload buffers not used in last 60 seconds
+const MAX_BUFFER_CACHE_SIZE_MB = 200; // Cache size in MB
+const BUFFER_UNLOAD_IDLE_TIME_MS = 30000; // Unload buffers not used in last 30 seconds
+const CACHE_EVICTION_TARGET_RATIO = 0.7; // When evicting, reduce to 70% of max
 
 // Priority thresholds (distance multipliers from maxDistance)
 const HIGH_PRIORITY_DISTANCE = 1.5; // Immediate playback range
@@ -32,6 +52,21 @@ const MEDIUM_PRIORITY_DISTANCE = 2.5; // Preload for upcoming area
 const LOW_PRIORITY_DISTANCE = 4.0; // Background preload
 
 type LoadingState = "not_loaded" | "loading" | "loaded" | "unloaded";
+
+/**
+ * Global audio buffer cache - shared across all TokyoSpatialAudio instances
+ * Prevents re-fetching the same audio files for different sources
+ */
+interface CachedBuffer {
+  buffer: AudioBuffer;
+  sizeMB: number;
+  refCount: number;
+  lastUsedTime: number;
+}
+
+const globalBufferCache = new Map<string, CachedBuffer>();
+const globalLoadingPromises = new Map<string, Promise<AudioBuffer>>();
+let globalCacheSizeMB = 0;
 
 interface AudioSourceState {
   source: SpatialAudioSource;
@@ -43,16 +78,21 @@ interface AudioSourceState {
   error: string | null;
   lastUsedTime: number; // Timestamp when buffer was last used
   bufferSizeMB: number; // Size of buffer in MB
+  playStartTime: number;
 }
 
 export interface TokyoSpatialAudioProps {
   enabled?: boolean;
   showDebug?: boolean;
+  enableProcedural?: boolean;
+  additionalSources?: SpatialAudioSource[];
   volume?: number; // Volume control for spatial audio (0.0 to 1.0)
   onStatsUpdate?: (stats: {
     total: number;
     active: number;
     culled: number;
+    handPlaced: number;
+    procedural: number;
   }) => void;
 }
 
@@ -122,6 +162,8 @@ function DebugMarker({
 export function TokyoSpatialAudio({
   enabled = true,
   showDebug = false,
+  enableProcedural = false,
+  additionalSources = [],
   volume,
   onStatsUpdate,
 }: TokyoSpatialAudioProps) {
@@ -129,6 +171,14 @@ export function TokyoSpatialAudio({
   const [listener, setListener] = useState<THREE.AudioListener | null>(null);
   const [contextResumed, setContextResumed] = useState(false);
   const [audioStates, setAudioStates] = useState<AudioSourceState[]>([]);
+
+  const proceduralSources = useProceduralSources({
+    enabled: enabled && enableProcedural,
+  });
+
+  const allAdditionalSources = useMemo(() => {
+    return [...additionalSources, ...proceduralSources];
+  }, [additionalSources, proceduralSources]);
 
   const audioStatesRef = useRef<AudioSourceState[]>([]);
   const groupRef = useRef<THREE.Group>(null);
@@ -138,7 +188,6 @@ export function TokyoSpatialAudio({
   // Loading queue management
   const loadingQueueRef = useRef<Set<string>>(new Set()); // IDs currently loading
   const loaderRef = useRef<THREE.AudioLoader | null>(null);
-  const totalBufferSizeMBRef = useRef(0); // Track total buffer cache size
 
   const initialStates = useMemo(() => {
     return TOKYO_SPATIAL_AUDIO_SOURCES.map((source) => {
@@ -160,6 +209,7 @@ export function TokyoSpatialAudio({
         error: null,
         lastUsedTime: 0,
         bufferSizeMB: 0,
+        playStartTime: 0,
       } as AudioSourceState;
     });
   }, []);
@@ -222,9 +272,11 @@ export function TokyoSpatialAudio({
           groupRef.current?.remove(state.audio);
           state.audio = null;
         }
-        // Clear buffer and update cache size
         if (state.buffer) {
-          totalBufferSizeMBRef.current -= state.bufferSizeMB;
+          const cached = globalBufferCache.get(state.source.src);
+          if (cached) {
+            cached.refCount = Math.max(0, cached.refCount - 1);
+          }
           state.buffer = null;
           state.bufferSizeMB = 0;
         }
@@ -233,8 +285,74 @@ export function TokyoSpatialAudio({
     };
   }, [listener, contextResumed, initialStates]);
 
+  const additionalSourcesMapRef = useRef<Map<string, AudioSourceState>>(new Map());
+  
+  useEffect(() => {
+    if (!listener || !contextResumed) return;
+
+    const currentIds = new Set(allAdditionalSources.map((s) => s.id));
+    const existingIds = new Set(additionalSourcesMapRef.current.keys());
+
+    for (const id of existingIds) {
+      if (!currentIds.has(id)) {
+        const state = additionalSourcesMapRef.current.get(id);
+        if (state) {
+          if (state.audio) {
+            if (state.audio.isPlaying) {
+              state.audio.stop();
+            }
+            state.audio.disconnect();
+            groupRef.current?.remove(state.audio);
+          }
+          if (state.buffer) {
+            const cached = globalBufferCache.get(state.source.src);
+            if (cached) {
+              cached.refCount = Math.max(0, cached.refCount - 1);
+            }
+          }
+          additionalSourcesMapRef.current.delete(id);
+        }
+      }
+    }
+
+    for (const source of allAdditionalSources) {
+      if (!additionalSourcesMapRef.current.has(source.id)) {
+        const pos = latLngAltToENU(
+          source.lat,
+          source.lng,
+          source.alt,
+          TOKYO_CENTER.lat,
+          TOKYO_CENTER.lng,
+          0
+        );
+        const newState: AudioSourceState = {
+          source,
+          position: new THREE.Vector3(pos.x, pos.y, pos.z),
+          buffer: null,
+          audio: null,
+          isPlaying: false,
+          loadingState: "not_loaded" as LoadingState,
+          error: null,
+          lastUsedTime: 0,
+          bufferSizeMB: 0,
+          playStartTime: 0,
+        };
+        additionalSourcesMapRef.current.set(source.id, newState);
+      }
+    }
+
+    const allStates = [
+      ...initialStates,
+      ...Array.from(additionalSourcesMapRef.current.values()),
+    ];
+    audioStatesRef.current = allStates;
+  }, [listener, contextResumed, allAdditionalSources, initialStates]);
+
   /**
    * Calculate buffer size in MB
+   * 
+   * @param buffer - The audio buffer.
+   * @returns The buffer size in MB.
    */
   const calculateBufferSizeMB = useCallback((buffer: AudioBuffer): number => {
     // Float32 samples = 4 bytes per sample
@@ -242,49 +360,109 @@ export function TokyoSpatialAudio({
     return bytes / (1024 * 1024);
   }, []);
 
-  const stopAudio = useCallback((state: AudioSourceState) => {
-    if (!state.audio || !state.isPlaying) return;
-
-    try {
-      if (state.audio.isPlaying) {
-        state.audio.stop();
-      }
-      state.audio.disconnect();
-      groupRef.current?.remove(state.audio);
-    } catch (err) {
-      console.error(`[SpatialAudio] Error stopping ${state.source.id}:`, err);
-    }
-
-    state.audio = null;
-    state.isPlaying = false;
-    console.log(`[SpatialAudio] Stopped: ${state.source.id}`);
+  /**
+   * Calculate the perceived gain at a given distance using inverse distance model
+   * Formula: gain = refDistance / (refDistance + rolloffFactor * (distance - refDistance))
+   * This matches Web Audio API's inverse distance model
+   * 
+   * @param distance - The distance from the listener to the audio source.
+   * @param refDistance - The reference distance of the audio source.
+   * @param volume - The volume of the audio source.
+   * @returns The perceived gain at the given distance.
+   */
+  const calculateGainAtDistance = useCallback((distance: number, refDistance: number, volume: number): number => {
+    if (distance <= refDistance) return volume;
+    const gain = refDistance / (refDistance + ROLLOFF_FACTOR * (distance - refDistance));
+    return gain * volume;
   }, []);
 
   /**
-   * Unload audio source to free memory
+   * Stop audio with a smooth fade-out to prevent abrupt cutoffs
+   * 
+   * @param state - The audio source state.
+   * @param immediate - Whether to stop the audio immediately.
+   * @returns void.
+   */
+  const stopAudio = useCallback((state: AudioSourceState, immediate = false) => {
+    if (!state.audio || !state.isPlaying) return;
+
+    const audio = state.audio;
+    const gainNode = audio.gain;
+
+    state.isPlaying = false;
+
+    if (immediate || !gainNode) {
+      try {
+        if (audio.isPlaying) {
+          audio.stop();
+        }
+        audio.disconnect();
+        groupRef.current?.remove(audio);
+      } catch (err) {
+        console.error(`[SpatialAudio] Error stopping ${state.source.id}:`, err);
+      }
+      state.audio = null;
+      console.log(`[SpatialAudio] Stopped: ${state.source.id}`);
+    } else {
+      const currentVolume = gainNode.gain.value;
+      const fadeOutSeconds = FADE_OUT_DURATION_MS / 1000;
+      
+      gainNode.gain.setValueAtTime(currentVolume, audio.context.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0, audio.context.currentTime + fadeOutSeconds);
+      
+      setTimeout(() => {
+        try {
+          if (audio.isPlaying) {
+            audio.stop();
+          }
+          audio.disconnect();
+          groupRef.current?.remove(audio);
+        } catch (err) {
+        }
+        if (state.audio === audio) {
+          state.audio = null;
+        }
+        console.log(`[SpatialAudio] Faded out: ${state.source.id}`);
+      }, FADE_OUT_DURATION_MS + 100);
+    }
+  }, []);
+
+  /**
+   * Unload audio source - decrements refCount in global cache
+   * 
+   * @param state - The audio source state.
+   * @returns void.
    */
   const unloadAudioSource = useCallback(
     (state: AudioSourceState) => {
       if (state.loadingState !== "loaded" || !state.buffer) return;
 
-      // Stop playing if active
       if (state.isPlaying && state.audio) {
-        stopAudio(state);
+        stopAudio(state, true);
       }
 
-      // Free buffer memory
-      totalBufferSizeMBRef.current -= state.bufferSizeMB;
+      const srcUrl = state.source.src;
+      const cached = globalBufferCache.get(srcUrl);
+      if (cached) {
+        cached.refCount = Math.max(0, cached.refCount - 1);
+        cached.lastUsedTime = Date.now();
+      }
+
       state.buffer = null;
       state.bufferSizeMB = 0;
       state.loadingState = "unloaded";
       state.lastUsedTime = 0;
-      console.log(`[SpatialAudio] Unloaded: ${state.source.id}`);
+      console.log(`[SpatialAudio] Unloaded source: ${state.source.id} (buffer still cached)`);
     },
     [stopAudio]
   );
 
   /**
-   * Load audio source with priority support
+   * Load audio source with priority support and global buffer caching
+   * 
+   * @param state - The audio source state.
+   * @param priority - The priority of the audio source.
+   * @returns void.
    */
   const loadAudioSource = useCallback(
     (state: AudioSourceState, priority: "high" | "medium" | "low") => {
@@ -296,26 +474,75 @@ export function TokyoSpatialAudio({
         return;
       }
 
+      const srcUrl = state.source.src;
+
+      const cached = globalBufferCache.get(srcUrl);
+      if (cached) {
+        cached.refCount++;
+        cached.lastUsedTime = Date.now();
+        state.buffer = cached.buffer;
+        state.bufferSizeMB = cached.sizeMB;
+        state.loadingState = "loaded";
+        state.lastUsedTime = Date.now();
+        state.error = null;
+        console.log(
+          `[SpatialAudio] Reused cached buffer for ${state.source.id} (${cached.sizeMB.toFixed(2)}MB, refCount=${cached.refCount})`
+        );
+        return;
+      }
+
+      const existingPromise = globalLoadingPromises.get(srcUrl);
+      if (existingPromise) {
+        state.loadingState = "loading";
+        existingPromise.then((buffer) => {
+          const cachedAfterLoad = globalBufferCache.get(srcUrl);
+          if (cachedAfterLoad) {
+            cachedAfterLoad.refCount++;
+            cachedAfterLoad.lastUsedTime = Date.now();
+            state.buffer = cachedAfterLoad.buffer;
+            state.bufferSizeMB = cachedAfterLoad.sizeMB;
+            state.loadingState = "loaded";
+            state.lastUsedTime = Date.now();
+            state.error = null;
+            console.log(
+              `[SpatialAudio] Reused buffer after wait for ${state.source.id}`
+            );
+          }
+        }).catch((err) => {
+          state.error = String(err);
+          state.loadingState = "not_loaded";
+        });
+        return;
+      }
+
       // Check concurrent load limit
       if (loadingQueueRef.current.size >= MAX_CONCURRENT_LOADS) {
         return;
       }
 
-      // Check memory limit
-      if (totalBufferSizeMBRef.current >= MAX_BUFFER_CACHE_SIZE_MB) {
-        // Try to free up space by unloading distant buffers
-        const states = audioStatesRef.current;
-        for (const s of states) {
-          if (s !== state && s.loadingState === "loaded" && !s.isPlaying) {
-            const now = Date.now();
-            if (now - s.lastUsedTime > BUFFER_UNLOAD_IDLE_TIME_MS) {
-              unloadAudioSource(s);
+      if (globalCacheSizeMB >= MAX_BUFFER_CACHE_SIZE_MB) {
+        const targetSize = MAX_BUFFER_CACHE_SIZE_MB * CACHE_EVICTION_TARGET_RATIO;
+        
+        const sortedEntries = [...globalBufferCache.entries()].sort((a, b) => {
+          if (a[1].refCount === 0 && b[1].refCount !== 0) return -1;
+          if (a[1].refCount !== 0 && b[1].refCount === 0) return 1;
+          return a[1].lastUsedTime - b[1].lastUsedTime;
+        });
+        
+        for (const [url, cached] of sortedEntries) {
+          if (cached.refCount === 0) {
+            globalCacheSizeMB -= cached.sizeMB;
+            globalBufferCache.delete(url);
+            console.log(`[SpatialAudio] Evicted LRU buffer: ${url} (freed ${cached.sizeMB.toFixed(2)}MB, cache now ${globalCacheSizeMB.toFixed(2)}MB)`);
+            
+            if (globalCacheSizeMB <= targetSize) {
               break;
             }
           }
         }
-        // Still over limit? Skip loading
-        if (totalBufferSizeMBRef.current >= MAX_BUFFER_CACHE_SIZE_MB) {
+        
+        if (globalCacheSizeMB >= MAX_BUFFER_CACHE_SIZE_MB * 1.1) {
+          console.warn(`[SpatialAudio] Cache still at ${globalCacheSizeMB.toFixed(2)}MB, skipping load for ${state.source.id}`);
           return;
         }
       }
@@ -323,55 +550,92 @@ export function TokyoSpatialAudio({
       state.loadingState = "loading";
       loadingQueueRef.current.add(state.source.id);
 
-      loaderRef.current.load(
-        state.source.src,
-        (buffer) => {
-          const bufferSizeMB = calculateBufferSizeMB(buffer);
+      const loadPromise = new Promise<AudioBuffer>((resolve, reject) => {
+        loaderRef.current!.load(
+          srcUrl,
+          (buffer) => {
+            const bufferSizeMB = calculateBufferSizeMB(buffer);
 
-          // Final memory check
-          if (
-            totalBufferSizeMBRef.current + bufferSizeMB >
-            MAX_BUFFER_CACHE_SIZE_MB
-          ) {
-            state.loadingState = "not_loaded";
-            state.error = "Memory limit exceeded";
+            if (globalCacheSizeMB + bufferSizeMB > MAX_BUFFER_CACHE_SIZE_MB) {
+              const spaceNeeded = (globalCacheSizeMB + bufferSizeMB) - (MAX_BUFFER_CACHE_SIZE_MB * CACHE_EVICTION_TARGET_RATIO);
+              let freedSpace = 0;
+              
+              const sortedEntries = [...globalBufferCache.entries()].sort((a, b) => {
+                if (a[1].refCount === 0 && b[1].refCount !== 0) return -1;
+                if (a[1].refCount !== 0 && b[1].refCount === 0) return 1;
+                return a[1].lastUsedTime - b[1].lastUsedTime;
+              });
+              
+              for (const [url, cached] of sortedEntries) {
+                if (cached.refCount === 0) {
+                  globalCacheSizeMB -= cached.sizeMB;
+                  freedSpace += cached.sizeMB;
+                  globalBufferCache.delete(url);
+                  console.log(`[SpatialAudio] Post-load eviction: ${url} (freed ${cached.sizeMB.toFixed(2)}MB)`);
+                  
+                  if (freedSpace >= spaceNeeded) break;
+                }
+              }
+              
+              if (globalCacheSizeMB + bufferSizeMB > MAX_BUFFER_CACHE_SIZE_MB * 1.2) {
+                state.loadingState = "not_loaded";
+                state.error = "Memory limit exceeded";
+                loadingQueueRef.current.delete(state.source.id);
+                globalLoadingPromises.delete(srcUrl);
+                console.warn(
+                  `[SpatialAudio] Memory limit exceeded after eviction: ${state.source.id} (need ${bufferSizeMB.toFixed(2)}MB, cache at ${globalCacheSizeMB.toFixed(2)}MB)`
+                );
+                reject(new Error("Memory limit exceeded"));
+                return;
+              }
+            }
+
+            globalBufferCache.set(srcUrl, {
+              buffer,
+              sizeMB: bufferSizeMB,
+              refCount: 1,
+              lastUsedTime: Date.now(),
+            });
+            globalCacheSizeMB += bufferSizeMB;
+
+            state.buffer = buffer;
+            state.bufferSizeMB = bufferSizeMB;
+            state.loadingState = "loaded";
+            state.lastUsedTime = Date.now();
+            state.error = null;
             loadingQueueRef.current.delete(state.source.id);
-            console.warn(
-              `[SpatialAudio] Memory limit: skipping ${state.source.id}`
+            globalLoadingPromises.delete(srcUrl);
+            console.log(
+              `[SpatialAudio] Loaded & cached: ${state.source.id} (${bufferSizeMB.toFixed(2)}MB, total cache: ${globalCacheSizeMB.toFixed(2)}MB)`
             );
-            return;
+            resolve(buffer);
+          },
+          undefined,
+          (err) => {
+            state.error = String(err);
+            state.loadingState = "not_loaded";
+            loadingQueueRef.current.delete(state.source.id);
+            globalLoadingPromises.delete(srcUrl);
+            console.error(
+              `[SpatialAudio] Failed to load ${state.source.id}:`,
+              err
+            );
+            reject(err);
           }
+        );
+      });
 
-          state.buffer = buffer;
-          state.bufferSizeMB = bufferSizeMB;
-          state.loadingState = "loaded";
-          state.lastUsedTime = Date.now();
-          state.error = null;
-          totalBufferSizeMBRef.current += bufferSizeMB;
-          loadingQueueRef.current.delete(state.source.id);
-          console.log(
-            `[SpatialAudio] Loaded: ${state.source.id} (${bufferSizeMB.toFixed(
-              2
-            )}MB)`
-          );
-        },
-        undefined,
-        (err) => {
-          state.error = String(err);
-          state.loadingState = "not_loaded";
-          loadingQueueRef.current.delete(state.source.id);
-          console.error(
-            `[SpatialAudio] Failed to load ${state.source.id}:`,
-            err
-          );
-        }
-      );
+      globalLoadingPromises.set(srcUrl, loadPromise);
     },
-    [calculateBufferSizeMB, unloadAudioSource]
+    [calculateBufferSizeMB]
   );
 
   /**
    * Get loading priority based on distance
+   * 
+   * @param distance - The distance from the listener to the audio source.
+   * @param maxDistance - The maximum distance of the audio source.
+   * @returns The loading priority.
    */
   const getLoadingPriority = useCallback(
     (
@@ -389,6 +653,14 @@ export function TokyoSpatialAudio({
     []
   );
 
+  /**
+   * Start audio
+   * 
+   * @param state - The audio source state.
+   * @returns void.
+   */
+  const startAudio = useCallback(
+    (state: AudioSourceState) => {
   const startAudio = useCallback((state: AudioSourceState) => {
       if (!listener || !groupRef.current || !state.buffer || state.isPlaying)
         return;
@@ -397,7 +669,7 @@ export function TokyoSpatialAudio({
 
       audio.setBuffer(state.buffer);
       audio.setRefDistance(state.source.refDistance);
-      audio.setRolloffFactor(1.5);
+      audio.setRolloffFactor(ROLLOFF_FACTOR);
       audio.setMaxDistance(state.source.maxDistance);
       audio.setDistanceModel("inverse");
       audio.setLoop(state.source.loop);
@@ -413,11 +685,20 @@ export function TokyoSpatialAudio({
 
       audio.position.copy(state.position);
       groupRef.current.add(audio);
+      
+      audio.updateMatrixWorld(true);
 
       try {
         audio.play();
         state.audio = audio;
         state.isPlaying = true;
+        state.lastUsedTime = Date.now();
+        state.playStartTime = Date.now();
+        
+        const worldPos = new THREE.Vector3();
+        audio.getWorldPosition(worldPos);
+        const fileName = state.source.src.split('/').pop() || state.source.src;
+        console.log(`[SpatialAudio] Started: ${state.source.id} | file: ${fileName} | loop: ${state.source.loop}`);
         state.lastUsedTime = Date.now(); // Update last used time
         console.log(`[SpatialAudio] Started: ${state.source.id} at volume: ${effectiveVolume}`);
       } catch (err) {
@@ -443,18 +724,78 @@ export function TokyoSpatialAudio({
     }
   }, [volume, enabled, contextResumed]);
 
+  const lastDebugLogRef = useRef(0);
+  
+  const lastCameraPositionRef = useRef(new THREE.Vector3());
+  const velocityRef = useRef(0);
+  const lastVelocityUpdateRef = useRef(0);
+  
   useFrame(() => {
     if (!enabled || !contextResumed) return;
 
     const now = performance.now();
+    const states = audioStatesRef.current;
+    
+    if (listener) {
+      listener.updateMatrixWorld(true);
+    }
+    
+    for (const state of states) {
+      if (state.isPlaying && state.audio) {
+        state.audio.updateMatrixWorld(true);
+      }
+    }
+    
     if (now - lastUpdateRef.current < 100) return;
+    const deltaTime = (now - lastUpdateRef.current) / 1000; // seconds
     lastUpdateRef.current = now;
 
     camera.getWorldPosition(cameraPositionRef.current);
     const camPos = cameraPositionRef.current;
+    
+    if (lastVelocityUpdateRef.current > 0) {
+      const displacement = camPos.distanceTo(lastCameraPositionRef.current);
+      const instantVelocity = deltaTime > 0 ? displacement / deltaTime : 0;
+      velocityRef.current = velocityRef.current * 0.8 + instantVelocity * 0.2;
+    }
+    lastCameraPositionRef.current.copy(camPos);
+    lastVelocityUpdateRef.current = now;
+    
+    const currentVelocity = velocityRef.current;
+    const minPlayDuration = currentVelocity > HIGH_SPEED_THRESHOLD 
+      ? HIGH_SPEED_MIN_PLAY_DURATION_MS 
+      : MIN_PLAY_DURATION_MS;
+    
+    if (now - lastDebugLogRef.current > 5000) {
+      lastDebugLogRef.current = now;
+      const playingStates = states.filter(s => s.isPlaying);
+      if (playingStates.length > 0) {
+        console.log(`[SpatialAudio Debug] Camera at (${camPos.x.toFixed(1)}, ${camPos.y.toFixed(1)}, ${camPos.z.toFixed(1)}), velocity: ${(currentVelocity * 3.6).toFixed(0)} km/h`);
+        
+        if (listener) {
+          const ctx = listener.context;
+          const webAudioListener = ctx.listener;
+          if (webAudioListener.positionX) {
+            console.log(`  WebAudio Listener: (${webAudioListener.positionX.value.toFixed(1)}, ${webAudioListener.positionY.value.toFixed(1)}, ${webAudioListener.positionZ.value.toFixed(1)})`);
+          }
+        }
+        
+        playingStates.slice(0, 3).forEach(s => {
+          const dist = camPos.distanceTo(s.position);
+          const playTime = Date.now() - s.playStartTime;
+          let pannerInfo = '';
+          if (s.audio) {
+            const panner = s.audio.getOutput() as PannerNode;
+            if (panner?.positionX) {
+              pannerInfo = ` | panner: (${panner.positionX.value.toFixed(1)}, ${panner.positionY.value.toFixed(1)}, ${panner.positionZ.value.toFixed(1)})`;
+            }
+          }
+          console.log(`  - ${s.source.id}: pos (${s.position.x.toFixed(1)}, ${s.position.y.toFixed(1)}, ${s.position.z.toFixed(1)}), dist=${dist.toFixed(1)}m, played=${(playTime/1000).toFixed(1)}s${pannerInfo}`);
+        });
+      }
+    }
 
     let activeCount = 0;
-    const states = audioStatesRef.current;
 
     // Separate states by priority for loading
     const highPriorityStates: AudioSourceState[] = [];
@@ -463,21 +804,27 @@ export function TokyoSpatialAudio({
 
     for (const state of states) {
       const distance = camPos.distanceTo(state.position);
-      const cullDistance = state.source.maxDistance * CULL_DISTANCE_MULTIPLIER;
-      const resumeDistance = cullDistance * HYSTERESIS;
       const unloadDistance =
         state.source.maxDistance * UNLOAD_DISTANCE_MULTIPLIER;
+      
+      const perceivedGain = calculateGainAtDistance(
+        distance, 
+        state.source.refDistance, 
+        state.source.volume
+      );
+      
+      const playDuration = state.isPlaying ? Date.now() - state.playStartTime : 0;
+      const hasPlayedMinimum = playDuration >= minPlayDuration;
 
-      // Handle playing/stopping audio
       if (state.isPlaying) {
-        if (distance > cullDistance) {
+        if (perceivedGain < CULL_GAIN_THRESHOLD && hasPlayedMinimum) {
           stopAudio(state);
         } else {
           activeCount++;
-          state.lastUsedTime = Date.now(); // Update last used time when playing
+          state.lastUsedTime = Date.now();
         }
       } else {
-        if (distance < resumeDistance && state.buffer) {
+        if (perceivedGain > RESUME_GAIN_THRESHOLD && state.buffer) {
           startAudio(state);
           if (state.isPlaying) activeCount++;
         }
@@ -527,10 +874,15 @@ export function TokyoSpatialAudio({
       }
     }
 
+    const handPlacedCount = TOKYO_SPATIAL_AUDIO_SOURCES.length;
+    const proceduralCount = states.length - handPlacedCount;
+
     onStatsUpdate?.({
       total: states.length,
       active: activeCount,
       culled: states.length - activeCount,
+      handPlaced: handPlacedCount,
+      procedural: proceduralCount,
     });
   });
 

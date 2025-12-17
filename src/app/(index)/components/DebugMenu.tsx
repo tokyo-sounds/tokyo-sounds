@@ -3,7 +3,6 @@ import { TimeOfDay } from "@/config/tokyo-config";
 import { type MovementMode } from "@/lib/flight";
 import { TIME_OF_DAY_PRESETS } from "@/config/tokyo-config";
 import { clearVisitedFlag } from "@/hooks/useDemoFlythrough";
-import { useAmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudioContext";
 import { LocationSearch } from "@/components/city/LocationSearch";
 import { type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import DistrictDebugContent from "./DistricDebugContent";
@@ -23,7 +22,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CodeXml, Play, Pause, Settings } from "lucide-react";
+import { CodeXml, Play, Settings } from "lucide-react";
 
 /** DebugMenu
  *

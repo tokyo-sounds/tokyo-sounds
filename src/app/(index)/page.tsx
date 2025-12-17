@@ -10,7 +10,7 @@ import { Suspense, useRef, useState, useCallback, useEffect, createContext, useC
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 // Config
-import { TOKYO_CENTER, type District, BACKGROUND_AMBIENT_MAX_HEIGHT } from "@/config/tokyo-config";
+import { TOKYO_CENTER, type District } from "@/config/tokyo-config";
 import { DebugOptions } from "./type/FlightPageTypes";
 // Components
 import DashboardToggleButton from "./components/DashboardToggleButton";
@@ -28,8 +28,6 @@ import {
 } from "@/components/city/DistrictLyriaAudio";
 import { DistrictTracker } from "@/components/city/DistrictTracker";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
-import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
-import { AmbientBackgroundAudioProvider } from "@/components/city/AmbientBackgroundAudioContext";
 import {
   PlaneController,
   type PlaneControllerHandle,
@@ -149,6 +147,8 @@ export default function TokyoPage() {
     total: 0,
     active: 0,
     culled: 0,
+    handPlaced: 0,
+    procedural: 0,
   });
   // Volume states with logging
   const [spatialVolume, setSpatialVolume] = useState(1.0);
@@ -419,6 +419,7 @@ export default function TokyoPage() {
   }
 
   return (
+    <div className="w-full h-svh bg-black relative overflow-hidden">
     <VolumeContext.Provider value={{
       spatialVolume,
       lyriaVolume,
@@ -494,6 +495,7 @@ export default function TokyoPage() {
 
             <TokyoSpatialAudio
               enabled={spatialAudioEnabled}
+              enableProcedural={spatialAudioEnabled}
               showDebug={debugOptions.showBounds}
               volume={spatialVolume} // Add dynamic spatial volume prop
               onStatsUpdate={setSpatialAudioStats}
@@ -541,6 +543,7 @@ export default function TokyoPage() {
 
         {isMobile && <VirtualController enabled={started} />}
 
+        {/* <AmbientBackgroundAudio cameraY={cameraY} maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT} enabled={started} /> */}
         <AmbientBackgroundAudio
           cameraY={cameraY}
           maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT}
@@ -583,6 +586,7 @@ export default function TokyoPage() {
           playerCount={playerCount}
         />
       </div>
+  );
     </AmbientBackgroundAudioProvider>
   </VolumeContext.Provider>
 );

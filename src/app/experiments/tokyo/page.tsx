@@ -28,8 +28,6 @@ import {
 } from "@/components/city/DistrictLyriaAudio";
 import { DistrictTracker } from "@/components/city/DistrictTracker";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
-import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
-import { AmbientBackgroundAudioProvider } from "@/components/city/AmbientBackgroundAudioContext";
 import {
   PlaneController,
   type PlaneControllerHandle,
@@ -379,8 +377,7 @@ export default function TokyoPage() {
   }
 
   return (
-    <AmbientBackgroundAudioProvider>
-      <div className="w-full h-svh bg-black relative overflow-hidden">
+    <div className="w-full h-svh bg-black relative overflow-hidden">
         <Canvas
           shadows="soft"
           camera={{
@@ -488,7 +485,7 @@ export default function TokyoPage() {
 
         {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
-        <AmbientBackgroundAudio cameraY={cameraY} enabled={started} />
+        {/* AmbientBackgroundAudio disabled - using procedural spatial audio instead */}
 
         <DebugMenu
           options={debugOptions}
@@ -525,6 +522,5 @@ export default function TokyoPage() {
           playerCount={playerCount}
         />
       </div>
-    </AmbientBackgroundAudioProvider>
   );
 }

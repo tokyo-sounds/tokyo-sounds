@@ -187,7 +187,7 @@ export function GoogleTilesScene({
   }, [collisionGroupRef, modelCount]);
 
   const handleLoadTileset = useCallback(() => {
-    console.log("[GoogleTiles] Tileset loaded!");
+    // console.log("[GoogleTiles] Tileset loaded!");
     onTilesLoaded?.();
     onStatusChange?.("Tileset loaded");
   }, [onTilesLoaded, onStatusChange]);
@@ -240,7 +240,7 @@ export function GoogleTilesScene({
     setModelCount((c) => {
       const newCount = c + 1;
       if (newCount <= 3 || newCount % 50 === 0) {
-        console.log(`[GoogleTiles] Loaded ${newCount} models`);
+        // console.log(`[GoogleTiles] Loaded ${newCount} models`);
       }
       return newCount;
     });
