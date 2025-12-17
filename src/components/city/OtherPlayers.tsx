@@ -78,7 +78,8 @@ function OtherPlayerPlane({
   localPlayerPosition,
 }: OtherPlayerPlaneProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const { scene } = useGLTF(DEFAULT_MODEL_PATH);
+  const modelPath = player.modelPath || DEFAULT_MODEL_PATH;
+  const { scene } = useGLTF(modelPath);
 
   const currentPos = useRef(
     new THREE.Vector3(player.position.x, player.position.y, player.position.z)
@@ -157,7 +158,7 @@ function OtherPlayerPlane({
     });
 
     return clone;
-  }, [scene, player.color]);
+  }, [scene, player.color, player.modelPath]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;

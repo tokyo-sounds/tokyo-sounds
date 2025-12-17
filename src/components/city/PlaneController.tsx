@@ -51,7 +51,6 @@ const PLANE_RESPONSIVENESS = 1.1; // plane turns slightly faster than camera fol
 const PLANE_SCALE = 0.15; // 15% of original size
 const DEMO_CAMERA_LAG = 0.95; // slower, more cinematic movement
 const DEFAULT_MODEL_PATH = "/models/plane_balance.glb";
-const SPEED_MODEL_PATH = "/models/plane_speed.glb";
 
 interface PlaneControllerProps {
   onSpeedChange?: (speed: number) => void;
@@ -75,6 +74,7 @@ interface PlaneControllerProps {
   onDemoComplete?: () => void;
   onGyroStateChange?: (state: GyroState) => void;
   planeColor?: string;
+  modelPath?: string;
 }
 
 const COLLISION_DISTANCE = 2;
@@ -100,14 +100,15 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   onDemoComplete,
   onGyroStateChange,
   planeColor,
+  modelPath,
 }, ref) {
   const { camera } = useThree();
   const planeRef = useRef<THREE.Group>(null);
   const frameCountRef = useRef(0);
 
   const [isBoosting, setIsBoosting] = useState(false);
-  const { scene: defaultScene } = useGLTF(DEFAULT_MODEL_PATH);
-  const { scene: speedScene } = useGLTF(SPEED_MODEL_PATH);
+  const selectedModelPath = modelPath ?? DEFAULT_MODEL_PATH;
+  const { scene } = useGLTF(selectedModelPath);
 
   const virtualCameraRef = useRef<THREE.Object3D>(new THREE.Object3D());
   const smoothCameraPos = useRef(new THREE.Vector3(0, 200, 100));
@@ -479,8 +480,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   );
 
   const coloredScene = useMemo(() => {
-    const activeScene = isBoosting ? speedScene : defaultScene;
-    const clone = activeScene.clone();
+    const clone = scene.clone();
 
     if (planeColor) {
       clone.traverse((child) => {
@@ -505,7 +505,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     }
 
     return clone;
-  }, [isBoosting, speedScene, defaultScene, planeColor]);
+  }, [scene, planeColor]);
 
   const isDemoActive = demoState.active;
   const showPlane = !isDemoActive && currentMode === "elytra";
@@ -524,4 +524,3 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
 });
 
 useGLTF.preload(DEFAULT_MODEL_PATH);
-useGLTF.preload(SPEED_MODEL_PATH);

@@ -36,6 +36,7 @@ interface PlayerState {
   id: string;
   name: string;
   color: string;
+  modelPath: string;
   position: Position3D;
   quaternion: Quaternion;
   heading: number;
@@ -49,6 +50,7 @@ interface JoinMessage {
   type: "join";
   name: string;
   color: string;
+  modelPath: string;
 }
 
 interface UpdateMessage {
@@ -107,10 +109,17 @@ function getNearbyPlayers(playerId: string, radius: number): PlayerState[] {
 }
 
 function handleJoin(ws: WebSocket, playerId: string, message: JoinMessage): void {
+  // Validate modelPath to prevent path traversal attacks
+  let modelPath = message.modelPath || "/models/plane_balance.glb";
+  if (!modelPath.startsWith("/models/") || modelPath.includes("..")) {
+    modelPath = "/models/plane_balance.glb";
+  }
+
   const player: PlayerState = {
     id: playerId,
     name: message.name || "Anonymous",
     color: message.color || "#BAE1FF",
+    modelPath,
     position: { x: 0, y: 200, z: 0 },
     quaternion: { x: 0, y: 0, z: 0, w: 1 },
     heading: 0,

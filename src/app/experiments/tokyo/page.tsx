@@ -92,6 +92,7 @@ function getMultiplayerUrl(): string {
 const STORAGE_KEYS = {
   playerName: "tokyo-sounds-player-name",
   planeColor: "tokyo-sounds-plane-color",
+  planeModelPath: "tokyo-sounds-plane-model-path",
 } as const;
 
 const ENV_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
@@ -105,6 +106,7 @@ export default function TokyoPage() {
   // Initialize with safe defaults that match SSR
   const [playerName, setPlayerName] = useState("");
   const [planeColor, setPlaneColor] = useState(PASTEL_COLORS[4].hex);
+  const [planeModelPath, setPlaneModelPath] = useState("/models/plane_balance.glb");
 
   // Calculate multiplayer URL inside component to avoid module-level window access
   const multiplayerUrl = mounted ? getMultiplayerUrl() : "ws://localhost:3001";
@@ -171,6 +173,7 @@ export default function TokyoPage() {
     serverUrl: multiplayerUrl,
     playerName: playerName || "Anonymous",
     planeColor,
+    planeModelPath,
     enabled: started,
   });
 
@@ -189,6 +192,12 @@ export default function TokyoPage() {
     if (storedPlaneColor) {
       setPlaneColor(storedPlaneColor);
     }
+
+    // Load planeModelPath from localStorage
+    const storedPlaneModelPath = localStorage.getItem(STORAGE_KEYS.planeModelPath);
+    if (storedPlaneModelPath) {
+      setPlaneModelPath(storedPlaneModelPath);
+    }
   }, []);
 
   // Save to localStorage when values change (only after hydration)
@@ -203,6 +212,12 @@ export default function TokyoPage() {
       localStorage.setItem(STORAGE_KEYS.planeColor, planeColor);
     }
   }, [planeColor, mounted]);
+
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem(STORAGE_KEYS.planeModelPath, planeModelPath);
+    }
+  }, [planeModelPath, mounted]);
 
   const handleStart = useCallback(async () => {
     try {
@@ -367,6 +382,8 @@ export default function TokyoPage() {
         setPlayerName={setPlayerName}
         planeColor={planeColor}
         setPlaneColor={setPlaneColor}
+        planeModelPath={planeModelPath}
+        setPlaneModelPath={setPlaneModelPath}
         generativeEnabled={generativeEnabled}
         setGenerativeEnabled={setGenerativeEnabled}
         spatialAudioEnabled={spatialAudioEnabled}
@@ -418,6 +435,7 @@ export default function TokyoPage() {
               onDemoStateChange={setDemoState}
               onGyroStateChange={setGyroState}
               planeColor={planeColor}
+              modelPath={planeModelPath}
             />
 
             <FlightBoundsHelper visible={debugOptions.showBounds} />

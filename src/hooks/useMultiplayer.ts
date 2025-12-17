@@ -30,6 +30,7 @@ export interface UseMultiplayerOptions {
   serverUrl: string;
   playerName: string;
   planeColor: string;
+  planeModelPath: string;
   enabled?: boolean;
 }
 
@@ -45,6 +46,7 @@ export function useMultiplayer({
   serverUrl,
   playerName,
   planeColor,
+  planeModelPath,
   enabled = true,
 }: UseMultiplayerOptions): UseMultiplayerReturn {
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected");
@@ -59,11 +61,13 @@ export function useMultiplayer({
 
   const playerNameRef = useRef(playerName);
   const planeColorRef = useRef(planeColor);
+  const planeModelPathRef = useRef(planeModelPath);
 
   useEffect(() => {
     playerNameRef.current = playerName;
     planeColorRef.current = planeColor;
-  }, [playerName, planeColor]);
+    planeModelPathRef.current = planeModelPath;
+  }, [playerName, planeColor, planeModelPath]);
 
   const sendMessage = useCallback((message: ClientMessage) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
@@ -123,6 +127,7 @@ export function useMultiplayer({
           type: "join",
           name: playerNameRef.current,
           color: planeColorRef.current,
+          modelPath: planeModelPathRef.current,
         });
       };
 

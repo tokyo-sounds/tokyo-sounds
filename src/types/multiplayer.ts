@@ -20,6 +20,7 @@ export interface PlayerState {
   id: string;
   name: string;
   color: string;
+  modelPath: string;
   position: Position3D;
   quaternion: Quaternion;
   heading: number;
@@ -42,6 +43,7 @@ export interface JoinMessage {
   type: "join";
   name: string;
   color: string;
+  modelPath: string;
 }
 
 export interface UpdateMessage {

@@ -3,6 +3,8 @@
  * Landing page for Tokyo Sounds
  * @returns null
  */
+import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { PASTEL_COLORS } from "../page";
 import Nav from "@/components/layout/nav";
 import HomeHero from "@/components/layout/HomeHero";
@@ -20,11 +22,19 @@ import { Button } from "@/components/ui/button";
 import { SendHorizontal, Send } from "lucide-react";
 import { App_Info } from "@/lib/constraint";
 
+// Lazy load the 3D preview component
+const ModelPreview = dynamic(
+  () => import("./ModelPreview"),
+  { ssr: false, loading: () => <div className="w-full h-48 bg-neutral-900/50 rounded-lg animate-pulse" /> }
+);
+
 interface LandingPageProps {
   playerName: string;
   setPlayerName: (playerName: string) => void;
   planeColor: string;
   setPlaneColor: (planeColor: string) => void;
+  planeModelPath: string;
+  setPlaneModelPath: (planeModelPath: string) => void;
   generativeEnabled: boolean;
   setGenerativeEnabled: (generativeEnabled: boolean) => void;
   spatialAudioEnabled: boolean;
@@ -32,24 +42,54 @@ interface LandingPageProps {
   handleStart: () => void;
 }
 
+interface ModelInfo {
+  name: string;
+  path: string;
+}
+
 export default function LandingPage({
   playerName,
   setPlayerName,
   planeColor,
   setPlaneColor,
+  planeModelPath,
+  setPlaneModelPath,
   generativeEnabled,
   setGenerativeEnabled,
   spatialAudioEnabled,
   setSpatialAudioEnabled,
   handleStart,
 }: LandingPageProps) {
+  const [models, setModels] = useState<ModelInfo[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Fetch available models when dialog opens
+  useEffect(() => {
+    if (dialogOpen) {
+      fetch("/api/models")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.models && data.models.length > 0) {
+            setModels(data.models);
+            // Set default model if not already set
+            if (!planeModelPath && data.models[0]) {
+              setPlaneModelPath(data.models[0].path);
+            }
+          }
+        })
+        .catch((err) => {
+          console.error("[LandingPage] Failed to fetch models:", err);
+        });
+    }
+  }, [dialogOpen, planeModelPath, setPlaneModelPath]);
+
   return (
     <div className="w-full h-full min-h-svh relative flex flex-col items-center justify-center">
       <Nav />
       <HomeHero />
       <div className="flex flex-col items-center justify-center z-10">
         <h1 className="text-6xl md:text-7xl text-white font-bold text-center text-shadow-lg animate-in fade-in slide-in-from-bottom duration-500">{App_Info.title_ja}</h1>
-        <Dialog>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
             <Button
               variant="outline"
@@ -77,6 +117,7 @@ export default function LandingPage({
             </div>
 
             <div className="space-y-2">
+              <Label>機体の色</Label>
               <div className="flex justify-center items-center gap-3">
                 {PASTEL_COLORS.map((color) => (
                   <button
@@ -92,6 +133,33 @@ export default function LandingPage({
                     aria-label={`Select ${color.name} color`}
                   />
                 ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>機体モデル</Label>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <div className="flex flex-col gap-2 max-h-48 overflow-y-auto">
+                    {models.map((model) => (
+                      <button
+                        key={model.path}
+                        onClick={() => setPlaneModelPath(model.path)}
+                        className={`px-3 py-2 text-sm rounded transition-all text-left ${
+                          planeModelPath === model.path
+                            ? "bg-primary/20 ring-1 ring-primary"
+                            : "bg-neutral-800/50 hover:bg-neutral-700/50"
+                        }`}
+                      >
+                        {model.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div>
+                  {dialogOpen && planeModelPath && (
+                    <ModelPreview modelPath={planeModelPath} planeColor={planeColor} />
+                  )}
+                </div>
               </div>
             </div>
             <div className="space-y-2">
