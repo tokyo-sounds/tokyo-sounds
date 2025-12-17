@@ -10,9 +10,11 @@ export default function AudioVolumeControls() {
     spatialVolume,
     lyriaVolume,
     ambientVolume,
+    flyingVolume,
     setSpatialVolume,
     setLyriaVolume,
     setAmbientVolume,
+    setFlyingVolume,
   } = useVolume();
 
   const handleSpatialVolumeChange = (value: number[]) => {
@@ -25,6 +27,10 @@ export default function AudioVolumeControls() {
 
   const handleAmbientVolumeChange = (value: number[]) => {
     setAmbientVolume(value[0]);
+  };
+
+  const handleFlyingVolumeChange = (value: number[]) => {
+    setFlyingVolume(value[0]);
   };
 
   return (
@@ -94,6 +100,29 @@ export default function AudioVolumeControls() {
           step={0.01}
           value={[lyriaVolume]}
           onValueChange={handleLyriaVolumeChange}
+          className="w-full"
+        />
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="flying-volume"
+            className="text-xs text-primary-foreground/50 font-light tracking-wide"
+          >
+            飛行音
+          </Label>
+          <span className="text-xs text-primary-foreground/50 font-light tracking-wide w-10 text-right">
+            {Math.round(flyingVolume * 100)}%
+          </span>
+        </div>
+        <Slider
+          id="flying-volume"
+          min={0}
+          max={1}
+          step={0.01}
+          value={[flyingVolume]}
+          onValueChange={handleFlyingVolumeChange}
           className="w-full"
         />
       </div>
