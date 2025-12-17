@@ -726,9 +726,6 @@ export function TokyoSpatialAudio({
       const effectiveVolume =
         typeof volume !== "undefined" ? volume : state.source.volume;
       audio.setVolume(effectiveVolume);
-      console.log(
-        `[SpatialAudio] Setting volume for ${state.source.id} to: ${effectiveVolume}`
-      );
 
       const panner = audio.getOutput() as PannerNode;
       if (panner?.panningModel !== undefined) {
@@ -747,15 +744,9 @@ export function TokyoSpatialAudio({
         state.lastUsedTime = Date.now();
         state.playStartTime = Date.now();
 
-        const worldPos = new THREE.Vector3();
-        audio.getWorldPosition(worldPos);
         const fileName = state.source.src.split("/").pop() || state.source.src;
         console.log(
           `[SpatialAudio] Started: ${state.source.id} | file: ${fileName} | loop: ${state.source.loop}`
-        );
-        state.lastUsedTime = Date.now(); // Update last used time
-        console.log(
-          `[SpatialAudio] Started: ${state.source.id} at volume: ${effectiveVolume}`
         );
       } catch (err) {
         console.error(`[SpatialAudio] Failed to play ${state.source.id}:`, err);
