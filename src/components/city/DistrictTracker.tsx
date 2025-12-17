@@ -70,11 +70,11 @@ export function DistrictTracker({
       currentDistrictRef.current = currentDistrict;
       onCurrentDistrictChange?.(currentDistrict);
 
-      console.log(
-        `[DistrictTracker] Position: ${geo.lat.toFixed(4)}, ${geo.lng.toFixed(
-          4
-        )} → ${currentDistrict?.name || "none"}`
-      );
+      // console.log(
+      //   `[DistrictTracker] Position: ${geo.lat.toFixed(4)}, ${geo.lng.toFixed(
+      //     4
+      //   )} → ${currentDistrict?.name || "none"}`
+      // );
     }
 
     // Update debug info periodically (lazy loads details only for significant districts)

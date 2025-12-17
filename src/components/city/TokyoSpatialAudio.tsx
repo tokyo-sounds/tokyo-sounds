@@ -42,7 +42,7 @@ const HIGH_SPEED_MIN_PLAY_DURATION_MS = 5000; // 5 secs
 const PRELOAD_DISTANCE_MULTIPLIER = 2.0; // Load audio when within maxDistance * this
 const UNLOAD_DISTANCE_MULTIPLIER = 4.0; // Unload audio when beyond maxDistance * this
 const MAX_CONCURRENT_LOADS = 3; // Maximum simultaneous audio file downloads
-const MAX_BUFFER_CACHE_SIZE_MB = 200; // Cache size in MB
+const MAX_BUFFER_CACHE_SIZE_MB = 400; // Cache size in MB (increased for larger ambient files)
 const BUFFER_UNLOAD_IDLE_TIME_MS = 30000; // Unload buffers not used in last 30 seconds
 const CACHE_EVICTION_TARGET_RATIO = 0.7; // When evicting, reduce to 70% of max
 
