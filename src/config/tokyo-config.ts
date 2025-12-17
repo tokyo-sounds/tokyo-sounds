@@ -920,22 +920,6 @@ export const TOKYO_DISTRICTS: District[] = [
       "日本唯一のネオバロック宮殿！国宝の迎賓館で正面玄関のフランス製大理石が圧巻、1909年完成の東宮御所が起源",
   },
   {
-    id: "okubo-park",
-    name: "Okubo Park",
-    nameJa: "大久保公園",
-    center: { lat: 35.6934, lng: 139.7031 }, // Okubo Park
-    radius: 300,
-    prompt:
-      "Urban oasis in entertainment district, peaceful park atmosphere amidst neon lights, local community gathering space, contrast of nature and city vibrancy",
-    promptMorning:
-      "Gentle park awakening, peaceful Okubo Park dawn, soft morning light through trees, quiet neighborhood park morning, serene urban oasis",
-    promptEvening:
-      "Peaceful park evening atmosphere, Okubo Park night serenity, gentle contrast with surrounding neon, tranquil local gathering space, calm urban green escape",
-    color: "#98fb98",
-    descriptionJa:
-      "歌舞伎町の真ん中のオアシス！小泉八雲（ラフカディオ・ハーン）終焉の地でギリシャ風デザインが特徴",
-  },
-  {
     id: "sumida",
     name: "Sumida",
     nameJa: "墨田区",
@@ -988,7 +972,7 @@ export const TOKYO_DISTRICTS: District[] = [
     name: "Setagaya",
     nameJa: "世田谷区",
     center: { lat: 35.6436, lng: 139.6684 }, // Sangenjaya Station
-    radius: 2000,
+    radius: 2500,
     prompt:
       "Residential district charm, trendy Sangenjaya cafe culture, youthful neighborhood energy, relaxed suburban atmosphere, comfortable Tokyo living vibes",
     promptMorning:
@@ -1094,6 +1078,86 @@ export const TOKYO_DISTRICTS: District[] = [
     color: "#9400d3",
     descriptionJa:
       "国際的なビジネス街、大使館が多く外国人居住者も多い！東京タワーや六本木ヒルズがあり、夜景が美しい高層ビルが立ち並ぶ洗練されたエリア",
+  },
+  {
+    id: "shimokitazawa",
+    name: "Shimokitazawa",
+    nameJa: "下北沢",
+    center: { lat: 35.6616, lng: 139.6667 },
+    radius: 800,
+    prompt:
+      "Indie rock vibes, acoustic guitar melodies, vintage shop atmosphere, bohemian spirit, narrow alleyway echoes, theatrical energy, cozy cafe jazz",
+    promptMorning:
+      "Quiet bohemian morning, soft acoustic guitar, gentle bird songs in narrow alleys, peaceful theater district awakening, serene indie cafe dawn",
+    promptEvening:
+      "Vibrant indie rock nightlife, bustling vintage market energy, lively theater applause, crowded izakaya atmosphere, electric Shimokitazawa subculture",
+    color: "#ff4500",
+    descriptionJa:
+      "古着と演劇、サブカルの聖地。迷路のような路地を歩くだけでワクワクする街！「世界で最もクールな街」の常連。実はカレーの激戦区でもあるんだよ。",
+  },
+  {
+    id: "omotesando",
+    name: "Omotesando",
+    nameJa: "表参道",
+    center: { lat: 35.6652, lng: 139.7113 },
+    radius: 700,
+    prompt:
+      "High-end fashion elegance, sophisticated electronic pop, rustling zelkova trees, minimalist architecture echoes, luxury boutique ambiance, refined urban pulse",
+    promptMorning:
+      "Serene zelkova tree rustle, peaceful luxury district dawn, soft ambient fashion beats, quiet architectural beauty, refined morning coffee shop vibes",
+    promptEvening:
+      "Sophisticated fashion night, illuminated luxury boutiques, vibrant metropolitan energy, elegant architectural lighting, refined upscale social scene",
+    color: "#4682b4",
+    descriptionJa:
+      "「日本のシャンゼリゼ」とも称される洗練された並木道。世界的建築家によるビルが並ぶ。参道のケヤキ並木は、明治神宮への参道として1920年に植えられたのが始まりだよ。",
+  },
+  {
+    id: "daikanyama",
+    name: "Daikanyama",
+    nameJa: "代官山",
+    center: { lat: 35.6481, lng: 139.7031 },
+    radius: 600,
+    prompt:
+      "Chic boutique sophistication, sophisticated bossa nova, peaceful residential luxury, T-site book browsing atmosphere, gentle urban breeze, stylish minimalist vibes",
+    promptMorning:
+      "Soft morning bossa nova, quiet T-site dawn, gentle residential awakening, peaceful boutique street morning, refined urban tranquility",
+    promptEvening:
+      "Elegant residential nightlife, sophisticated boutique lighting, vibrant yet peaceful dining scene, stylish metropolitan evening, refined Daikanyama magic",
+    color: "#20b2aa",
+    descriptionJa:
+      "「東京の小さなブルックリン」とも呼ばれる大人の隠れ家。T-SITEでの読書は至福。かつては水車が多くある農村だったけど、今は日本で最もおしゃれな街の一つになったんだ。",
+  },
+  {
+    id: "mitaka",
+    name: "Mitaka",
+    nameJa: "三鷹",
+    center: { lat: 35.6963, lng: 139.5704 }, // Near Ghibli Museum
+    radius: 1200,
+    prompt:
+      "Whimsical orchestral melodies, Ghibli-inspired nostalgia, nature sounds in Inokashira Park, gentle bicycle bells, peaceful suburban childhood memories, magical storytelling atmosphere",
+    promptMorning:
+      "Serene forest awakening, peaceful Inokashira dawn, soft whimsical piano, quiet suburban morning meditation, tranquil Ghibli-esque sunrise",
+    promptEvening:
+      "Magical twilight atmosphere, nostalgic orchestral swells, gentle park lantern-lit paths, peaceful residential night, whimsical storytelling energy",
+    color: "#2e8b57",
+    descriptionJa:
+      "ジブリ美術館がある夢と自然の街。太宰治が愛し、最期を迎えた地としても有名。三鷹駅のホームは、実は三鷹市と武蔵野市にまたがって設置されているんだよ。",
+  },
+  {
+    id: "haneda",
+    name: "Haneda Airport",
+    nameJa: "羽田空港",
+    center: { lat: 35.5444, lng: 139.7647 },
+    radius: 2000,
+    prompt:
+      "Thundering jet engines, international terminal bustle, digital departure board chimes, excitement of global travel, vast open sky energy, futuristic transit hub atmosphere",
+    promptMorning:
+      "Gentle sunrise over runways, peaceful terminal dawn, soft arrival announcements, quiet airport awakening, serene gateway to the world",
+    promptEvening:
+      "Dynamic runway lights, energetic international travel, vibrant terminal nightlife, thundering late-night departures, electric airport spectacle",
+    color: "#1e90ff",
+    descriptionJa:
+      "東京の空の玄関口。江戸小路や展望デッキで1日中楽しめるエンタメ空港！世界で最も清潔な空港ランキングで何度も1位に選ばれている、日本が誇る空港なんだ。",
   },
 ];
 
@@ -1783,8 +1847,8 @@ export const PROCEDURAL_AUDIO_CONFIG = {
 
   velocityForMaxRange: 100,
 
-  altitudeFadeStart: 100,  // start fading at 100m
-  altitudeFadeEnd: 250,    // fully fade out at 250m altitude
+  altitudeFadeStart: 100, // start fading at 100m
+  altitudeFadeEnd: 250, // fully fade out at 250m altitude
 
   fadeInDuration: 500,
   fadeOutDuration: 500,
@@ -1792,10 +1856,10 @@ export const PROCEDURAL_AUDIO_CONFIG = {
 
   spawnAngleDegrees: 180,
 
-  baseVolume: 0.6,        // moderate volume
-  refDistance: 20,        // full volume within 20m
-  maxDistance: 200,       // max distance for Web Audio (culling uses gain threshold)
-  rolloffFactor: 8.0,     // high rolloff for localized sounds (fast fade with distance)
+  baseVolume: 0.6, // moderate volume
+  refDistance: 20, // full volume within 20m
+  maxDistance: 200, // max distance for Web Audio (culling uses gain threshold)
+  rolloffFactor: 8.0, // high rolloff for localized sounds (fast fade with distance)
 
   audioDirectory: "/audio/ambient-sounds",
 };
