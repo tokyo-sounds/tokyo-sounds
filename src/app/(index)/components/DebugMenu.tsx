@@ -8,7 +8,7 @@ import { LocationSearch } from "@/components/city/LocationSearch";
 import { type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import DistrictDebugContent from "./DistricDebugContent";
 import { DebugOptions } from "../type/FlightPageTypes";
-import { AudioVolumeControls } from "@/components/ui/audio-volume-controls";
+import AudioVolumeControls from "@/components/audio/audio-volume-controls";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -128,6 +128,9 @@ export default function DebugMenu({
           <TabsContent value="options" className="flex-1 flex flex-col gap-2">
             <div>
               <DebugMenuLabel>環境設定</DebugMenuLabel>
+              <p className="text-xs text-muted/50">
+                時間帯の選択によって、AI生成音楽も変化します。
+              </p>
               <div className="bg-muted/40 text-muted-foreground inline-flex h-9 w-full gap-1 items-center justify-center rounded-lg p-[3px]">
                 {timeOptions.map((time) => (
                   <Button
@@ -146,14 +149,21 @@ export default function DebugMenu({
             </div>
             <div>
               <DebugMenuLabel>背景音</DebugMenuLabel>
+              <p className="text-xs text-muted/50">現在再生中の背景音。</p>
               <AmbientAudioControl />
             </div>
             <div>
               <DebugMenuLabel>音量設定</DebugMenuLabel>
+              <p className="text-xs text-muted/50">
+                環境音とAI生成音楽の音量を調整できます。
+              </p>
               <AudioVolumeControls />
             </div>
             <div className="flex-1">
               <DebugMenuLabel>地域パラメーター</DebugMenuLabel>
+              <p className="text-xs text-muted/50">
+                現在地の地域情報解析結果。
+              </p>
               {/* District Debug Panel Section */}
               {generativeEnabled && districts.length > 0 ? (
                 <DistrictDebugContent districts={districts} />
@@ -325,6 +335,11 @@ function AmbientAudioControl() {
   const { currentFileName, isPlaying, play, pause } =
     useAmbientBackgroundAudio();
 
+  // Remove file extension from filename
+  const fileNameWithoutExtension = currentFileName
+    ? currentFileName.replace(/\.[^/.]+$/, "")
+    : null;
+
   const handleToggle = () => {
     if (isPlaying) {
       pause();
@@ -347,7 +362,7 @@ function AmbientAudioControl() {
             停止
           </span>
           <span className="inline group-hover:hidden">
-            {currentFileName || "None"}
+            {fileNameWithoutExtension || "None"}
           </span>
         </>
       ) : (
@@ -357,7 +372,7 @@ function AmbientAudioControl() {
             再生
           </span>
           <span className="inline group-hover:hidden">
-            {currentFileName || "None"}
+            {fileNameWithoutExtension || "None"}
           </span>
         </>
       )}

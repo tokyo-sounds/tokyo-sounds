@@ -5,7 +5,7 @@ import { useVolume } from "@/app/(index)/page"; // Import from the main page
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 
-export function AudioVolumeControls() {
+export default function AudioVolumeControls() {
   const {
     spatialVolume,
     lyriaVolume,
