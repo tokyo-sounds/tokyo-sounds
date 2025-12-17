@@ -153,6 +153,7 @@ export default function TokyoPage() {
   const [flightSpeed, setFlightSpeed] = useState(0);
   const [movementMode, setMovementMode] = useState<MovementMode>("elytra");
   const [currentDistrict, setCurrentDistrict] = useState<District | null>(null);
+  const [districtOverlayVisible, setDistrictOverlayVisible] = useState(false);
   const [districtDebug, setDistrictDebug] = useState<DistrictDebugInfo[]>([]);
   const [lyriaStatus, setLyriaStatus] = useState("Idle");
   const [spatialAudioEnabled, setSpatialAudioEnabled] = useState(true);
@@ -525,41 +526,57 @@ export default function TokyoPage() {
           </Canvas>
 
           {dashboardVisible && (
-            <FlightDashboard
-              flightSpeed={flightSpeed}
-              pitch={pitch}
-              roll={roll}
-              cameraY={cameraY}
-              mapsApiKey={ENV_MAPS_API_KEY}
-              handleTeleport={handleTeleport}
-              gyroState={gyroState}
-              planeControllerRef={
-                planeControllerRef as React.RefObject<PlaneControllerHandle>
-              }
-              operationManualOpen={operationManualOpen}
-              setOperationManualOpen={setOperationManualOpen}
-              heading={heading}
-              speedoMeterSize={speedoMeterSize}
-              isMobile={isMobile}
-              nearbyPlayers={nearbyPlayers}
-              localPlayerPosition={localPlayerPositionState}
-            />
+            <div 
+              className="transition-opacity duration-500 ease-in-out"
+              style={{ opacity: districtOverlayVisible ? 0 : 1 }}
+            >
+              <FlightDashboard
+                flightSpeed={flightSpeed}
+                pitch={pitch}
+                roll={roll}
+                cameraY={cameraY}
+                mapsApiKey={ENV_MAPS_API_KEY}
+                handleTeleport={handleTeleport}
+                gyroState={gyroState}
+                planeControllerRef={
+                  planeControllerRef as React.RefObject<PlaneControllerHandle>
+                }
+                operationManualOpen={operationManualOpen}
+                setOperationManualOpen={setOperationManualOpen}
+                heading={heading}
+                speedoMeterSize={speedoMeterSize}
+                isMobile={isMobile}
+                nearbyPlayers={nearbyPlayers}
+                localPlayerPosition={localPlayerPositionState}
+              />
+            </div>
           )}
 
-          <div className="absolute top-4 right-4 z-50">
+          <div 
+            className="absolute top-4 right-4 z-50 transition-opacity duration-500 ease-in-out"
+            style={{ opacity: districtOverlayVisible ? 0 : 1 }}
+          >
             <DashboardToggleButton
               dashboardVisible={dashboardVisible}
               setDashboardVisible={setDashboardVisible}
             />
           </div>
 
-          {currentDistrict && cameraY < 900 && (
-            <DistrictIndicator district={currentDistrict} />
-          )}
+          <DistrictIndicator 
+            district={currentDistrict && cameraY < 900 ? currentDistrict : null} 
+            onVisibilityChange={setDistrictOverlayVisible}
+          />
 
           {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
-          {isMobile && <VirtualController enabled={started} />}
+          {isMobile && (
+            <div 
+              className="transition-opacity duration-500 ease-in-out"
+              style={{ opacity: districtOverlayVisible ? 0 : 1 }}
+            >
+              <VirtualController enabled={started} />
+            </div>
+          )}
 
           {/* AmbientBackgroundAudio disabled - using procedural spatial audio instead */}
 

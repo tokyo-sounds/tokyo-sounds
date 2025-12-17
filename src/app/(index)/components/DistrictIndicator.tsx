@@ -1,31 +1,220 @@
+"use client";
+
 import { District } from "@/config/tokyo-config";
+import { useState, useEffect, useRef, useCallback } from "react";
+
+interface DistrictIndicatorProps {
+  district: District | null;
+  onVisibilityChange?: (isVisible: boolean) => void;
+}
+
+// Duration constants (in ms)
+const FADE_DURATION = 500;
+const DISPLAY_DURATION = 5000;
+const DEBOUNCE_DELAY = 300;
+const COOLDOWN_DURATION = 5000; // Cooldown after display ends before showing another
+
+type Phase = "idle" | "fade-in" | "visible" | "fade-out" | "cooldown";
 
 /** DistrictIndicator
  *
- * District indicator overlay
- * @param district - District
- * @returns null
+ * Cinematic district indicator overlay with fullscreen darkened background.
+ * Shows area name centered with fade in/out transitions.
+ * Debounces rapid area changes to prevent flashing.
  */
 export default function DistrictIndicator({
   district,
-}: {
-  district: District | null;
-}) {
-  if (!district) return null;
+  onVisibilityChange,
+}: DistrictIndicatorProps) {
+  const [displayedDistrict, setDisplayedDistrict] = useState<District | null>(null);
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [opacity, setOpacity] = useState(0);
+  
+  const phaseRef = useRef<Phase>(phase);
+  phaseRef.current = phase;
+  
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const displayTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const fadeOutTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const cooldownTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const lastDistrictIdRef = useRef<string | null>(null);
+
+  const clearAllTimers = useCallback(() => {
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    if (displayTimerRef.current) {
+      clearTimeout(displayTimerRef.current);
+      displayTimerRef.current = null;
+    }
+    if (fadeOutTimerRef.current) {
+      clearTimeout(fadeOutTimerRef.current);
+      fadeOutTimerRef.current = null;
+    }
+    if (cooldownTimerRef.current) {
+      clearTimeout(cooldownTimerRef.current);
+      cooldownTimerRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    const newDistrictId = district?.id ?? null;
+    
+    console.log("[DistrictIndicator] district changed:", {
+      newDistrictId,
+      lastDistrictId: lastDistrictIdRef.current,
+      phase: phaseRef.current,
+      district: district?.name,
+    });
+    
+    if (newDistrictId === lastDistrictIdRef.current) {
+      console.log("[DistrictIndicator] Skipping - same district");
+      return;
+    }
+
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+
+    if (!district) {
+      console.log("[DistrictIndicator] No district, clearing ref");
+      lastDistrictIdRef.current = null;
+      return;
+    }
+
+    console.log("[DistrictIndicator] Setting debounce timer for:", district.name);
+    
+    debounceTimerRef.current = setTimeout(() => {
+      const currentPhase = phaseRef.current;
+      
+      console.log("[DistrictIndicator] Debounce fired:", {
+        currentPhase,
+        districtName: district.name,
+      });
+      
+      if (currentPhase === "idle") {
+        console.log("[DistrictIndicator] Starting fade-in for:", district.name);
+        lastDistrictIdRef.current = district.id;
+        setDisplayedDistrict(district);
+        setPhase("fade-in");
+        onVisibilityChange?.(true);
+      } else if (currentPhase === "fade-out") {
+        console.log("[DistrictIndicator] Currently fading out, skipping:", district.name);
+        lastDistrictIdRef.current = district.id; // Remember we saw this district
+      } else if (currentPhase === "cooldown") {
+        console.log("[DistrictIndicator] In cooldown, skipping:", district.name);
+        lastDistrictIdRef.current = district.id;
+      } else if (currentPhase === "visible" || currentPhase === "fade-in") {
+        console.log("[DistrictIndicator] Updating displayed district to:", district.name);
+        lastDistrictIdRef.current = district.id;
+        setDisplayedDistrict(district);
+        
+        if (displayTimerRef.current) {
+          clearTimeout(displayTimerRef.current);
+        }
+        displayTimerRef.current = setTimeout(() => {
+          setPhase("fade-out");
+        }, DISPLAY_DURATION);
+      }
+    }, DEBOUNCE_DELAY);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+        debounceTimerRef.current = null;
+      }
+    };
+  }, [district, onVisibilityChange]);
+
+  useEffect(() => {
+    console.log("[DistrictIndicator] Phase changed to:", phase);
+    
+    if (phase === "fade-in") {
+      requestAnimationFrame(() => {
+        setOpacity(1);
+      });
+      
+      const timer = setTimeout(() => {
+        setPhase("visible");
+      }, FADE_DURATION);
+      return () => clearTimeout(timer);
+    }
+
+    if (phase === "visible") {
+      setOpacity(1);
+      displayTimerRef.current = setTimeout(() => {
+        setPhase("fade-out");
+      }, DISPLAY_DURATION);
+      return () => {
+        if (displayTimerRef.current) {
+          clearTimeout(displayTimerRef.current);
+        }
+      };
+    }
+
+    if (phase === "fade-out") {
+      setOpacity(0);
+      fadeOutTimerRef.current = setTimeout(() => {
+        setPhase("cooldown");
+        setDisplayedDistrict(null);
+        onVisibilityChange?.(false);
+      }, FADE_DURATION);
+      return () => {
+        if (fadeOutTimerRef.current) {
+          clearTimeout(fadeOutTimerRef.current);
+        }
+      };
+    }
+    
+    if (phase === "cooldown") {
+      cooldownTimerRef.current = setTimeout(() => {
+        setPhase("idle");
+      }, COOLDOWN_DURATION);
+      return () => {
+        if (cooldownTimerRef.current) {
+          clearTimeout(cooldownTimerRef.current);
+        }
+      };
+    }
+    
+    if (phase === "idle") {
+      setOpacity(0);
+    }
+  }, [phase, onVisibilityChange]);
+
+  useEffect(() => {
+    return () => {
+      clearAllTimers();
+    };
+  }, [clearAllTimers]);
+
+  if (phase === "idle" || phase === "cooldown" || !displayedDistrict) {
+    return null;
+  }
 
   return (
-    <div className="w-4/5 max-w-5xl h-[70svh] max-h-120 absolute top-30 md:top-26 left-1/2 transform -translate-x-1/2 pointer-events-none select-none">
-      <div className="text-white text-center space-y-1 *:text-shadow-lg *:text-shadow-black/50 *:animate-in *:slide-in-from-bottom *:animate-out *:fade-out">
-        <h2 className="text-sm text-white/70 font-sans font-light uppercase">
-          {district.name}
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center pointer-events-none select-none"
+      style={{
+        opacity,
+        transition: `opacity ${FADE_DURATION}ms ease-in-out`,
+      }}
+    >
+      <div className="absolute inset-0 bg-black/30" />
+
+      <div className="relative z-10 text-center space-y-4 px-8 max-w-5xl">
+        <h2 className="text-lg md:text-xl text-white/70 font-sans font-light uppercase tracking-widest">
+          {displayedDistrict.name}
         </h2>
-        <h1 className="text-4xl md:text-5xl font-semibold font-noto">
-          {district.nameJa}
+
+        <h1 className="text-7xl md:text-9xl lg:text-[12rem] font-bold font-noto text-white text-shadow-xl text-shadow-black/50 whitespace-nowrap">
+          {displayedDistrict.nameJa}
         </h1>
-      </div>
-      <div className="absolute bottom-0 md:bottom-1/2 translate-y-0 md:translate-y-1/2 left-1/2 md:left-0 -translate-x-1/2 md:translate-x-0">
-        <p className="w-xs px-3 py-2 flight-dashboard-card rounded-md text-muted text-xs md:text-sm text-justify font-noto text-shadow-lg leading-loose">
-          {district.descriptionJa}
+
+        <p className="text-sm md:text-base lg:text-lg text-white/80 font-noto leading-relaxed max-w-lg mx-auto">
+          {displayedDistrict.descriptionJa}
         </p>
       </div>
     </div>

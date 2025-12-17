@@ -66,15 +66,20 @@ export function DistrictTracker({
 
     // Detect current district (lazy loads details only if found)
     const currentDistrict = getDistrictAtPosition(geo.lat, geo.lng);
-    if (currentDistrict !== currentDistrictRef.current) {
+    
+    // Compare by ID, not reference
+    const currentId = currentDistrict?.id ?? null;
+    const prevId = currentDistrictRef.current?.id ?? null;
+    
+    if (currentId !== prevId) {
+      console.log("[DistrictTracker] District changed:", {
+        from: currentDistrictRef.current?.name ?? "none",
+        to: currentDistrict?.name ?? "none",
+        lat: geo.lat.toFixed(4),
+        lng: geo.lng.toFixed(4),
+      });
       currentDistrictRef.current = currentDistrict;
       onCurrentDistrictChange?.(currentDistrict);
-
-      // console.log(
-      //   `[DistrictTracker] Position: ${geo.lat.toFixed(4)}, ${geo.lng.toFixed(
-      //     4
-      //   )} → ${currentDistrict?.name || "none"}`
-      // );
     }
 
     // Update debug info periodically (lazy loads details only for significant districts)
