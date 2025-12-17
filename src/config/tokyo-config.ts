@@ -1478,6 +1478,21 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     loop: true,
   },
 
+  // === 東京駅 (Tokyo Station) ===
+  {
+    id: "tokyo_station_bullet_train",
+    name: "Bullet Train",
+    nameJa: "新幹線",
+    lat: 35.6812,
+    lng: 139.7671,
+    alt: 25,
+    src: "/audio/東京駅/bullet_train.mp3",
+    volume: 1.0,
+    refDistance: 30,
+    maxDistance: 400,
+    loop: true,
+  },
+
   // === General Tokyo (ambient) ===
   {
     id: "tokyo_street_shinjuku",
@@ -1751,4 +1766,36 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
       far: 2500,
     },
   },
+};
+
+export const PROCEDURAL_AUDIO_CONFIG = {
+  cellSizeDegrees: 0.001,
+  spawnProbability: 0.25, // 1 in 4 cells have sound
+
+  maxActiveSources: 25,
+
+  minSpawnDistance: 30,
+  maxSpawnDistance: 600,
+
+  ambientSpawnProbability: 0.15,
+  ambientMaxSpawnDistance: 200,
+  ambientMinSpawnDistance: 40,
+
+  velocityForMaxRange: 100,
+
+  altitudeFadeStart: 100,  // start fading at 100m
+  altitudeFadeEnd: 250,    // fully fade out at 250m altitude
+
+  fadeInDuration: 500,
+  fadeOutDuration: 500,
+  updateThrottleMs: 60,
+
+  spawnAngleDegrees: 180,
+
+  baseVolume: 0.6,        // moderate volume
+  refDistance: 20,        // full volume within 20m
+  maxDistance: 200,       // max distance for Web Audio (culling uses gain threshold)
+  rolloffFactor: 8.0,     // high rolloff for localized sounds (fast fade with distance)
+
+  audioDirectory: "/audio/ambient-sounds",
 };

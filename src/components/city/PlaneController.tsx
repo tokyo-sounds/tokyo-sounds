@@ -14,6 +14,7 @@ import {
   useImperativeHandle,
   forwardRef,
   useMemo,
+  useCallback,
 } from "react";
 import { useFrame, useThree } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
@@ -53,6 +54,12 @@ const DEMO_CAMERA_LAG = 0.95; // slower, more cinematic movement
 const DEFAULT_MODEL_PATH = "/models/plane_balance.glb";
 const SPEED_MODEL_PATH = "/models/plane_speed.glb";
 
+// Flying audio configuration
+const FLYING_AUDIO_FILES = ["/audio/flying/flying_01.mp3", "/audio/flying/flying_02.mp3"];
+const FLYING_AUDIO_VOLUME = 0.15; // Reduced gain for flying sfx
+const FLYING_AUDIO_FADE_DURATION = 0.5; // Fade in/out duration in seconds
+const FLYING_AUDIO_STOP_SPEED_THRESHOLD = 5; // Speed below which audio fades out (m/s)
+
 interface PlaneControllerProps {
   onSpeedChange?: (speed: number) => void;
   onModeChange?: (mode: MovementMode) => void;
@@ -75,6 +82,7 @@ interface PlaneControllerProps {
   onDemoComplete?: () => void;
   onGyroStateChange?: (state: GyroState) => void;
   planeColor?: string;
+  flyingVolume?: number;
 }
 
 const COLLISION_DISTANCE = 2;
@@ -100,6 +108,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   onDemoComplete,
   onGyroStateChange,
   planeColor,
+  flyingVolume = FLYING_AUDIO_VOLUME,
 }, ref) {
   const { camera } = useThree();
   const planeRef = useRef<THREE.Group>(null);
@@ -130,6 +139,23 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
 
   const flyToActiveRef = useRef(false);
 
+  // Flying audio state
+  const flyingAudioRef = useRef<THREE.PositionalAudio | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioBuffersRef = useRef<AudioBuffer[]>([]);
+  const currentTrackIndexRef = useRef(0);
+  const audioInitializedRef = useRef(false);
+  const audioPlayingRef = useRef(false); // Whether audio should be playing
+  const audioFadeRef = useRef(1); // Current fade level (0-1)
+  const targetFadeRef = useRef(1); // Target fade level
+  const lastSpeedRef = useRef(0); // Track speed for stopped detection
+  const flyingVolumeRef = useRef(flyingVolume); // Ref for volume to avoid callback recreation
+  
+  // Keep ref in sync with prop
+  useEffect(() => {
+    flyingVolumeRef.current = flyingVolume;
+  }, [flyingVolume]);
+
   const {
     state: demoState,
     update: updateDemo,
@@ -143,6 +169,122 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   useEffect(() => {
     onDemoStateChange?.(demoState);
   }, [demoState, onDemoStateChange]);
+
+  // Play the next flying audio track (alternating between 01 and 02)
+  const playNextFlyingTrack = useCallback(() => {
+    const audio = flyingAudioRef.current;
+    const buffers = audioBuffersRef.current;
+    
+    if (!audio || buffers.length === 0) return;
+    
+    // Don't start new track if we're supposed to be stopped
+    if (!audioPlayingRef.current) return;
+    
+    // Stop current playback if any
+    if (audio.isPlaying) {
+      audio.stop();
+    }
+    
+    // Get the next buffer (alternating 0 -> 1 -> 0 -> 1...)
+    const buffer = buffers[currentTrackIndexRef.current];
+    if (buffer) {
+      audio.setBuffer(buffer);
+      audio.setVolume(flyingVolumeRef.current * audioFadeRef.current);
+      audio.setRefDistance(5);
+      audio.setRolloffFactor(1);
+      audio.setLoop(false); // Don't loop individual tracks
+      audio.play();
+      
+      // Switch to next track for next play
+      currentTrackIndexRef.current = (currentTrackIndexRef.current + 1) % buffers.length;
+    }
+  }, []);
+
+  // Start flying audio with fade in
+  const startFlyingAudio = useCallback(() => {
+    if (audioPlayingRef.current) return;
+    audioPlayingRef.current = true;
+    targetFadeRef.current = 1;
+    
+    const audio = flyingAudioRef.current;
+    if (audio && !audio.isPlaying && audioBuffersRef.current.length > 0) {
+      playNextFlyingTrack();
+    }
+  }, [playNextFlyingTrack]);
+
+  // Stop flying audio with fade out
+  const stopFlyingAudio = useCallback(() => {
+    if (!audioPlayingRef.current) return;
+    audioPlayingRef.current = false;
+    targetFadeRef.current = 0;
+  }, []);
+
+  // Initialize flying audio
+  useEffect(() => {
+    if (audioInitializedRef.current) return;
+    if (!planeRef.current) return;
+    
+    const loadAudioBuffers = async () => {
+      try {
+        // Get or create AudioContext from the Three.js listener
+        const listener = new THREE.AudioListener();
+        camera.add(listener);
+        
+        // Create PositionalAudio and attach to plane
+        const positionalAudio = new THREE.PositionalAudio(listener);
+        positionalAudio.setRefDistance(5);
+        positionalAudio.setRolloffFactor(1);
+        positionalAudio.setVolume(FLYING_AUDIO_VOLUME);
+        planeRef.current!.add(positionalAudio);
+        flyingAudioRef.current = positionalAudio;
+        
+        // Get audio context
+        const context = listener.context;
+        audioContextRef.current = context;
+        
+        // Load both audio files
+        const loadBuffer = async (url: string): Promise<AudioBuffer> => {
+          const response = await fetch(url);
+          const arrayBuffer = await response.arrayBuffer();
+          return await context.decodeAudioData(arrayBuffer);
+        };
+        
+        const buffers = await Promise.all(
+          FLYING_AUDIO_FILES.map(loadBuffer)
+        );
+        
+        audioBuffersRef.current = buffers;
+        audioInitializedRef.current = true;
+        
+        // Set up onEnded handler to play next track
+        positionalAudio.onEnded = () => {
+          // Only continue to next track if we're supposed to be playing
+          if (audioPlayingRef.current) {
+            playNextFlyingTrack();
+          }
+        };
+        
+        // Don't auto-start here - let useFrame handle it based on conditions
+        // Audio will start when conditions are met (not in demo, not frozen, not simple mode)
+      } catch (error) {
+        console.error("[PlaneController] Failed to load flying audio:", error);
+      }
+    };
+    
+    // Small delay to ensure planeRef is ready
+    const timer = setTimeout(loadAudioBuffers, 100);
+    
+    return () => {
+      clearTimeout(timer);
+      // Cleanup audio on unmount
+      if (flyingAudioRef.current) {
+        if (flyingAudioRef.current.isPlaying) {
+          flyingAudioRef.current.stop();
+        }
+        flyingAudioRef.current.disconnect();
+      }
+    };
+  }, [camera, playNextFlyingTrack]);
 
   useEffect(() => {
     const initialYaw = -69 * (Math.PI / 180);
@@ -360,6 +502,42 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
 
       _rollQuat.setFromAxisAngle(_rollAxis, smoothRoll.current);
       camera.quaternion.multiply(_rollQuat);
+    }
+
+    // Flying audio fade management
+    // Check conditions: freeze (Space), simple mode, or very low speed
+    const isFrozen = keysRef.current.freeze;
+    const isSimple = currentMode === "simple";
+    
+    // Get current speed from onSpeedChange callback (we track it via lastSpeedRef)
+    // Speed is updated via onSpeedChange prop, but we can estimate from position delta
+    // For simplicity, use the freeze and mode checks primarily
+    const shouldPlayAudio = !isDemoActive && !isFrozen && !isSimple && audioInitializedRef.current;
+    
+    if (shouldPlayAudio && !audioPlayingRef.current) {
+      startFlyingAudio();
+    } else if (!shouldPlayAudio && audioPlayingRef.current) {
+      stopFlyingAudio();
+    }
+    
+    // Update fade level
+    const audio = flyingAudioRef.current;
+    if (audio) {
+      const fadeSpeed = delta / FLYING_AUDIO_FADE_DURATION;
+      
+      if (audioFadeRef.current < targetFadeRef.current) {
+        audioFadeRef.current = Math.min(audioFadeRef.current + fadeSpeed, targetFadeRef.current);
+      } else if (audioFadeRef.current > targetFadeRef.current) {
+        audioFadeRef.current = Math.max(audioFadeRef.current - fadeSpeed, targetFadeRef.current);
+      }
+      
+      // Apply volume with fade
+      audio.setVolume(flyingVolumeRef.current * audioFadeRef.current);
+      
+      // Stop audio completely when faded out
+      if (audioFadeRef.current <= 0 && audio.isPlaying) {
+        audio.stop();
+      }
     }
 
     frameCountRef.current++;
