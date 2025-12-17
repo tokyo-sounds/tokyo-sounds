@@ -64,6 +64,7 @@ interface PlaneControllerProps {
   onSpeedChange?: (speed: number) => void;
   onModeChange?: (mode: MovementMode) => void;
   onCameraYChange?: (y: number) => void;
+  onGroundDistanceChange?: (distance: number | null) => void;
   onHeadingChange?: (heading: number) => void;
   onPitchChange?: (pitch: number) => void;
   onRollChange?: (roll: number) => void;
@@ -88,11 +89,14 @@ interface PlaneControllerProps {
 const COLLISION_DISTANCE = 2;
 const COLLISION_PUSH_STRENGTH = 1;
 const NUM_COLLISION_RAYS = 8;
+const GROUND_RAYCAST_DISTANCE = 300; // Max distance to check for ground
+const GROUND_RAYCAST_INTERVAL = 3; // Check every N frames (~20fps at 60fps)
 
 export const PlaneController = forwardRef<PlaneControllerHandle, PlaneControllerProps>(function PlaneController({
   onSpeedChange,
   onModeChange,
   onCameraYChange,
+  onGroundDistanceChange,
   onHeadingChange,
   onPitchChange,
   onRollChange,
@@ -133,6 +137,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   const _planeForward = useRef(new THREE.Vector3()).current;
   const _rollQuat = useRef(new THREE.Quaternion()).current;
   const _rollAxis = useRef(new THREE.Vector3(0, 0, 1)).current;
+  const _downDirection = useRef(new THREE.Vector3(0, -1, 0)).current;
 
   const smoothRoll = useRef(0);
   const smoothLag = useRef(CAMERA_LAG);
@@ -441,6 +446,19 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       if (_pushBack.lengthSq() > 0.001) {
         virtualCam.position.add(_pushBack);
         onCollision?.(closestHit);
+      }
+    }
+
+    if (collisionGroup && frameCountRef.current % GROUND_RAYCAST_INTERVAL === 0) {
+      _raycaster.set(virtualCam.position, _downDirection);
+      _raycaster.far = GROUND_RAYCAST_DISTANCE;
+      
+      const groundHits = _raycaster.intersectObject(collisionGroup, true);
+      
+      if (groundHits.length > 0) {
+        onGroundDistanceChange?.(groundHits[0].distance);
+      } else {
+        onGroundDistanceChange?.(null);
       }
     }
 

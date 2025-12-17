@@ -61,15 +61,7 @@ export default function DistrictIndicator({
   useEffect(() => {
     const newDistrictId = district?.id ?? null;
     
-    console.log("[DistrictIndicator] district changed:", {
-      newDistrictId,
-      lastDistrictId: lastDistrictIdRef.current,
-      phase: phaseRef.current,
-      district: district?.name,
-    });
-    
     if (newDistrictId === lastDistrictIdRef.current) {
-      console.log("[DistrictIndicator] Skipping - same district");
       return;
     }
 
@@ -79,35 +71,23 @@ export default function DistrictIndicator({
     }
 
     if (!district) {
-      console.log("[DistrictIndicator] No district, clearing ref");
       lastDistrictIdRef.current = null;
       return;
     }
 
-    console.log("[DistrictIndicator] Setting debounce timer for:", district.name);
-    
     debounceTimerRef.current = setTimeout(() => {
       const currentPhase = phaseRef.current;
       
-      console.log("[DistrictIndicator] Debounce fired:", {
-        currentPhase,
-        districtName: district.name,
-      });
-      
       if (currentPhase === "idle") {
-        console.log("[DistrictIndicator] Starting fade-in for:", district.name);
         lastDistrictIdRef.current = district.id;
         setDisplayedDistrict(district);
         setPhase("fade-in");
         onVisibilityChange?.(true);
       } else if (currentPhase === "fade-out") {
-        console.log("[DistrictIndicator] Currently fading out, skipping:", district.name);
         lastDistrictIdRef.current = district.id; // Remember we saw this district
       } else if (currentPhase === "cooldown") {
-        console.log("[DistrictIndicator] In cooldown, skipping:", district.name);
         lastDistrictIdRef.current = district.id;
       } else if (currentPhase === "visible" || currentPhase === "fade-in") {
-        console.log("[DistrictIndicator] Updating displayed district to:", district.name);
         lastDistrictIdRef.current = district.id;
         setDisplayedDistrict(district);
         
@@ -129,8 +109,6 @@ export default function DistrictIndicator({
   }, [district, onVisibilityChange]);
 
   useEffect(() => {
-    console.log("[DistrictIndicator] Phase changed to:", phase);
-    
     if (phase === "fade-in") {
       requestAnimationFrame(() => {
         setOpacity(1);

@@ -21,6 +21,7 @@ interface FlightDashboardProps {
   pitch: number;
   roll: number;
   cameraY: number;
+  groundDistance: number | null;
   mapsApiKey: string;
   handleTeleport: (lat: number, lng: number, alt: number) => void;
   demoState?: DemoState;
@@ -43,6 +44,7 @@ export default function FlightDashboard({
   pitch,
   roll,
   cameraY,
+  groundDistance,
   gyroState,
   planeControllerRef,
   isMobile,
@@ -64,7 +66,7 @@ export default function FlightDashboard({
         onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
       />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <AttitudeIndicator pitch={pitch} roll={roll} cameraY={cameraY} />
+        <AttitudeIndicator pitch={pitch} roll={roll} cameraY={cameraY} groundDistance={groundDistance} />
       </div>
 
       <div className="hidden md:block absolute top-18 left-4">

@@ -7,6 +7,7 @@ interface AttitudeIndicatorProps {
   pitch: number;
   roll: number;
   cameraY: number;
+  groundDistance: number | null;
 }
 
 // Static SVG tick marks - generated once at module level
@@ -51,6 +52,7 @@ export default function AttitudeIndicator({
   pitch,
   roll,
   cameraY,
+  groundDistance,
 }: AttitudeIndicatorProps) {
   // Refs for RAF interpolation
   const targetRollRef = useRef(roll);
@@ -72,9 +74,21 @@ export default function AttitudeIndicator({
   const pitchValueRef = useRef<HTMLHeadingElement>(null);
   const cameraYValueRef = useRef<HTMLSpanElement>(null);
   const warningContainerRef = useRef<HTMLDivElement>(null);
+  const pullUpWarningRef = useRef<HTMLDivElement>(null);
 
-  // Warning threshold for low altitude
-  const LOW_ALTITUDE_THRESHOLD = 100;
+  // Ref for ground distance
+  const groundDistanceRef = useRef<number | null>(groundDistance);
+  groundDistanceRef.current = groundDistance;
+
+  // Warning state with hysteresis
+  const warningVisibleRef = useRef(false);
+  const warningCooldownRef = useRef(0);
+  const WARNING_SHOW_DELAY = 200; // ms
+  const WARNING_HIDE_DELAY = 500; // ms
+
+  // Warning thresholds
+  const LOW_ALTITUDE_THRESHOLD = 100; // Fallback for sea-level altitude
+  const LOW_GROUND_DISTANCE_THRESHOLD = 10; // Distance to actual ground/buildings
 
   // Update target values when props change
   useEffect(() => {
@@ -179,12 +193,37 @@ export default function AttitudeIndicator({
         cameraYValueRef.current.textContent = `${roundedCameraY.toFixed(1)} m`;
       }
 
-      // Update warning indicator based on altitude and pitch
+      // Update warning indicator based on ground distance (or altitude as fallback)
       if (warningContainerRef.current) {
-        const isLowAltitude = currentCameraY < LOW_ALTITUDE_THRESHOLD;
+        const currentGroundDistance = groundDistanceRef.current;
         const isDescending = currentPitch < 0;
+        const frameDeltaMs = deltaTime * 16.67;
         
-        if (isLowAltitude) {
+        let isLowAltitude = false;
+        if (currentGroundDistance !== null) {
+          isLowAltitude = currentGroundDistance < LOW_GROUND_DISTANCE_THRESHOLD;
+        } else {
+          isLowAltitude = currentCameraY < LOW_ALTITUDE_THRESHOLD;
+        }
+        
+        // Hysteresis: require sustained condition before changing state
+        if (isLowAltitude && !warningVisibleRef.current) {
+          warningCooldownRef.current += frameDeltaMs;
+          if (warningCooldownRef.current >= WARNING_SHOW_DELAY) {
+            warningVisibleRef.current = true;
+            warningCooldownRef.current = 0;
+          }
+        } else if (!isLowAltitude && warningVisibleRef.current) {
+          warningCooldownRef.current += frameDeltaMs;
+          if (warningCooldownRef.current >= WARNING_HIDE_DELAY) {
+            warningVisibleRef.current = false;
+            warningCooldownRef.current = 0;
+          }
+        } else {
+          warningCooldownRef.current = 0;
+        }
+        
+        if (warningVisibleRef.current) {
           warningContainerRef.current.style.opacity = "1";
           // Red warning when descending, yellow when level or climbing
           if (isDescending) {
@@ -194,6 +233,10 @@ export default function AttitudeIndicator({
           }
         } else {
           warningContainerRef.current.style.opacity = "0";
+        }
+        
+        if (pullUpWarningRef.current) {
+          pullUpWarningRef.current.style.opacity = warningVisibleRef.current ? "1" : "0";
         }
       }
 
@@ -229,6 +272,18 @@ export default function AttitudeIndicator({
           <div className="h-0.5 w-3 md:w-5 bg-white/80 shadow-[0_0_10px_rgba(0,0,0,0.35)] rounded-full" />
         </div>
       </div>
+      
+      {/* PULL UP Warning Box */}
+      <div
+        ref={pullUpWarningRef}
+        className="absolute left-1/2 -translate-x-1/2 bottom-[-3rem] md:bottom-[-4rem] flex items-center gap-2 px-3 py-1.5 backdrop-blur-md bg-black/30 rounded-md border-2 border-red-500 transition-opacity duration-200"
+        style={{ opacity: 0 }}
+      >
+        <AlertTriangle className="size-4 md:size-5 text-red-500" />
+        <span className="text-red-500 font-bold text-sm md:text-base tracking-wider">プールアップ</span>
+        <AlertTriangle className="size-4 md:size-5 text-red-500" />
+      </div>
+
       {/* Roll Indicator */}
       <div className="absolute left-0 right-0 bottom-0 flex flex-col items-center justify-center gap-1">
         {/* Scale marks */}
@@ -333,8 +388,8 @@ export default function AttitudeIndicator({
           <span
             ref={warningContainerRef}
             className="transition-opacity duration-200 data-[severity=critical]:text-red-500 data-[severity=warning]:text-amber-500"
-            style={{ opacity: cameraY < 100 ? 1 : 0 }}
-            data-severity={cameraY < 100 ? (pitch < 0 ? "critical" : "warning") : undefined}
+            style={{ opacity: (groundDistance !== null ? groundDistance < 10 : cameraY < 100) ? 1 : 0 }}
+            data-severity={(groundDistance !== null ? groundDistance < 10 : cameraY < 100) ? (pitch < 0 ? "critical" : "warning") : undefined}
           >
             <AlertTriangle className="size-3 md:size-4" />
           </span>

@@ -72,12 +72,6 @@ export function DistrictTracker({
     const prevId = currentDistrictRef.current?.id ?? null;
     
     if (currentId !== prevId) {
-      console.log("[DistrictTracker] District changed:", {
-        from: currentDistrictRef.current?.name ?? "none",
-        to: currentDistrict?.name ?? "none",
-        lat: geo.lat.toFixed(4),
-        lng: geo.lng.toFixed(4),
-      });
       currentDistrictRef.current = currentDistrict;
       onCurrentDistrictChange?.(currentDistrict);
     }

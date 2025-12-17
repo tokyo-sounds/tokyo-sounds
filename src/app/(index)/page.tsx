@@ -184,6 +184,7 @@ export default function TokyoPage() {
   const [collisionDistance, setCollisionDistance] = useState<number | null>(
     null
   );
+  const [groundDistance, setGroundDistance] = useState<number | null>(null);
   const [demoState, setDemoState] = useState<DemoState | null>(null);
   const [gyroState, setGyroState] = useState<GyroState>({
     isActive: false,
@@ -475,6 +476,7 @@ export default function TokyoPage() {
                 onSpeedChange={setFlightSpeed}
                 onModeChange={setMovementMode}
                 onCameraYChange={setCameraY}
+                onGroundDistanceChange={setGroundDistance}
                 onHeadingChange={setHeading}
                 onPitchChange={setPitch}
                 onRollChange={setRoll}
@@ -535,6 +537,7 @@ export default function TokyoPage() {
                 pitch={pitch}
                 roll={roll}
                 cameraY={cameraY}
+                groundDistance={groundDistance}
                 mapsApiKey={ENV_MAPS_API_KEY}
                 handleTeleport={handleTeleport}
                 gyroState={gyroState}
