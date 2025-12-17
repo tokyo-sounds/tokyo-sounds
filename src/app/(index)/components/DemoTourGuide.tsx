@@ -9,13 +9,7 @@ import { DEMO_WAYPOINTS } from "@/config/tokyo-config";
  */
 export default function DemoTourGuide({ demoState }: { demoState: DemoState }) {
   return (
-    <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 flight-dashboard-card px-6 py-4 text-white text-center">
-      <h1 className="mb-1 text-center text-primary-foreground text-lg font-bold font-sans uppercase">
-        TOKYO SOUNDS
-      </h1>
-      <h2 className="mb-2 text-center text-primary-foreground/70 text-sm font-noto font-sans uppercase">
-        耳で東京を巡る
-      </h2>
+    <div className="absolute bottom-24 left-1/2 transform -translate-x-1/2 flight-dashboard-card px-6 py-4 rounded-md text-white text-center animate-pulse">
       <div className="flex items-center justify-center gap-2 text-xs text-white/50">
         {/*   <span>
           {demoState.phase === "transitioning"

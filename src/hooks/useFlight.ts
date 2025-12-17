@@ -122,7 +122,7 @@ export function useFlight({
   const smoothPitchVelocityRef = useRef(0);
   const smoothBankVelocityRef = useRef(0);
 
-  const boostCooldownRef = useRef(0);
+  const boostHoldTimeRef = useRef(0);
   const lastReportedSpeedRef = useRef(-1);
 
   // FlyTo animation state
@@ -649,13 +649,16 @@ export function useFlight({
         currentSpeedRef.current += verticalFactor * config.gravityDecel * dt;
       }
 
-      if (keys.boost && boostCooldownRef.current <= 0) {
-        currentSpeedRef.current += config.boostImpulse;
-        boostCooldownRef.current = 0.5;
-      }
-
-      if (boostCooldownRef.current > 0) {
-        boostCooldownRef.current -= dt;
+      if (keys.boost) {
+        boostHoldTimeRef.current += dt;
+        
+        const rampTau = 1.0;
+        const rampFactor = 1 - Math.exp(-boostHoldTimeRef.current / rampTau);
+        
+        const boostAcceleration = config.boostImpulse * 2 * rampFactor;
+        currentSpeedRef.current += boostAcceleration * dt;
+      } else {
+        boostHoldTimeRef.current = 0;
       }
 
       currentSpeedRef.current *= config.drag;

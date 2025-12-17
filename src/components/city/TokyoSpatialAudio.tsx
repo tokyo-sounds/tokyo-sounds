@@ -42,7 +42,7 @@ const HIGH_SPEED_MIN_PLAY_DURATION_MS = 5000; // 5 secs
 const PRELOAD_DISTANCE_MULTIPLIER = 2.0; // Load audio when within maxDistance * this
 const UNLOAD_DISTANCE_MULTIPLIER = 4.0; // Unload audio when beyond maxDistance * this
 const MAX_CONCURRENT_LOADS = 3; // Maximum simultaneous audio file downloads
-const MAX_BUFFER_CACHE_SIZE_MB = 200; // Cache size in MB
+const MAX_BUFFER_CACHE_SIZE_MB = 400; // Cache size in MB (increased for larger ambient files)
 const BUFFER_UNLOAD_IDLE_TIME_MS = 30000; // Unload buffers not used in last 30 seconds
 const CACHE_EVICTION_TARGET_RATIO = 0.7; // When evicting, reduce to 70% of max
 
@@ -726,9 +726,6 @@ export function TokyoSpatialAudio({
       const effectiveVolume =
         typeof volume !== "undefined" ? volume : state.source.volume;
       audio.setVolume(effectiveVolume);
-      console.log(
-        `[SpatialAudio] Setting volume for ${state.source.id} to: ${effectiveVolume}`
-      );
 
       const panner = audio.getOutput() as PannerNode;
       if (panner?.panningModel !== undefined) {
@@ -747,15 +744,9 @@ export function TokyoSpatialAudio({
         state.lastUsedTime = Date.now();
         state.playStartTime = Date.now();
 
-        const worldPos = new THREE.Vector3();
-        audio.getWorldPosition(worldPos);
         const fileName = state.source.src.split("/").pop() || state.source.src;
         console.log(
           `[SpatialAudio] Started: ${state.source.id} | file: ${fileName} | loop: ${state.source.loop}`
-        );
-        state.lastUsedTime = Date.now(); // Update last used time
-        console.log(
-          `[SpatialAudio] Started: ${state.source.id} at volume: ${effectiveVolume}`
         );
       } catch (err) {
         console.error(`[SpatialAudio] Failed to play ${state.source.id}:`, err);
@@ -826,7 +817,7 @@ export function TokyoSpatialAudio({
         ? HIGH_SPEED_MIN_PLAY_DURATION_MS
         : MIN_PLAY_DURATION_MS;
 
-    if (now - lastDebugLogRef.current > 5000) {
+    if (showDebug && now - lastDebugLogRef.current > 5000) {
       lastDebugLogRef.current = now;
       const playingStates = states.filter((s) => s.isPlaying);
       if (playingStates.length > 0) {
@@ -971,26 +962,6 @@ export function TokyoSpatialAudio({
       procedural: proceduralCount,
     });
   });
-
-  // Update volume when volume prop changes for all playing audio
-  useEffect(() => {
-    if (!enabled || !contextResumed) return;
-
-    const states = audioStatesRef.current;
-    for (const state of states) {
-      if (state.isPlaying && state.audio) {
-        // Update the volume of currently playing audio
-        state.audio.setVolume(
-          typeof volume !== "undefined" ? volume : state.source.volume
-        );
-        console.log(
-          `[SpatialAudio] Updated volume for: ${state.source.id} to ${
-            typeof volume !== "undefined" ? volume : state.source.volume
-          }`
-        );
-      }
-    }
-  }, [volume, enabled, contextResumed]);
 
   useEffect(() => {
     if (!showDebug) return;

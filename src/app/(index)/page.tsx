@@ -16,6 +16,7 @@ import {
   useContext,
 } from "react";
 import { Canvas } from "@react-three/fiber";
+import { Environment } from "@react-three/drei";
 import * as THREE from "three";
 // Config
 import { TOKYO_CENTER, type District } from "@/config/tokyo-config";
@@ -89,16 +90,7 @@ export const PASTEL_COLORS = [
 ];
 
 function Loader() {
-  return (
-    <mesh rotation={[0, 0, 0]}>
-      <boxGeometry args={[50, 50, 50]} />
-      <meshStandardMaterial
-        color="#ff6b9d"
-        emissive="#ff6b9d"
-        emissiveIntensity={0.5}
-      />
-    </mesh>
-  );
+  return null;
 }
 
 function getMultiplayerUrl(): string {
@@ -153,6 +145,7 @@ export default function TokyoPage() {
   const [flightSpeed, setFlightSpeed] = useState(0);
   const [movementMode, setMovementMode] = useState<MovementMode>("elytra");
   const [currentDistrict, setCurrentDistrict] = useState<District | null>(null);
+  const [districtOverlayVisible, setDistrictOverlayVisible] = useState(false);
   const [districtDebug, setDistrictDebug] = useState<DistrictDebugInfo[]>([]);
   const [lyriaStatus, setLyriaStatus] = useState("Idle");
   const [spatialAudioEnabled, setSpatialAudioEnabled] = useState(true);
@@ -183,6 +176,7 @@ export default function TokyoPage() {
   const [collisionDistance, setCollisionDistance] = useState<number | null>(
     null
   );
+  const [groundDistance, setGroundDistance] = useState<number | null>(null);
   const [demoState, setDemoState] = useState<DemoState | null>(null);
   const [gyroState, setGyroState] = useState<GyroState>({
     isActive: false,
@@ -474,6 +468,7 @@ export default function TokyoPage() {
                 onSpeedChange={setFlightSpeed}
                 onModeChange={setMovementMode}
                 onCameraYChange={setCameraY}
+                onGroundDistanceChange={setGroundDistance}
                 onHeadingChange={setHeading}
                 onPitchChange={setPitch}
                 onRollChange={setRoll}
@@ -521,45 +516,65 @@ export default function TokyoPage() {
                 players={nearbyPlayers}
                 localPlayerPosition={localPlayerPositionRef.current}
               />
+
+              {/* Environment for PBR material reflections on the plane */}
+              <Environment preset="city" />
             </Suspense>
           </Canvas>
 
           {dashboardVisible && (
-            <FlightDashboard
-              flightSpeed={flightSpeed}
-              pitch={pitch}
-              roll={roll}
-              cameraY={cameraY}
-              mapsApiKey={ENV_MAPS_API_KEY}
-              handleTeleport={handleTeleport}
-              gyroState={gyroState}
-              planeControllerRef={
-                planeControllerRef as React.RefObject<PlaneControllerHandle>
-              }
-              operationManualOpen={operationManualOpen}
-              setOperationManualOpen={setOperationManualOpen}
-              heading={heading}
-              speedoMeterSize={speedoMeterSize}
-              isMobile={isMobile}
-              nearbyPlayers={nearbyPlayers}
-              localPlayerPosition={localPlayerPositionState}
-            />
+            <div 
+              className="transition-opacity duration-500 ease-in-out"
+              style={{ opacity: districtOverlayVisible ? 0 : 1 }}
+            >
+              <FlightDashboard
+                flightSpeed={flightSpeed}
+                pitch={pitch}
+                roll={roll}
+                cameraY={cameraY}
+                groundDistance={groundDistance}
+                mapsApiKey={ENV_MAPS_API_KEY}
+                handleTeleport={handleTeleport}
+                gyroState={gyroState}
+                planeControllerRef={
+                  planeControllerRef as React.RefObject<PlaneControllerHandle>
+                }
+                operationManualOpen={operationManualOpen}
+                setOperationManualOpen={setOperationManualOpen}
+                heading={heading}
+                speedoMeterSize={speedoMeterSize}
+                isMobile={isMobile}
+                nearbyPlayers={nearbyPlayers}
+                localPlayerPosition={localPlayerPositionState}
+              />
+            </div>
           )}
 
-          <div className="absolute top-4 right-4 z-50">
+          <div 
+            className="absolute top-4 right-4 z-50 transition-opacity duration-500 ease-in-out"
+            style={{ opacity: districtOverlayVisible ? 0 : 1 }}
+          >
             <DashboardToggleButton
               dashboardVisible={dashboardVisible}
               setDashboardVisible={setDashboardVisible}
             />
           </div>
 
-          {currentDistrict && cameraY < 900 && (
-            <DistrictIndicator district={currentDistrict} />
-          )}
+          <DistrictIndicator 
+            district={currentDistrict && cameraY < 900 ? currentDistrict : null} 
+            onVisibilityChange={setDistrictOverlayVisible}
+          />
 
           {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
-          {isMobile && <VirtualController enabled={started} />}
+          {isMobile && (
+            <div 
+              className="transition-opacity duration-500 ease-in-out"
+              style={{ opacity: districtOverlayVisible ? 0 : 1 }}
+            >
+              <VirtualController enabled={started} />
+            </div>
+          )}
 
           {/* AmbientBackgroundAudio disabled - using procedural spatial audio instead */}
 

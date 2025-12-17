@@ -72,6 +72,7 @@ export function useProceduralSources({
   const [sources, setSources] = useState<SpatialAudioSource[]>([]);
 
   const lastPositionRef = useRef(new THREE.Vector3());
+  const cameraPosRef = useRef(new THREE.Vector3());
   const lastUpdateTimeRef = useRef(0);
   const velocityRef = useRef(0);
   const activeCellsRef = useRef<Set<string>>(new Set());
@@ -105,7 +106,7 @@ export function useProceduralSources({
     const deltaTime = (now - lastUpdateTimeRef.current) / 1000;
     lastUpdateTimeRef.current = now;
 
-    const cameraPos = new THREE.Vector3();
+    const cameraPos = cameraPosRef.current;
     camera.getWorldPosition(cameraPos);
 
     const displacement = cameraPos.distanceTo(lastPositionRef.current);
