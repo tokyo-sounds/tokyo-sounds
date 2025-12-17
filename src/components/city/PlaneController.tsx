@@ -143,6 +143,9 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   const smoothLag = useRef(CAMERA_LAG);
 
   const flyToActiveRef = useRef(false);
+  const boostingRef = useRef(false);
+  
+  const _lookTarget = useRef(new THREE.Vector3()).current;
 
   // Flying audio state
   const flyingAudioRef = useRef<THREE.PositionalAudio | null>(null);
@@ -386,7 +389,9 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     }
 
     const boosting = !isDemoActive && !isFlyToActive && keysRef.current.boost;
-    if (boosting !== isBoosting) {
+    const boostingChanged = boosting !== boostingRef.current;
+    boostingRef.current = boosting;
+    if (boostingChanged) {
       setIsBoosting(boosting);
     }
 
@@ -478,13 +483,13 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
 
     if (isFlyToActive) {
     } else if (isDemoActive) {
-      smoothCameraPos.current.lerp(virtualCam.position, 1 - DEMO_CAMERA_LAG);
+      const demoSmoothingSpeed = (1 - DEMO_CAMERA_LAG) * 60;
+      const demoLerpFactor = 1 - Math.exp(-demoSmoothingSpeed * delta);
+      
+      smoothCameraPos.current.lerp(virtualCam.position, demoLerpFactor);
       camera.position.copy(smoothCameraPos.current);
 
-      smoothCameraQuat.current.slerp(
-        virtualCam.quaternion,
-        1 - DEMO_CAMERA_LAG
-      );
+      smoothCameraQuat.current.slerp(virtualCam.quaternion, demoLerpFactor);
       camera.quaternion.copy(smoothCameraQuat.current);
     } else if (isSimpleMode) {
       camera.position.copy(virtualCam.position);
@@ -504,19 +509,21 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
         (targetLag - smoothLag.current) *
         Math.min(1, delta * LAG_TRANSITION_SPEED);
 
-      smoothCameraPos.current.lerp(_targetCameraPos, 1 - smoothLag.current);
+      const smoothingSpeed = (1 - smoothLag.current) * 60;
+      const lerpFactor = 1 - Math.exp(-smoothingSpeed * delta);
+      
+      smoothCameraPos.current.lerp(_targetCameraPos, lerpFactor);
 
       _euler.setFromQuaternion(virtualCam.quaternion, "YXZ");
       const planeRoll = _euler.z;
 
-      smoothRoll.current +=
-        (planeRoll - smoothRoll.current) * (1 - smoothLag.current);
+      smoothRoll.current += (planeRoll - smoothRoll.current) * lerpFactor;
 
       camera.position.copy(smoothCameraPos.current);
 
-      const lookTarget = virtualCam.position.clone();
-      lookTarget.addScaledVector(_planeForward, CAMERA_LOOK_OFFSET);
-      camera.lookAt(lookTarget);
+      _lookTarget.copy(virtualCam.position);
+      _lookTarget.addScaledVector(_planeForward, CAMERA_LOOK_OFFSET);
+      camera.lookAt(_lookTarget);
 
       _rollQuat.setFromAxisAngle(_rollAxis, smoothRoll.current);
       camera.quaternion.multiply(_rollQuat);
