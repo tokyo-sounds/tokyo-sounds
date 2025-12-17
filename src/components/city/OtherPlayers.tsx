@@ -232,16 +232,17 @@ function OtherPlayerPlane({
           style={{
             background: "rgba(0, 0, 0, 0.7)",
             color: player.color,
-            padding: "2px 8px",
-            borderRadius: "4px",
-            fontSize: "12px",
+            // padding: "2px 8px",
+            // borderRadius: "4px",
+            fontSize: "36px",
             fontFamily: "monospace",
-            fontWeight: "bold",
+            fontWeight: "semibold",
             whiteSpace: "nowrap",
             textShadow: "0 1px 2px rgba(0,0,0,0.5)",
           }}
         >
-          {player.name || "Anonymous"}
+          {/* TODO: 多言語対応 */}
+          {player.name || "名無し"}
         </div>
       </Html>
     </group>
