@@ -70,7 +70,7 @@ export default function FlightDashboard({
       {cameraY < 100 && (
         <Alert
           variant="destructive"
-          className="absolute bottom-12 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-black/80 backdrop-blur-sm"
+          className="absolute bottom-12 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-black/80 backdrop-blur-sm select-none"
         >
           <AlertCircle className="size-4" />
           <AlertTitle>地面接近警報</AlertTitle>

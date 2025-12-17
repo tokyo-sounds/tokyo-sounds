@@ -550,3 +550,126 @@ export function useDistanceCulling(cameraRef: React.RefObject<THREE.Camera>) {
 
     return stats;
 }
+
+/**
+ * useSpatialVolume control the spatial audio volume
+ * @returns spatial volume control functions
+ */
+export function useSpatialVolume(): [number, (volume: number) => void] {
+    const session = useAudioSessionContext();
+    const [volume, setVolume] = useState(1.0);
+    const rafRef = useRef<number | null>(null);
+    const pendingVolumeRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (!session) return;
+
+        // Initialize with current spatial volume from the session if getter exists
+        if (session.getSpatialVolume) {
+            setVolume(session.getSpatialVolume());
+        }
+    }, [session]);
+
+    const setSpatialVolume = useCallback((newVolume: number) => {
+        if (!session) return;
+
+        pendingVolumeRef.current = newVolume;
+        setVolume(newVolume);
+
+        if (rafRef.current !== null) {
+            cancelAnimationFrame(rafRef.current);
+        }
+
+        rafRef.current = requestAnimationFrame(() => {
+            if (session && pendingVolumeRef.current !== null && session.setSpatialVolume) {
+                session.setSpatialVolume(pendingVolumeRef.current);
+                pendingVolumeRef.current = null;
+            }
+            rafRef.current = null;
+        });
+    }, [session]);
+
+    return [volume, setSpatialVolume];
+}
+
+/**
+ * useLyriaVolume control the Lyria audio volume
+ * @returns Lyria volume control functions
+ */
+export function useLyriaVolume(): [number, (volume: number) => void] {
+    const session = useAudioSessionContext();
+    const [volume, setVolume] = useState(1.0);
+    const rafRef = useRef<number | null>(null);
+    const pendingVolumeRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (!session) return;
+
+        // Initialize with current Lyria volume from the session if getter exists
+        if (session.getLyriaVolume) {
+            setVolume(session.getLyriaVolume());
+        }
+    }, [session]);
+
+    const setLyriaVolume = useCallback((newVolume: number) => {
+        if (!session) return;
+
+        pendingVolumeRef.current = newVolume;
+        setVolume(newVolume);
+
+        if (rafRef.current !== null) {
+            cancelAnimationFrame(rafRef.current);
+        }
+
+        rafRef.current = requestAnimationFrame(() => {
+            if (session && pendingVolumeRef.current !== null && session.setLyriaVolume) {
+                session.setLyriaVolume(pendingVolumeRef.current);
+                pendingVolumeRef.current = null;
+            }
+            rafRef.current = null;
+        });
+    }, [session]);
+
+    return [volume, setLyriaVolume];
+}
+
+/**
+ * useAmbientVolume control the ambient audio volume
+ * @returns ambient volume control functions
+ */
+export function useAmbientVolume(): [number, (volume: number) => void] {
+    const session = useAudioSessionContext();
+    const [volume, setVolume] = useState(1.0);
+    const rafRef = useRef<number | null>(null);
+    const pendingVolumeRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        if (!session) return;
+
+        // Initialize with current ambient volume from the session if getter exists
+        if (session.getAmbientVolume) {
+            setVolume(session.getAmbientVolume());
+        }
+    }, [session]);
+
+    const setAmbientVolume = useCallback((newVolume: number) => {
+        if (!session) return;
+
+        pendingVolumeRef.current = newVolume;
+        setVolume(newVolume);
+
+        if (rafRef.current !== null) {
+            cancelAnimationFrame(rafRef.current);
+        }
+
+        rafRef.current = requestAnimationFrame(() => {
+            if (session && pendingVolumeRef.current !== null && session.setAmbientVolume) {
+                session.setAmbientVolume(pendingVolumeRef.current);
+                pendingVolumeRef.current = null;
+            }
+            rafRef.current = null;
+        });
+    }, [session]);
+
+    return [volume, setAmbientVolume];
+}

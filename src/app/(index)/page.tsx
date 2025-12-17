@@ -6,7 +6,7 @@
  */
 //
 // Base Modules
-import { Suspense, useRef, useState, useCallback, useEffect } from "react";
+import { Suspense, useRef, useState, useCallback, useEffect, createContext, useContext } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 // Config
@@ -44,6 +44,26 @@ import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
 // Utils
 import { type MovementMode } from "@/lib/flight";
 import { latLngAltToENU } from "@/lib/geo-utils";
+
+// Define the volume context
+interface VolumeContextType {
+  spatialVolume: number;
+  lyriaVolume: number;
+  ambientVolume: number;
+  setSpatialVolume: (volume: number) => void;
+  setLyriaVolume: (volume: number) => void;
+  setAmbientVolume: (volume: number) => void;
+}
+
+const VolumeContext = createContext<VolumeContextType | undefined>(undefined);
+
+export const useVolume = () => {
+  const context = useContext(VolumeContext);
+  if (context === undefined) {
+    throw new Error('useVolume must be used within a VolumeProvider');
+  }
+  return context;
+};
 
 // Pastel color options for plane customization
 export const PASTEL_COLORS = [
@@ -130,6 +150,11 @@ export default function TokyoPage() {
     handPlaced: 0,
     procedural: 0,
   });
+  // Volume states with logging
+  const [spatialVolume, setSpatialVolume] = useState(1.0);
+  const [lyriaVolume, setLyriaVolume] = useState(1.0);
+  const [ambientVolume, setAmbientVolume] = useState(1.0);
+
 
   const [debugOptions, setDebugOptions] = useState<DebugOptions>({
     showMeshes: true,
@@ -395,6 +420,16 @@ export default function TokyoPage() {
 
   return (
     <div className="w-full h-svh bg-black relative overflow-hidden">
+    <VolumeContext.Provider value={{
+      spatialVolume,
+      lyriaVolume,
+      ambientVolume,
+      setSpatialVolume,
+      setLyriaVolume,
+      setAmbientVolume
+    }}>
+      <AmbientBackgroundAudioProvider>
+        <div className="w-full h-svh bg-black relative overflow-hidden">
         <Canvas
           shadows="soft"
           camera={{
@@ -443,7 +478,7 @@ export default function TokyoPage() {
               <DistrictLyriaAudio
                 apiKey={effectiveLyriaApiKey}
                 enabled={generativeEnabled}
-                volume={0.4}
+                volume={lyriaVolume} // Use dynamic lyria volume instead of fixed 0.4
                 onStatusUpdate={setLyriaStatus}
                 onDebugUpdate={setDistrictDebug}
                 onCurrentDistrictChange={setCurrentDistrict}
@@ -462,6 +497,7 @@ export default function TokyoPage() {
               enabled={spatialAudioEnabled}
               enableProcedural={spatialAudioEnabled}
               showDebug={debugOptions.showBounds}
+              volume={spatialVolume} // Add dynamic spatial volume prop
               onStatsUpdate={setSpatialAudioStats}
             />
 
@@ -508,6 +544,12 @@ export default function TokyoPage() {
         {isMobile && <VirtualController enabled={started} />}
 
         {/* <AmbientBackgroundAudio cameraY={cameraY} maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT} enabled={started} /> */}
+        <AmbientBackgroundAudio
+          cameraY={cameraY}
+          maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT}
+          enabled={started}
+          masterVolume={ambientVolume} // Add dynamic ambient volume prop
+        />
 
         <DebugMenu
           options={debugOptions}
@@ -545,4 +587,7 @@ export default function TokyoPage() {
         />
       </div>
   );
+    </AmbientBackgroundAudioProvider>
+  </VolumeContext.Provider>
+);
 }
