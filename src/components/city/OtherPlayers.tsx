@@ -228,22 +228,10 @@ function OtherPlayerPlane({
           pointerEvents: "none",
         }}
       >
-        <div
-          style={{
-            background: "rgba(0, 0, 0, 0.7)",
-            color: player.color,
-            // padding: "2px 8px",
-            // borderRadius: "4px",
-            fontSize: "36px",
-            fontFamily: "monospace",
-            fontWeight: "semibold",
-            whiteSpace: "nowrap",
-            textShadow: "0 1px 2px rgba(0,0,0,0.5)",
-          }}
-        >
+        <h1 className="-translate-y-[200px] text-[120px] text-primary-foreground bg-black/20 rounded-2xl px-3 py-1 text-shadow-md text-shadow-black/50 font-bold font-sans font-noto whitespace-nowrap">
           {/* TODO: 多言語対応 */}
           {player.name || "名無し"}
-        </div>
+        </h1>
       </Html>
     </group>
   );
