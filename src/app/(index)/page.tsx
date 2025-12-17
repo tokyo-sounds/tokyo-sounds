@@ -61,9 +61,11 @@ interface VolumeContextType {
   spatialVolume: number;
   lyriaVolume: number;
   ambientVolume: number;
+  flyingVolume: number;
   setSpatialVolume: (volume: number) => void;
   setLyriaVolume: (volume: number) => void;
   setAmbientVolume: (volume: number) => void;
+  setFlyingVolume: (volume: number) => void;
 }
 
 const VolumeContext = createContext<VolumeContextType | undefined>(undefined);
@@ -165,6 +167,7 @@ export default function TokyoPage() {
   const [spatialVolume, setSpatialVolume] = useState(1.0);
   const [lyriaVolume, setLyriaVolume] = useState(1.0);
   const [ambientVolume, setAmbientVolume] = useState(1.0);
+  const [flyingVolume, setFlyingVolume] = useState(0.15); // Default to reduced volume
 
   const [debugOptions, setDebugOptions] = useState<DebugOptions>({
     showMeshes: true,
@@ -435,9 +438,11 @@ export default function TokyoPage() {
           spatialVolume,
           lyriaVolume,
           ambientVolume,
+          flyingVolume,
           setSpatialVolume,
           setLyriaVolume,
           setAmbientVolume,
+          setFlyingVolume,
         }}
       >
           <Canvas
@@ -480,6 +485,7 @@ export default function TokyoPage() {
                 onDemoStateChange={setDemoState}
                 onGyroStateChange={setGyroState}
                 planeColor={planeColor}
+                flyingVolume={flyingVolume}
               />
 
               <FlightBoundsHelper visible={debugOptions.showBounds} />

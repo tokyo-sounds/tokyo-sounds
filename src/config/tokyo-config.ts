@@ -1478,6 +1478,21 @@ export const TOKYO_SPATIAL_AUDIO_SOURCES: SpatialAudioSource[] = [
     loop: true,
   },
 
+  // === 東京駅 (Tokyo Station) ===
+  {
+    id: "tokyo_station_bullet_train",
+    name: "Bullet Train",
+    nameJa: "新幹線",
+    lat: 35.6812,
+    lng: 139.7671,
+    alt: 25,
+    src: "/audio/東京駅/bullet_train.mp3",
+    volume: 1.0,
+    refDistance: 30,
+    maxDistance: 400,
+    loop: true,
+  },
+
   // === General Tokyo (ambient) ===
   {
     id: "tokyo_street_shinjuku",
@@ -1768,8 +1783,8 @@ export const PROCEDURAL_AUDIO_CONFIG = {
 
   velocityForMaxRange: 100,
 
-  altitudeFadeStart: 80,   // start fading at 80m
-  altitudeFadeEnd: 200,    // fully fade out at 200m altitude
+  altitudeFadeStart: 100,  // start fading at 100m
+  altitudeFadeEnd: 250,    // fully fade out at 250m altitude
 
   fadeInDuration: 500,
   fadeOutDuration: 500,

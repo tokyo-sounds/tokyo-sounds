@@ -115,6 +115,7 @@ function DebugMarker({
     if (source.src.includes("秋葉原")) return "#ff6b6b";
     if (source.src.includes("原宿")) return "#ff69b4";
     if (source.src.includes("中野")) return "#00ffff";
+    if (source.src.includes("東京駅")) return "#dc143c";
     return "#ffffff";
   }, [source.src]);
 
