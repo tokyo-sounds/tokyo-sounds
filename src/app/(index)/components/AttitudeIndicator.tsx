@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
+import { AlertTriangle } from "lucide-react";
 
 interface AttitudeIndicatorProps {
   pitch: number;
@@ -69,7 +70,11 @@ export default function AttitudeIndicator({
   const pitchFillNegativeRef = useRef<HTMLDivElement>(null);
   const rollValueRef = useRef<HTMLHeadingElement>(null);
   const pitchValueRef = useRef<HTMLHeadingElement>(null);
-  const cameraYValueRef = useRef<HTMLLabelElement>(null);
+  const cameraYValueRef = useRef<HTMLSpanElement>(null);
+  const warningContainerRef = useRef<HTMLDivElement>(null);
+
+  // Warning threshold for low altitude
+  const LOW_ALTITUDE_THRESHOLD = 100;
 
   // Update target values when props change
   useEffect(() => {
@@ -172,6 +177,24 @@ export default function AttitudeIndicator({
       if (cameraYValueRef.current) {
         const roundedCameraY = Math.round(currentCameraY * 10) / 10;
         cameraYValueRef.current.textContent = `${roundedCameraY.toFixed(1)} m`;
+      }
+
+      // Update warning indicator based on altitude and pitch
+      if (warningContainerRef.current) {
+        const isLowAltitude = currentCameraY < LOW_ALTITUDE_THRESHOLD;
+        const isDescending = currentPitch < 0;
+        
+        if (isLowAltitude) {
+          warningContainerRef.current.style.opacity = "1";
+          // Red warning when descending, yellow when level or climbing
+          if (isDescending) {
+            warningContainerRef.current.dataset.severity = "critical";
+          } else {
+            warningContainerRef.current.dataset.severity = "warning";
+          }
+        } else {
+          warningContainerRef.current.style.opacity = "0";
+        }
       }
 
       rafIdRef.current = requestAnimationFrame(animate);
@@ -303,10 +326,18 @@ export default function AttitudeIndicator({
           {pitch.toFixed(1)}°
         </h3>
         <label
-          ref={cameraYValueRef}
-          className="absolute top-6 left-1/2 -translate-x-1/2 w-full text-xs md:text-sm text-muted text-shadow-sm text-shadow-black/50 font-mono"
+          className="absolute top-6 left-1/2 -translate-x-1/2 w-full text-xs md:text-sm text-muted text-shadow-sm text-shadow-black/50 font-mono flex items-center justify-center gap-1"
         >
-          {cameraY.toFixed(1)} m
+          <span ref={cameraYValueRef}>{cameraY.toFixed(1)} m</span>
+          {/* Low altitude warning indicator */}
+          <span
+            ref={warningContainerRef}
+            className="transition-opacity duration-200 data-[severity=critical]:text-red-500 data-[severity=warning]:text-amber-500"
+            style={{ opacity: cameraY < 100 ? 1 : 0 }}
+            data-severity={cameraY < 100 ? (pitch < 0 ? "critical" : "warning") : undefined}
+          >
+            <AlertTriangle className="size-3 md:size-4" />
+          </span>
         </label>
       </div>
     </div>
