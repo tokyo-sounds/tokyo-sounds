@@ -34,14 +34,17 @@ export default function TimeOfDayEffectsMenu() {
                 onClick={() => setTimeOfDay(time)}
                 className={`rounded-full ${
                   currentTime === time
-                    ? "bg-primary/70 text-primary-foreground"
+                    ? "bg-primary/70 text-primary-foreground border hover:text-white"
                     : "flight-dashboard-card text-muted"
                 }`}
               >
                 <Icon className="size-4" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent className="pointer-events-none select-none">
+            <TooltipContent
+              side="left"
+              className="pointer-events-none select-none"
+            >
               <p>{TIME_OF_DAY_PRESETS[time].nameJa}</p>
             </TooltipContent>
           </Tooltip>

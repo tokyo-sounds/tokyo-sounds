@@ -37,10 +37,6 @@ import { CodeXml, Play, Pause, Settings } from "lucide-react";
  * @returns null
  */
 
-function DebugMenuLabel({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-sm text-muted mb-1">{children}</h3>;
-}
-
 export default function DebugMenu({
   options,
   onOptionsChange,
@@ -97,14 +93,15 @@ export default function DebugMenu({
           <SheetTrigger asChild>
             <Button
               aria-label="メニュー"
+              size="icon"
               variant="ghost"
-              className="absolute top-4 left-4 text-white/70 text-shadow-sm hover:text-white text-xs font-mono pointer-events-auto"
+              className="absolute top-4 left-4 rounded-full text-white/70 text-shadow-sm hover:bg-black/30 hover:border hover:border-border/50 hover:text-white text-xs font-mono pointer-events-auto"
             >
               <Settings className="size-4" />
             </Button>
           </SheetTrigger>
         </TooltipTrigger>
-        <TooltipContent>
+        <TooltipContent side="right">
           <p>メニュー</p>
         </TooltipContent>
       </Tooltip>
@@ -127,10 +124,10 @@ export default function DebugMenu({
           </TabsList>
           <TabsContent value="options" className="flex-1 flex flex-col gap-2">
             <div>
-              <DebugMenuLabel>環境設定</DebugMenuLabel>
-              <p className="text-xs text-muted/50">
+              <DebugMenuLabel>時間設定</DebugMenuLabel>
+              <DebugMenuDescription>
                 時間帯の選択によって、AI生成音楽も変化します。
-              </p>
+              </DebugMenuDescription>
               <div className="bg-muted/40 text-muted-foreground inline-flex h-9 w-full gap-1 items-center justify-center rounded-lg p-[3px]">
                 {timeOptions.map((time) => (
                   <Button
@@ -147,23 +144,21 @@ export default function DebugMenu({
                 ))}
               </div>
             </div>
-            <div>
-              <DebugMenuLabel>背景音</DebugMenuLabel>
-              <p className="text-xs text-muted/50">現在再生中の背景音。</p>
+            {/* Remove background audio control for more display space */}
+            {/* <div>
+              <DebugMenuLabel>音声設定</DebugMenuLabel>
+              <DebugMenuDescription>現在再生中の背景音。</DebugMenuDescription>
               <AmbientAudioControl />
-            </div>
+            </div> */}
             <div>
               <DebugMenuLabel>音量設定</DebugMenuLabel>
-              <p className="text-xs text-muted/50">
-                環境音とAI生成音楽の音量を調整できます。
-              </p>
               <AudioVolumeControls />
             </div>
             <div className="flex-1">
               <DebugMenuLabel>地域パラメーター</DebugMenuLabel>
-              <p className="text-xs text-muted/50">
+              <DebugMenuDescription>
                 現在地の地域情報解析結果。
-              </p>
+              </DebugMenuDescription>
               {/* District Debug Panel Section */}
               {generativeEnabled && districts.length > 0 ? (
                 <DistrictDebugContent districts={districts} />
@@ -327,55 +322,65 @@ export default function DebugMenu({
   );
 }
 
+// Debug Menu Label Component
+function DebugMenuLabel({ children }: { children: React.ReactNode }) {
+  return <h3 className="text-sm text-muted mb-1">{children}</h3>;
+}
+
+// Debug Menu Section Description Component
+function DebugMenuDescription({ children }: { children: React.ReactNode }) {
+  return <p className="text-xs text-muted/50 mb-1">{children}</p>;
+}
+
 /**
  * Ambient Audio Control Component
  * Displays current playing audio file and provides play/pause controls
  */
-function AmbientAudioControl() {
-  const { currentFileName, isPlaying, play, pause } =
-    useAmbientBackgroundAudio();
+// function AmbientAudioControl() {
+//   const { currentFileName, isPlaying, play, pause } =
+//     useAmbientBackgroundAudio();
 
-  // Remove file extension from filename
-  const fileNameWithoutExtension = currentFileName
-    ? currentFileName.replace(/\.[^/.]+$/, "")
-    : null;
+//   // Remove file extension from filename
+//   const fileNameWithoutExtension = currentFileName
+//     ? currentFileName.replace(/\.[^/.]+$/, "")
+//     : null;
 
-  const handleToggle = () => {
-    if (isPlaying) {
-      pause();
-    } else {
-      play();
-    }
-  };
+//   const handleToggle = () => {
+//     if (isPlaying) {
+//       pause();
+//     } else {
+//       play();
+//     }
+//   };
 
-  return (
-    <Button
-      variant="ghost"
-      size="lg"
-      onClick={handleToggle}
-      className="group w-full hover:bg-muted/[0.2] hover:border hover:border-border/70 hover:text-white transition-all"
-    >
-      {isPlaying ? (
-        <>
-          <span className="hidden group-hover:inline-flex items-center">
-            <Pause className="size-3 mr-1" />
-            停止
-          </span>
-          <span className="inline group-hover:hidden">
-            {fileNameWithoutExtension || "None"}
-          </span>
-        </>
-      ) : (
-        <>
-          <span className="hidden items-center group-hover:inline-flex">
-            <Play className="size-3 mr-1" />
-            再生
-          </span>
-          <span className="inline group-hover:hidden">
-            {fileNameWithoutExtension || "None"}
-          </span>
-        </>
-      )}
-    </Button>
-  );
-}
+//   return (
+//     <Button
+//       variant="ghost"
+//       size="lg"
+//       onClick={handleToggle}
+//       className="group w-full hover:bg-muted/[0.2] hover:border hover:border-border/70 hover:text-white transition-all"
+//     >
+//       {isPlaying ? (
+//         <>
+//           <span className="hidden group-hover:inline-flex items-center">
+//             <Pause className="size-3 mr-1" />
+//             停止
+//           </span>
+//           <span className="inline group-hover:hidden">
+//             {fileNameWithoutExtension || "None"}
+//           </span>
+//         </>
+//       ) : (
+//         <>
+//           <span className="hidden items-center group-hover:inline-flex">
+//             <Play className="size-3 mr-1" />
+//             再生
+//           </span>
+//           <span className="inline group-hover:hidden">
+//             {fileNameWithoutExtension || "None"}
+//           </span>
+//         </>
+//       )}
+//     </Button>
+//   );
+// }

@@ -12,7 +12,7 @@ export default function AudioVolumeControls() {
     ambientVolume,
     setSpatialVolume,
     setLyriaVolume,
-    setAmbientVolume
+    setAmbientVolume,
   } = useVolume();
 
   const handleSpatialVolumeChange = (value: number[]) => {
@@ -28,13 +28,16 @@ export default function AudioVolumeControls() {
   };
 
   return (
-    <div className="space-y-4 p-2">
-      <div className="space-y-2">
+    <div className="space-y-2 p-2">
+      <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <Label htmlFor="spatial-volume" className="text-xs text-muted-foreground">
-            空間音響ボリューム
+          <Label
+            htmlFor="spatial-volume"
+            className="text-xs text-primary-foreground/50 font-light tracking-wide"
+          >
+            場所環境音
           </Label>
-          <span className="text-xs text-muted-foreground w-10 text-right">
+          <span className="text-xs text-primary-foreground/50 font-light tracking-wide w-10 text-right">
             {Math.round(spatialVolume * 100)}%
           </span>
         </div>
@@ -49,32 +52,15 @@ export default function AudioVolumeControls() {
         />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <div className="flex items-center justify-between">
-          <Label htmlFor="lyria-volume" className="text-xs text-muted-foreground">
-            Lyria音楽ボリューム
+          <Label
+            htmlFor="ambient-volume"
+            className="text-xs text-primary-foreground/50 font-light tracking-wide"
+          >
+            常設環境音
           </Label>
-          <span className="text-xs text-muted-foreground w-10 text-right">
-            {Math.round(lyriaVolume * 100)}%
-          </span>
-        </div>
-        <Slider
-          id="lyria-volume"
-          min={0}
-          max={1}
-          step={0.01}
-          value={[lyriaVolume]}
-          onValueChange={handleLyriaVolumeChange}
-          className="w-full"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="ambient-volume" className="text-xs text-muted-foreground">
-            環境音ボリューム
-          </Label>
-          <span className="text-xs text-muted-foreground w-10 text-right">
+          <span className="text-xs text-primary-foreground/50 font-light tracking-wide w-10 text-right">
             {Math.round(ambientVolume * 100)}%
           </span>
         </div>
@@ -85,6 +71,29 @@ export default function AudioVolumeControls() {
           step={0.01}
           value={[ambientVolume]}
           onValueChange={handleAmbientVolumeChange}
+          className="w-full"
+        />
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex items-center justify-between">
+          <Label
+            htmlFor="lyria-volume"
+            className="text-xs text-primary-foreground/50 font-light tracking-wide"
+          >
+            AI生成音楽
+          </Label>
+          <span className="text-xs text-primary-foreground/50 font-light tracking-wide w-10 text-right">
+            {Math.round(lyriaVolume * 100)}%
+          </span>
+        </div>
+        <Slider
+          id="lyria-volume"
+          min={0}
+          max={1}
+          step={0.01}
+          value={[lyriaVolume]}
+          onValueChange={handleLyriaVolumeChange}
           className="w-full"
         />
       </div>

@@ -20,13 +20,13 @@ export default function DashboardToggleButton({
           variant="ghost"
           size="icon"
           onClick={() => setDashboardVisible(!dashboardVisible)}
-          className="flight-dashboard-card hover:text-white"
+          className="fixed top-4 right-4 rounded-full text-white/70 text-shadow-sm hover:bg-black/30 hover:border hover:border-border/50 hover:text-white text-xs font-mono pointer-events-auto"
           aria-label={dashboardVisible ? "Hide dashboard" : "Show dashboard"}
         >
           {dashboardVisible ? (
-            <Eye strokeWidth={1} className="size-5" />
+            <Eye className="size-4" />
           ) : (
-            <EyeClosed strokeWidth={1} className="size-5" />
+            <EyeClosed strokeWidth={1.5} className="size-4" />
           )}
         </Button>
       </TooltipTrigger>
