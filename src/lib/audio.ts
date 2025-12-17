@@ -202,8 +202,11 @@ export interface AudioSession {
     on(event: AudioSessionEvent, handler: (...args: any[]) => void): void;
     off(event: AudioSessionEvent, handler: (...args: any[]) => void): void;
     getSpatialVolume(): number;
+    setSpatialVolume(volume: number): void;
     getLyriaVolume(): number;
+    setLyriaVolume(volume: number): void;
     getAmbientVolume(): number;
+    setAmbientVolume(volume: number): void;
 }
 
 interface ParamConstraint {
