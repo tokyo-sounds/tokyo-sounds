@@ -8,8 +8,7 @@ import InformationContainer from "./InformationContainer";
 import TimeOfDayEffectsMenu from "./TimeOfDayEffectsMenu";
 import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { type PlaneControllerHandle } from "@/components/city/PlaneController";
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+
 import { type PlayerState } from "@/types/multiplayer";
 import * as THREE from "three";
 
@@ -22,6 +21,7 @@ interface FlightDashboardProps {
   pitch: number;
   roll: number;
   cameraY: number;
+  groundDistance: number | null;
   mapsApiKey: string;
   handleTeleport: (lat: number, lng: number, alt: number) => void;
   demoState?: DemoState;
@@ -44,6 +44,7 @@ export default function FlightDashboard({
   pitch,
   roll,
   cameraY,
+  groundDistance,
   gyroState,
   planeControllerRef,
   isMobile,
@@ -65,20 +66,9 @@ export default function FlightDashboard({
         onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
       />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <AttitudeIndicator pitch={pitch} roll={roll} cameraY={cameraY} />
+        <AttitudeIndicator pitch={pitch} roll={roll} cameraY={cameraY} groundDistance={groundDistance} />
       </div>
-      {cameraY < 100 && (
-        <Alert
-          variant="destructive"
-          className="absolute bottom-12 left-1/2 transform -translate-x-1/2 w-full max-w-sm bg-black/80 backdrop-blur-sm select-none"
-        >
-          <AlertCircle className="size-4" />
-          <AlertTitle>地面接近警報</AlertTitle>
-          <AlertDescription>
-            プルアップ！飛行高度が低すぎます。墜落する危険性があります。高度を上げてください。
-          </AlertDescription>
-        </Alert>
-      )}
+
       <div className="hidden md:block absolute top-18 left-4">
         <InformationContainer
           operationManualOpen={operationManualOpen}
