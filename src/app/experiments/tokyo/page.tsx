@@ -443,6 +443,7 @@ export default function TokyoPage() {
 
             <TokyoSpatialAudio
               enabled={spatialAudioEnabled}
+              enableProcedural={spatialAudioEnabled}
               showDebug={debugOptions.showBounds}
               onStatsUpdate={setSpatialAudioStats}
             />

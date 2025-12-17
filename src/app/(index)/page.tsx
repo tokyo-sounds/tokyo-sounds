@@ -18,11 +18,7 @@ import {
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 // Config
-import {
-  TOKYO_CENTER,
-  type District,
-  BACKGROUND_AMBIENT_MAX_HEIGHT,
-} from "@/config/tokyo-config";
+import { TOKYO_CENTER, type District } from "@/config/tokyo-config";
 import { DebugOptions } from "./type/FlightPageTypes";
 // Components
 import DashboardToggleButton from "./components/DashboardToggleButton";
@@ -46,8 +42,9 @@ import {
   type GyroState,
 } from "@/components/city/PlaneController";
 import { OtherPlayers } from "@/components/city/OtherPlayers";
-import { AmbientBackgroundAudioProvider } from "@/components/city/AmbientBackgroundAudioContext";
-import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
+// AmbientBackgroundAudio disabled - using procedural spatial audio instead
+// import { AmbientBackgroundAudioProvider } from "@/components/city/AmbientBackgroundAudioContext";
+// import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
 import VirtualController from "@/components/widget/VirtualController";
 // Hooks
 import { type DemoState } from "@/hooks/useDemoFlythrough";
@@ -443,7 +440,6 @@ export default function TokyoPage() {
           setAmbientVolume,
         }}
       >
-        <AmbientBackgroundAudioProvider>
           <Canvas
             shadows="soft"
             camera={{
@@ -559,13 +555,7 @@ export default function TokyoPage() {
 
           {isMobile && <VirtualController enabled={started} />}
 
-          {/* <AmbientBackgroundAudio cameraY={cameraY} maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT} enabled={started} /> */}
-          <AmbientBackgroundAudio
-            cameraY={cameraY}
-            maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT}
-            enabled={started}
-            masterVolume={ambientVolume} // Add dynamic ambient volume prop
-          />
+          {/* AmbientBackgroundAudio disabled - using procedural spatial audio instead */}
 
           <DebugMenu
             options={debugOptions}
@@ -601,7 +591,6 @@ export default function TokyoPage() {
             multiplayerConnected={multiplayerConnected}
             playerCount={playerCount}
           />
-        </AmbientBackgroundAudioProvider>
       </VolumeContext.Provider>
     </div>
   );
