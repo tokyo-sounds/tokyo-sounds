@@ -817,7 +817,7 @@ export function TokyoSpatialAudio({
         ? HIGH_SPEED_MIN_PLAY_DURATION_MS
         : MIN_PLAY_DURATION_MS;
 
-    if (now - lastDebugLogRef.current > 5000) {
+    if (showDebug && now - lastDebugLogRef.current > 5000) {
       lastDebugLogRef.current = now;
       const playingStates = states.filter((s) => s.isPlaying);
       if (playingStates.length > 0) {
