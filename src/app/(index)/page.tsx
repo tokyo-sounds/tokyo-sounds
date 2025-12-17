@@ -10,7 +10,7 @@ import { Suspense, useRef, useState, useCallback, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 // Config
-import { TOKYO_CENTER, type District, BACKGROUND_AMBIENT_MAX_HEIGHT } from "@/config/tokyo-config";
+import { TOKYO_CENTER, type District } from "@/config/tokyo-config";
 import { DebugOptions } from "./type/FlightPageTypes";
 // Components
 import DashboardToggleButton from "./components/DashboardToggleButton";
@@ -28,8 +28,6 @@ import {
 } from "@/components/city/DistrictLyriaAudio";
 import { DistrictTracker } from "@/components/city/DistrictTracker";
 import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
-import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
-import { AmbientBackgroundAudioProvider } from "@/components/city/AmbientBackgroundAudioContext";
 import {
   PlaneController,
   type PlaneControllerHandle,
@@ -129,6 +127,8 @@ export default function TokyoPage() {
     total: 0,
     active: 0,
     culled: 0,
+    handPlaced: 0,
+    procedural: 0,
   });
 
   const [debugOptions, setDebugOptions] = useState<DebugOptions>({
@@ -394,8 +394,7 @@ export default function TokyoPage() {
   }
 
   return (
-    <AmbientBackgroundAudioProvider>
-      <div className="w-full h-svh bg-black relative overflow-hidden">
+    <div className="w-full h-svh bg-black relative overflow-hidden">
         <Canvas
           shadows="soft"
           camera={{
@@ -461,6 +460,7 @@ export default function TokyoPage() {
 
             <TokyoSpatialAudio
               enabled={spatialAudioEnabled}
+              enableProcedural={spatialAudioEnabled}
               showDebug={debugOptions.showBounds}
               onStatsUpdate={setSpatialAudioStats}
             />
@@ -507,7 +507,7 @@ export default function TokyoPage() {
 
         {isMobile && <VirtualController enabled={started} />}
 
-        <AmbientBackgroundAudio cameraY={cameraY} maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT} enabled={started} />
+        {/* <AmbientBackgroundAudio cameraY={cameraY} maxHeight={BACKGROUND_AMBIENT_MAX_HEIGHT} enabled={started} /> */}
 
         <DebugMenu
           options={debugOptions}
@@ -544,6 +544,5 @@ export default function TokyoPage() {
           playerCount={playerCount}
         />
       </div>
-    </AmbientBackgroundAudioProvider>
   );
 }

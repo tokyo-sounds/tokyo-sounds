@@ -1752,3 +1752,35 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
     },
   },
 };
+
+export const PROCEDURAL_AUDIO_CONFIG = {
+  cellSizeDegrees: 0.001,
+  spawnProbability: 0.25, // 1 in 4 cells have sound
+
+  maxActiveSources: 25,
+
+  minSpawnDistance: 30,
+  maxSpawnDistance: 600,
+
+  ambientSpawnProbability: 0.15,
+  ambientMaxSpawnDistance: 200,
+  ambientMinSpawnDistance: 40,
+
+  velocityForMaxRange: 100,
+
+  altitudeFadeStart: 80,   // start fading at 80m
+  altitudeFadeEnd: 200,    // fully fade out at 200m altitude
+
+  fadeInDuration: 500,
+  fadeOutDuration: 500,
+  updateThrottleMs: 60,
+
+  spawnAngleDegrees: 180,
+
+  baseVolume: 0.6,        // moderate volume
+  refDistance: 20,        // full volume within 20m
+  maxDistance: 200,       // max distance for Web Audio (culling uses gain threshold)
+  rolloffFactor: 8.0,     // high rolloff for localized sounds (fast fade with distance)
+
+  audioDirectory: "/audio/ambient-sounds",
+};

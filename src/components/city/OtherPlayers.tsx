@@ -11,7 +11,7 @@
  * - Small name label above each plane
  */
 
-import { useRef, useMemo, useState } from "react";
+import { useRef, useMemo, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { useGLTF, Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -37,17 +37,14 @@ interface OtherPlayerPlaneProps {
  * PlayerHalo Component
  *
  * Renders an emissive halo beneath the plane for visibility.
- * 
- * @param color - The color of the halo.
- * @param opacity - The opacity of the halo.
- * @returns A React component that renders a halo beneath the plane.
+ * Uses a ref for opacity to avoid triggering re-renders every frame.
  */
-function PlayerHalo({ color, opacity }: { color: string; opacity: number }) {
+function PlayerHalo({ color, opacityRef }: { color: string; opacityRef: React.MutableRefObject<number> }) {
   const materialRef = useRef<THREE.MeshBasicMaterial>(null);
 
   useFrame(() => {
     if (materialRef.current) {
-      materialRef.current.opacity = opacity * HALO_OPACITY;
+      materialRef.current.opacity = opacityRef.current * HALO_OPACITY;
     }
   });
 
@@ -58,7 +55,7 @@ function PlayerHalo({ color, opacity }: { color: string; opacity: number }) {
         ref={materialRef}
         color={color}
         transparent
-        opacity={opacity * HALO_OPACITY}
+        opacity={HALO_OPACITY}
         side={THREE.DoubleSide}
         depthWrite={false}
         blending={THREE.AdditiveBlending}
@@ -82,7 +79,6 @@ function OtherPlayerPlane({
 }: OtherPlayerPlaneProps) {
   const groupRef = useRef<THREE.Group>(null);
   const { scene } = useGLTF(DEFAULT_MODEL_PATH);
-  const [haloOpacity, setHaloOpacity] = useState(1);
 
   const currentPos = useRef(
     new THREE.Vector3(player.position.x, player.position.y, player.position.z)
@@ -97,20 +93,39 @@ function OtherPlayerPlane({
   );
   const currentOpacity = useRef(1);
 
-  const targetPos = useRef(new THREE.Vector3());
-  const targetQuat = useRef(new THREE.Quaternion());
+  const targetPos = useRef(
+    new THREE.Vector3(player.position.x, player.position.y, player.position.z)
+  );
+  const targetQuat = useRef(
+    new THREE.Quaternion(
+      player.quaternion.x,
+      player.quaternion.y,
+      player.quaternion.z,
+      player.quaternion.w
+    )
+  );
 
-  targetPos.current.set(
+  useEffect(() => {
+    targetPos.current.set(
+      player.position.x,
+      player.position.y,
+      player.position.z
+    );
+    targetQuat.current.set(
+      player.quaternion.x,
+      player.quaternion.y,
+      player.quaternion.z,
+      player.quaternion.w
+    );
+  }, [
     player.position.x,
     player.position.y,
-    player.position.z
-  );
-  targetQuat.current.set(
+    player.position.z,
     player.quaternion.x,
     player.quaternion.y,
     player.quaternion.z,
-    player.quaternion.w
-  );
+    player.quaternion.w,
+  ]);
 
   const coloredScene = useMemo(() => {
     const clone = scene.clone();
@@ -171,8 +186,6 @@ function OtherPlayerPlane({
     currentOpacity.current +=
       (targetOpacity - currentOpacity.current) * Math.min(1, delta * 5);
 
-    setHaloOpacity(currentOpacity.current);
-
     groupRef.current.traverse((child) => {
       if (child instanceof THREE.Mesh && child.material) {
         if (Array.isArray(child.material)) {
@@ -196,7 +209,7 @@ function OtherPlayerPlane({
 
   return (
     <group ref={groupRef}>
-      <PlayerHalo color={player.color} opacity={haloOpacity} />
+      <PlayerHalo color={player.color} opacityRef={currentOpacity} />
 
       <primitive
         object={coloredScene}

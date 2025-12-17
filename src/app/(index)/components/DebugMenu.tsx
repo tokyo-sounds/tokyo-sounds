@@ -3,7 +3,6 @@ import { TimeOfDay } from "@/config/tokyo-config";
 import { type MovementMode } from "@/lib/flight";
 import { TIME_OF_DAY_PRESETS } from "@/config/tokyo-config";
 import { clearVisitedFlag } from "@/hooks/useDemoFlythrough";
-import { useAmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudioContext";
 import { LocationSearch } from "@/components/city/LocationSearch";
 import { type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import DistrictDebugContent from "./DistricDebugContent";
@@ -22,7 +21,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CodeXml, Play, Pause, Settings } from "lucide-react";
+import { CodeXml, Play, Settings } from "lucide-react";
 
 /** DebugMenu
  *
@@ -141,10 +140,6 @@ export default function DebugMenu({
                   </Button>
                 ))}
               </div>
-            </div>
-            <div>
-              <DebugMenuLabel>背景音</DebugMenuLabel>
-              <AmbientAudioControl />
             </div>
             <div className="flex-1">
               <DebugMenuLabel>AI生成音楽</DebugMenuLabel>
@@ -308,53 +303,5 @@ export default function DebugMenu({
         </Tabs>
       </SheetContent>
     </Sheet>
-  );
-}
-
-/**
- * Ambient Audio Control Component
- * Displays current playing audio file and provides play/pause controls
- */
-function AmbientAudioControl() {
-  const { currentFileName, isPlaying, play, pause } =
-    useAmbientBackgroundAudio();
-
-  const handleToggle = () => {
-    if (isPlaying) {
-      pause();
-    } else {
-      play();
-    }
-  };
-
-  return (
-    <Button
-      variant="ghost"
-      size="lg"
-      onClick={handleToggle}
-      className="group w-full hover:bg-muted/[0.2] hover:border hover:border-border/70 hover:text-white transition-all"
-    >
-      {isPlaying ? (
-        <>
-          <span className="hidden group-hover:inline-flex items-center">
-            <Pause className="size-3 mr-1" />
-            停止
-          </span>
-          <span className="inline group-hover:hidden">
-            {currentFileName || "None"}
-          </span>
-        </>
-      ) : (
-        <>
-          <span className="hidden items-center group-hover:inline-flex">
-            <Play className="size-3 mr-1" />
-            再生
-          </span>
-          <span className="inline group-hover:hidden">
-            {currentFileName || "None"}
-          </span>
-        </>
-      )}
-    </Button>
   );
 }
