@@ -972,26 +972,6 @@ export function TokyoSpatialAudio({
     });
   });
 
-  // Update volume when volume prop changes for all playing audio
-  useEffect(() => {
-    if (!enabled || !contextResumed) return;
-
-    const states = audioStatesRef.current;
-    for (const state of states) {
-      if (state.isPlaying && state.audio) {
-        // Update the volume of currently playing audio
-        state.audio.setVolume(
-          typeof volume !== "undefined" ? volume : state.source.volume
-        );
-        console.log(
-          `[SpatialAudio] Updated volume for: ${state.source.id} to ${
-            typeof volume !== "undefined" ? volume : state.source.volume
-          }`
-        );
-      }
-    }
-  }, [volume, enabled, contextResumed]);
-
   useEffect(() => {
     if (!showDebug) return;
 
