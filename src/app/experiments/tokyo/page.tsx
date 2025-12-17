@@ -99,6 +99,8 @@ const STORAGE_KEYS = {
 const ENV_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 const ENV_LYRIA_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_AI_API_KEY || "";
 
+import { VolumeContext, useVolume, useVolumeState } from "@/hooks/useAudio";
+
 export default function TokyoPage() {
   // Track hydration completion to prevent SSR/CSR mismatches
   const [mounted, setMounted] = useState(false);
@@ -150,6 +152,16 @@ export default function TokyoPage() {
     isMobile: false,
   });
   const [dashboardVisible, setDashboardVisible] = useState(true);
+
+  // Volume states
+  const {
+    spatialVolume,
+    lyriaVolume,
+    ambientVolume,
+    setSpatialVolume,
+    setLyriaVolume,
+    setAmbientVolume
+  } = useVolumeState();
 
   const collisionGroupRef = useRef<THREE.Group | null>(null);
   const planeControllerRef = useRef<PlaneControllerHandle | null>(null);
@@ -379,8 +391,16 @@ export default function TokyoPage() {
   }
 
   return (
-    <AmbientBackgroundAudioProvider>
-      <div className="w-full h-svh bg-black relative overflow-hidden">
+    <VolumeContext.Provider value={{
+      spatialVolume,
+      lyriaVolume,
+      ambientVolume,
+      setSpatialVolume,
+      setLyriaVolume,
+      setAmbientVolume
+    }}>
+      <AmbientBackgroundAudioProvider>
+        <div className="w-full h-svh bg-black relative overflow-hidden">
         <Canvas
           shadows="soft"
           camera={{
@@ -429,7 +449,7 @@ export default function TokyoPage() {
               <DistrictLyriaAudio
                 apiKey={effectiveLyriaApiKey}
                 enabled={generativeEnabled}
-                volume={0.4}
+                volume={lyriaVolume} // Use dynamic lyria volume instead of fixed 0.4
                 onStatusUpdate={setLyriaStatus}
                 onDebugUpdate={setDistrictDebug}
                 onCurrentDistrictChange={setCurrentDistrict}
@@ -447,6 +467,7 @@ export default function TokyoPage() {
             <TokyoSpatialAudio
               enabled={spatialAudioEnabled}
               showDebug={debugOptions.showBounds}
+              volume={spatialVolume} // Add dynamic spatial volume prop
               onStatsUpdate={setSpatialAudioStats}
             />
 
@@ -488,7 +509,11 @@ export default function TokyoPage() {
 
         {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
-        <AmbientBackgroundAudio cameraY={cameraY} enabled={started} />
+        <AmbientBackgroundAudio
+          cameraY={cameraY}
+          enabled={started}
+          masterVolume={ambientVolume} // Add dynamic ambient volume prop
+        />
 
         <DebugMenu
           options={debugOptions}
@@ -526,5 +551,6 @@ export default function TokyoPage() {
         />
       </div>
     </AmbientBackgroundAudioProvider>
-  );
+  </VolumeContext.Provider>
+);
 }

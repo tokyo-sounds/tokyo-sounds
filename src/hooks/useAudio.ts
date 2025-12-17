@@ -673,3 +673,39 @@ export function useAmbientVolume(): [number, (volume: number) => void] {
 
     return [volume, setAmbientVolume];
 }
+
+// Define the volume context for UI state management
+interface VolumeContextType {
+  spatialVolume: number;
+  lyriaVolume: number;
+  ambientVolume: number;
+  setSpatialVolume: (volume: number) => void;
+  setLyriaVolume: (volume: number) => void;
+  setAmbientVolume: (volume: number) => void;
+}
+
+export const VolumeContext = createContext<VolumeContextType | undefined>(undefined);
+
+export const useVolume = () => {
+  const context = useContext(VolumeContext);
+  if (context === undefined) {
+    throw new Error('useVolume must be used within a VolumeProvider');
+  }
+  return context;
+};
+
+// Hook to manage the volume state
+export const useVolumeState = () => {
+  const [spatialVolume, setSpatialVolume] = useState(1.0);
+  const [lyriaVolume, setLyriaVolume] = useState(1.0);
+  const [ambientVolume, setAmbientVolume] = useState(1.0);
+
+  return {
+    spatialVolume,
+    lyriaVolume,
+    ambientVolume,
+    setSpatialVolume,
+    setLyriaVolume,
+    setAmbientVolume
+  };
+};

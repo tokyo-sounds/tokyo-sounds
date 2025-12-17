@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useVolume } from "@/app/(index)/page"; // Import from the main page
+import { useVolume } from "@/hooks/useAudio";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 

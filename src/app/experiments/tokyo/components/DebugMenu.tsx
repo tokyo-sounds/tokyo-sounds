@@ -8,6 +8,7 @@ import { LocationSearch } from "@/components/city/LocationSearch";
 import { type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import DistrictDebugContent from "./DistricDebugContent";
 import { DebugOptions } from "../type/FlightPageTypes";
+import { AudioVolumeControls } from "@/components/ui/audio-volume-controls";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -145,6 +146,10 @@ export default function DebugMenu({
             <div>
               <DebugMenuLabel>背景音</DebugMenuLabel>
               <AmbientAudioControl />
+            </div>
+            <div>
+              <DebugMenuLabel>音量設定</DebugMenuLabel>
+              <AudioVolumeControls />
             </div>
             <div className="flex-1">
               <DebugMenuLabel>AI生成音楽</DebugMenuLabel>

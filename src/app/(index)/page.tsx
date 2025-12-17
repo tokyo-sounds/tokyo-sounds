@@ -6,7 +6,7 @@
  */
 //
 // Base Modules
-import { Suspense, useRef, useState, useCallback, useEffect, createContext, useContext } from "react";
+import { Suspense, useRef, useState, useCallback, useEffect } from "react";
 import { Canvas } from "@react-three/fiber";
 import * as THREE from "three";
 // Config
@@ -47,25 +47,7 @@ import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
 import { type MovementMode } from "@/lib/flight";
 import { latLngAltToENU } from "@/lib/geo-utils";
 
-// Define the volume context
-interface VolumeContextType {
-  spatialVolume: number;
-  lyriaVolume: number;
-  ambientVolume: number;
-  setSpatialVolume: (volume: number) => void;
-  setLyriaVolume: (volume: number) => void;
-  setAmbientVolume: (volume: number) => void;
-}
-
-const VolumeContext = createContext<VolumeContextType | undefined>(undefined);
-
-export const useVolume = () => {
-  const context = useContext(VolumeContext);
-  if (context === undefined) {
-    throw new Error('useVolume must be used within a VolumeProvider');
-  }
-  return context;
-};
+import { VolumeContext, useVolume, useVolumeState } from "@/hooks/useAudio";
 
 // Pastel color options for plane customization
 export const PASTEL_COLORS = [
@@ -151,9 +133,14 @@ export default function TokyoPage() {
     culled: 0,
   });
   // Volume states with logging
-  const [spatialVolume, setSpatialVolume] = useState(1.0);
-  const [lyriaVolume, setLyriaVolume] = useState(1.0);
-  const [ambientVolume, setAmbientVolume] = useState(1.0);
+  const {
+    spatialVolume,
+    lyriaVolume,
+    ambientVolume,
+    setSpatialVolume,
+    setLyriaVolume,
+    setAmbientVolume
+  } = useVolumeState();
 
 
   const [debugOptions, setDebugOptions] = useState<DebugOptions>({
