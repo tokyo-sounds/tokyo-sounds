@@ -16,6 +16,7 @@ import {
   useContext,
 } from "react";
 import { Canvas } from "@react-three/fiber";
+import { Environment } from "@react-three/drei";
 import * as THREE from "three";
 // Config
 import { TOKYO_CENTER, type District } from "@/config/tokyo-config";
@@ -89,16 +90,7 @@ export const PASTEL_COLORS = [
 ];
 
 function Loader() {
-  return (
-    <mesh rotation={[0, 0, 0]}>
-      <boxGeometry args={[50, 50, 50]} />
-      <meshStandardMaterial
-        color="#ff6b9d"
-        emissive="#ff6b9d"
-        emissiveIntensity={0.5}
-      />
-    </mesh>
-  );
+  return null;
 }
 
 function getMultiplayerUrl(): string {
@@ -524,6 +516,9 @@ export default function TokyoPage() {
                 players={nearbyPlayers}
                 localPlayerPosition={localPlayerPositionRef.current}
               />
+
+              {/* Environment for PBR material reflections on the plane */}
+              <Environment preset="city" />
             </Suspense>
           </Canvas>
 

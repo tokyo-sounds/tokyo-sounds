@@ -678,42 +678,71 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     const activeScene = isBoosting ? speedScene : defaultScene;
     const clone = activeScene.clone();
 
-    if (planeColor) {
-      clone.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material) {
-          if (Array.isArray(child.material)) {
-            child.material = child.material.map((mat) => {
-              const newMat = mat.clone();
-              if ("color" in newMat) {
-                newMat.color = new THREE.Color(planeColor);
-              }
-              return newMat;
-            });
-          } else {
-            const newMat = child.material.clone();
-            if ("color" in newMat) {
-              newMat.color = new THREE.Color(planeColor);
-            }
-            child.material = newMat;
+    clone.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.material) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+
+        const getBaseColor = (mat: THREE.Material): THREE.Color => {
+          if (planeColor) {
+            return new THREE.Color(planeColor);
           }
+          if ("color" in mat && mat.color instanceof THREE.Color) {
+            return mat.color.clone();
+          }
+          return new THREE.Color("#FAFAFA"); // Default paper white
+        };
+
+        const createPBRMaterial = (originalMat: THREE.Material) => {
+          return new THREE.MeshStandardMaterial({
+            color: getBaseColor(originalMat),
+            roughness: 0.4,
+            metalness: 0,
+            envMapIntensity: 1.2,
+            side: THREE.DoubleSide,
+          });
+        };
+
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map(createPBRMaterial);
+        } else {
+          child.material = createPBRMaterial(child.material);
         }
-      });
-    }
+      }
+    });
 
     return clone;
   }, [isBoosting, speedScene, defaultScene, planeColor]);
 
   const isDemoActive = demoState.active;
   const showPlane = !isDemoActive && currentMode === "elytra";
+  
+  const modelsLoaded = useMemo(() => {
+    let hasGeometry = false;
+    defaultScene.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.geometry && child.geometry.attributes.position) {
+        hasGeometry = true;
+      }
+    });
+    return hasGeometry;
+  }, [defaultScene, speedScene]);
 
   return (
     <group ref={planeRef}>
-      {showPlane && (
-        <primitive
-          object={coloredScene}
-          scale={[PLANE_SCALE, PLANE_SCALE, PLANE_SCALE]}
-          rotation={[0, -Math.PI / 2, 0]}
-        />
+      {showPlane && modelsLoaded && (
+        <>
+          <pointLight
+            position={[0, 2, -3]}
+            intensity={15}
+            distance={20}
+            color="#ffffff"
+          />
+          <primitive
+            object={coloredScene}
+            scale={[PLANE_SCALE, PLANE_SCALE, PLANE_SCALE]}
+            rotation={[0, -Math.PI / 2, 0]}
+          />
+        </>
       )}
     </group>
   );
