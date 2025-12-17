@@ -17,6 +17,7 @@ interface AmbientBackgroundAudioProps {
   minHeight?: number; // Minimum height for maximum volume (default: 0)
   maxHeight?: number; // Maximum height for minimum volume/silence (default: 1000)
   baseVolume?: number; // Base volume multiplier (0-1, default: 0.7)
+  masterVolume?: number; // Master volume control (0-1, default: 1.0)
 }
 
 const VOLUME_UPDATE_THROTTLE_MS = 100; // Throttle volume updates to avoid excessive updates
@@ -57,6 +58,7 @@ export function AmbientBackgroundAudio({
   minHeight = 0,
   maxHeight = 1000,
   baseVolume = 0.7,
+  masterVolume = 1.0,
 }: AmbientBackgroundAudioProps) {
   const {
     setCurrentFileName,
@@ -73,6 +75,7 @@ export function AmbientBackgroundAudio({
   const minHeightRef = useRef(minHeight);
   const maxHeightRef = useRef(maxHeight);
   const baseVolumeRef = useRef(baseVolume);
+  const masterVolumeRef = useRef(masterVolume);
   const cameraYRef = useRef(cameraY);
   const userInteractedRef = useRef(false);
   const isSwitchingRef = useRef(false); // Prevent concurrent calls to playNextAudio
@@ -85,8 +88,9 @@ export function AmbientBackgroundAudio({
     minHeightRef.current = minHeight;
     maxHeightRef.current = maxHeight;
     baseVolumeRef.current = baseVolume;
+    masterVolumeRef.current = masterVolume;
     cameraYRef.current = cameraY;
-  }, [enabled, minHeight, maxHeight, baseVolume, cameraY]);
+  }, [enabled, minHeight, maxHeight, baseVolume, masterVolume, cameraY]);
 
   // Load audio files from API
   useEffect(() => {
@@ -196,15 +200,17 @@ export function AmbientBackgroundAudio({
       return;
     }
 
-    // Set initial volume using current cameraY from ref
+    // Set initial volume using current cameraY from ref and master volume
     const volume = calculateVolume(
       cameraYRef.current,
       minHeightRef.current,
       maxHeightRef.current,
       baseVolumeRef.current
     );
-    audio.volume = volume;
-    lastVolumeRef.current = volume;
+    const finalVolume = volume * masterVolumeRef.current;
+    audio.volume = finalVolume;
+    console.log(`[AmbientBackgroundAudio] Initializing audio volume to: ${finalVolume} (height: ${cameraYRef.current}, base: ${volume}, master: ${masterVolumeRef.current})`);
+    lastVolumeRef.current = finalVolume;
 
     // Handle errors
     audio.onerror = (e) => {
@@ -371,7 +377,7 @@ export function AmbientBackgroundAudio({
   }, [playNextAudio]);
 
   /**
-   * Update volume with throttling
+   * Update volume with throttling - including master volume changes
    */
   const updateVolume = useCallback(() => {
     if (volumeUpdateTimeoutRef.current) {
@@ -386,15 +392,40 @@ export function AmbientBackgroundAudio({
           maxHeightRef.current,
           baseVolumeRef.current
         );
+        // Apply master volume as well
+        const finalVolume = volume * masterVolumeRef.current;
+
         // Only update if volume changed significantly (avoid unnecessary updates)
-        if (Math.abs(volume - lastVolumeRef.current) > 0.01) {
-          audioRef.current.volume = volume;
-          lastVolumeRef.current = volume;
+        if (Math.abs(finalVolume - lastVolumeRef.current) > 0.01) {
+          audioRef.current.volume = finalVolume;
+          console.log(`[AmbientBackgroundAudio] Setting volume to: ${finalVolume} (height: ${cameraYRef.current}, master: ${masterVolumeRef.current})`);
+          lastVolumeRef.current = finalVolume;
         }
       }
       volumeUpdateTimeoutRef.current = null;
     }, VOLUME_UPDATE_THROTTLE_MS);
-  }, []);
+  }, []); // Reset to empty array since we're using refs that dynamically update
+
+  // Effect to handle master volume changes specifically
+  useEffect(() => {
+    // Update the ref to track the current master volume
+    masterVolumeRef.current = masterVolume;
+
+    // Update the current audio volume if it exists
+    if (audioRef.current) {
+      const heightBasedVolume = calculateVolume(
+        cameraYRef.current,
+        minHeightRef.current,
+        maxHeightRef.current,
+        baseVolumeRef.current
+      );
+      const finalVolume = heightBasedVolume * masterVolume;
+
+      const previousVolume = audioRef.current.volume;
+      audioRef.current.volume = finalVolume;
+      lastVolumeRef.current = finalVolume;
+    }
+  }, [masterVolume]);
 
   // Initialize audio when enabled
   useEffect(() => {

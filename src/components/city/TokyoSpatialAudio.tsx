@@ -48,6 +48,7 @@ interface AudioSourceState {
 export interface TokyoSpatialAudioProps {
   enabled?: boolean;
   showDebug?: boolean;
+  volume?: number; // Volume control for spatial audio (0.0 to 1.0)
   onStatsUpdate?: (stats: {
     total: number;
     active: number;
@@ -121,6 +122,7 @@ function DebugMarker({
 export function TokyoSpatialAudio({
   enabled = true,
   showDebug = false,
+  volume,
   onStatsUpdate,
 }: TokyoSpatialAudioProps) {
   const { camera } = useThree();
@@ -387,8 +389,7 @@ export function TokyoSpatialAudio({
     []
   );
 
-  const startAudio = useCallback(
-    (state: AudioSourceState) => {
+  const startAudio = useCallback((state: AudioSourceState) => {
       if (!listener || !groupRef.current || !state.buffer || state.isPlaying)
         return;
 
@@ -400,7 +401,10 @@ export function TokyoSpatialAudio({
       audio.setMaxDistance(state.source.maxDistance);
       audio.setDistanceModel("inverse");
       audio.setLoop(state.source.loop);
-      audio.setVolume(state.source.volume);
+      // Use the volume prop if provided, otherwise use the source's default volume
+      const effectiveVolume = typeof volume !== 'undefined' ? volume : state.source.volume;
+      audio.setVolume(effectiveVolume);
+      console.log(`[SpatialAudio] Setting volume for ${state.source.id} to: ${effectiveVolume}`);
 
       const panner = audio.getOutput() as PannerNode;
       if (panner?.panningModel !== undefined) {
@@ -415,14 +419,29 @@ export function TokyoSpatialAudio({
         state.audio = audio;
         state.isPlaying = true;
         state.lastUsedTime = Date.now(); // Update last used time
-        console.log(`[SpatialAudio] Started: ${state.source.id}`);
+        console.log(`[SpatialAudio] Started: ${state.source.id} at volume: ${effectiveVolume}`);
       } catch (err) {
         console.error(`[SpatialAudio] Failed to play ${state.source.id}:`, err);
         groupRef.current.remove(audio);
       }
-    },
-    [listener]
-  );
+    }, [listener, volume]);
+
+  // Update volume when volume prop changes for all playing audio
+  useEffect(() => {
+    if (!enabled || !contextResumed) {
+      return;
+    }
+
+    const states = audioStatesRef.current;
+
+    for (const state of states) {
+      if (state.isPlaying && state.audio) {
+        // Update the volume of currently playing audio
+        const effectiveVolume = typeof volume !== 'undefined' ? volume : state.source.volume;
+        state.audio.setVolume(effectiveVolume);
+      }
+    }
+  }, [volume, enabled, contextResumed]);
 
   useFrame(() => {
     if (!enabled || !contextResumed) return;
@@ -514,6 +533,20 @@ export function TokyoSpatialAudio({
       culled: states.length - activeCount,
     });
   });
+
+  // Update volume when volume prop changes for all playing audio
+  useEffect(() => {
+    if (!enabled || !contextResumed) return;
+
+    const states = audioStatesRef.current;
+    for (const state of states) {
+      if (state.isPlaying && state.audio) {
+        // Update the volume of currently playing audio
+        state.audio.setVolume(typeof volume !== 'undefined' ? volume : state.source.volume);
+        console.log(`[SpatialAudio] Updated volume for: ${state.source.id} to ${typeof volume !== 'undefined' ? volume : state.source.volume}`);
+      }
+    }
+  }, [volume, enabled, contextResumed]);
 
   useEffect(() => {
     if (!showDebug) return;
