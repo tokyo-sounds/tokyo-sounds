@@ -64,6 +64,7 @@ interface PlaneControllerProps {
   onSpeedChange?: (speed: number) => void;
   onModeChange?: (mode: MovementMode) => void;
   onCameraYChange?: (y: number) => void;
+  onGroundDistanceChange?: (distance: number | null) => void;
   onHeadingChange?: (heading: number) => void;
   onPitchChange?: (pitch: number) => void;
   onRollChange?: (roll: number) => void;
@@ -88,11 +89,14 @@ interface PlaneControllerProps {
 const COLLISION_DISTANCE = 2;
 const COLLISION_PUSH_STRENGTH = 1;
 const NUM_COLLISION_RAYS = 8;
+const GROUND_RAYCAST_DISTANCE = 300; // Max distance to check for ground
+const GROUND_RAYCAST_INTERVAL = 3; // Check every N frames (~20fps at 60fps)
 
 export const PlaneController = forwardRef<PlaneControllerHandle, PlaneControllerProps>(function PlaneController({
   onSpeedChange,
   onModeChange,
   onCameraYChange,
+  onGroundDistanceChange,
   onHeadingChange,
   onPitchChange,
   onRollChange,
@@ -133,11 +137,15 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   const _planeForward = useRef(new THREE.Vector3()).current;
   const _rollQuat = useRef(new THREE.Quaternion()).current;
   const _rollAxis = useRef(new THREE.Vector3(0, 0, 1)).current;
+  const _downDirection = useRef(new THREE.Vector3(0, -1, 0)).current;
 
   const smoothRoll = useRef(0);
   const smoothLag = useRef(CAMERA_LAG);
 
   const flyToActiveRef = useRef(false);
+  const boostingRef = useRef(false);
+  
+  const _lookTarget = useRef(new THREE.Vector3()).current;
 
   // Flying audio state
   const flyingAudioRef = useRef<THREE.PositionalAudio | null>(null);
@@ -381,7 +389,9 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     }
 
     const boosting = !isDemoActive && !isFlyToActive && keysRef.current.boost;
-    if (boosting !== isBoosting) {
+    const boostingChanged = boosting !== boostingRef.current;
+    boostingRef.current = boosting;
+    if (boostingChanged) {
       setIsBoosting(boosting);
     }
 
@@ -444,6 +454,19 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       }
     }
 
+    if (collisionGroup && frameCountRef.current % GROUND_RAYCAST_INTERVAL === 0) {
+      _raycaster.set(virtualCam.position, _downDirection);
+      _raycaster.far = GROUND_RAYCAST_DISTANCE;
+      
+      const groundHits = _raycaster.intersectObject(collisionGroup, true);
+      
+      if (groundHits.length > 0) {
+        onGroundDistanceChange?.(groundHits[0].distance);
+      } else {
+        onGroundDistanceChange?.(null);
+      }
+    }
+
     planeRef.current.position.copy(virtualCam.position);
     planeRef.current.quaternion.copy(virtualCam.quaternion);
 
@@ -460,13 +483,13 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
 
     if (isFlyToActive) {
     } else if (isDemoActive) {
-      smoothCameraPos.current.lerp(virtualCam.position, 1 - DEMO_CAMERA_LAG);
+      const demoSmoothingSpeed = (1 - DEMO_CAMERA_LAG) * 60;
+      const demoLerpFactor = 1 - Math.exp(-demoSmoothingSpeed * delta);
+      
+      smoothCameraPos.current.lerp(virtualCam.position, demoLerpFactor);
       camera.position.copy(smoothCameraPos.current);
 
-      smoothCameraQuat.current.slerp(
-        virtualCam.quaternion,
-        1 - DEMO_CAMERA_LAG
-      );
+      smoothCameraQuat.current.slerp(virtualCam.quaternion, demoLerpFactor);
       camera.quaternion.copy(smoothCameraQuat.current);
     } else if (isSimpleMode) {
       camera.position.copy(virtualCam.position);
@@ -486,19 +509,21 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
         (targetLag - smoothLag.current) *
         Math.min(1, delta * LAG_TRANSITION_SPEED);
 
-      smoothCameraPos.current.lerp(_targetCameraPos, 1 - smoothLag.current);
+      const smoothingSpeed = (1 - smoothLag.current) * 60;
+      const lerpFactor = 1 - Math.exp(-smoothingSpeed * delta);
+      
+      smoothCameraPos.current.lerp(_targetCameraPos, lerpFactor);
 
       _euler.setFromQuaternion(virtualCam.quaternion, "YXZ");
       const planeRoll = _euler.z;
 
-      smoothRoll.current +=
-        (planeRoll - smoothRoll.current) * (1 - smoothLag.current);
+      smoothRoll.current += (planeRoll - smoothRoll.current) * lerpFactor;
 
       camera.position.copy(smoothCameraPos.current);
 
-      const lookTarget = virtualCam.position.clone();
-      lookTarget.addScaledVector(_planeForward, CAMERA_LOOK_OFFSET);
-      camera.lookAt(lookTarget);
+      _lookTarget.copy(virtualCam.position);
+      _lookTarget.addScaledVector(_planeForward, CAMERA_LOOK_OFFSET);
+      camera.lookAt(_lookTarget);
 
       _rollQuat.setFromAxisAngle(_rollAxis, smoothRoll.current);
       camera.quaternion.multiply(_rollQuat);
@@ -660,42 +685,71 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     const activeScene = isBoosting ? speedScene : defaultScene;
     const clone = activeScene.clone();
 
-    if (planeColor) {
-      clone.traverse((child) => {
-        if (child instanceof THREE.Mesh && child.material) {
-          if (Array.isArray(child.material)) {
-            child.material = child.material.map((mat) => {
-              const newMat = mat.clone();
-              if ("color" in newMat) {
-                newMat.color = new THREE.Color(planeColor);
-              }
-              return newMat;
-            });
-          } else {
-            const newMat = child.material.clone();
-            if ("color" in newMat) {
-              newMat.color = new THREE.Color(planeColor);
-            }
-            child.material = newMat;
+    clone.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.material) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+
+        const getBaseColor = (mat: THREE.Material): THREE.Color => {
+          if (planeColor) {
+            return new THREE.Color(planeColor);
           }
+          if ("color" in mat && mat.color instanceof THREE.Color) {
+            return mat.color.clone();
+          }
+          return new THREE.Color("#FAFAFA"); // Default paper white
+        };
+
+        const createPBRMaterial = (originalMat: THREE.Material) => {
+          return new THREE.MeshStandardMaterial({
+            color: getBaseColor(originalMat),
+            roughness: 0.4,
+            metalness: 0,
+            envMapIntensity: 1.2,
+            side: THREE.DoubleSide,
+          });
+        };
+
+        if (Array.isArray(child.material)) {
+          child.material = child.material.map(createPBRMaterial);
+        } else {
+          child.material = createPBRMaterial(child.material);
         }
-      });
-    }
+      }
+    });
 
     return clone;
   }, [isBoosting, speedScene, defaultScene, planeColor]);
 
   const isDemoActive = demoState.active;
   const showPlane = !isDemoActive && currentMode === "elytra";
+  
+  const modelsLoaded = useMemo(() => {
+    let hasGeometry = false;
+    defaultScene.traverse((child) => {
+      if (child instanceof THREE.Mesh && child.geometry && child.geometry.attributes.position) {
+        hasGeometry = true;
+      }
+    });
+    return hasGeometry;
+  }, [defaultScene, speedScene]);
 
   return (
     <group ref={planeRef}>
-      {showPlane && (
-        <primitive
-          object={coloredScene}
-          scale={[PLANE_SCALE, PLANE_SCALE, PLANE_SCALE]}
-          rotation={[0, -Math.PI / 2, 0]}
-        />
+      {showPlane && modelsLoaded && (
+        <>
+          <pointLight
+            position={[0, 2, -3]}
+            intensity={15}
+            distance={20}
+            color="#ffffff"
+          />
+          <primitive
+            object={coloredScene}
+            scale={[PLANE_SCALE, PLANE_SCALE, PLANE_SCALE]}
+            rotation={[0, -Math.PI / 2, 0]}
+          />
+        </>
       )}
     </group>
   );
