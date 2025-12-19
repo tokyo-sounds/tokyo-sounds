@@ -8,6 +8,8 @@ interface AttitudeIndicatorProps {
   roll: number;
   cameraY: number;
   groundDistance: number | null;
+  latitude?: number;
+  longitude?: number;
 }
 
 // Static SVG tick marks - generated once at module level
@@ -53,14 +55,20 @@ export default function AttitudeIndicator({
   roll,
   cameraY,
   groundDistance,
+  latitude,
+  longitude,
 }: AttitudeIndicatorProps) {
   // Refs for RAF interpolation
   const targetRollRef = useRef(roll);
   const targetPitchRef = useRef(pitch);
   const targetCameraYRef = useRef(cameraY);
+  const targetLatitudeRef = useRef(latitude ?? 0);
+  const targetLongitudeRef = useRef(longitude ?? 0);
   const currentRollRef = useRef(roll);
   const currentPitchRef = useRef(pitch);
   const currentCameraYRef = useRef(cameraY);
+  const currentLatitudeRef = useRef(latitude ?? 0);
+  const currentLongitudeRef = useRef(longitude ?? 0);
   const rafIdRef = useRef<number | null>(null);
   const lastFrameTimeRef = useRef<number>(performance.now());
 
@@ -70,9 +78,11 @@ export default function AttitudeIndicator({
   const rollFillNegativeRef = useRef<HTMLDivElement>(null);
   const pitchFillPositiveRef = useRef<HTMLDivElement>(null);
   const pitchFillNegativeRef = useRef<HTMLDivElement>(null);
-  const rollValueRef = useRef<HTMLHeadingElement>(null);
+  const rollValueLeftRef = useRef<HTMLHeadingElement>(null);
+  const rollValueRightRef = useRef<HTMLHeadingElement>(null);
   const pitchValueRef = useRef<HTMLHeadingElement>(null);
   const cameraYValueRef = useRef<HTMLSpanElement>(null);
+  const coordsValueRef = useRef<HTMLHeadingElement>(null);
   const warningContainerRef = useRef<HTMLDivElement>(null);
   const pullUpWarningRef = useRef<HTMLDivElement>(null);
 
@@ -95,7 +105,9 @@ export default function AttitudeIndicator({
     targetRollRef.current = roll;
     targetPitchRef.current = pitch;
     targetCameraYRef.current = cameraY;
-  }, [roll, pitch, cameraY]);
+    if (latitude !== undefined) targetLatitudeRef.current = latitude;
+    if (longitude !== undefined) targetLongitudeRef.current = longitude;
+  }, [roll, pitch, cameraY, latitude, longitude]);
 
   // RAF interpolation loop
   useEffect(() => {
@@ -110,16 +122,22 @@ export default function AttitudeIndicator({
       const rollDiff = targetRollRef.current - currentRollRef.current;
       const pitchDiff = targetPitchRef.current - currentPitchRef.current;
       const cameraYDiff = targetCameraYRef.current - currentCameraYRef.current;
+      const latDiff = targetLatitudeRef.current - currentLatitudeRef.current;
+      const lngDiff = targetLongitudeRef.current - currentLongitudeRef.current;
 
       // Exponential smoothing: alpha = 1 - exp(-k * dt)
       const alpha = 1 - Math.exp(-SMOOTHING_FACTOR * (deltaTime / 16.67));
       currentRollRef.current += rollDiff * alpha;
       currentPitchRef.current += pitchDiff * alpha;
       currentCameraYRef.current += cameraYDiff * alpha;
+      currentLatitudeRef.current += latDiff * alpha;
+      currentLongitudeRef.current += lngDiff * alpha;
 
       const currentRoll = currentRollRef.current;
       const currentPitch = currentPitchRef.current;
       const currentCameraY = currentCameraYRef.current;
+      const currentLat = currentLatitudeRef.current;
+      const currentLng = currentLongitudeRef.current;
 
       // Update wings rotation via CSS variable
       if (wingsRef.current) {
@@ -180,9 +198,15 @@ export default function AttitudeIndicator({
       }
 
       // Update text values (only when changed significantly to reduce layout work)
-      if (rollValueRef.current) {
+      if (rollValueLeftRef.current) {
         const roundedRoll = Math.round(currentRoll * 10) / 10;
-        rollValueRef.current.textContent = `${roundedRoll.toFixed(1)}°`;
+        rollValueLeftRef.current.textContent =
+          roundedRoll > 0 ? `${Math.abs(roundedRoll).toFixed(1)}°` : "";
+      }
+      if (rollValueRightRef.current) {
+        const roundedRoll = Math.round(currentRoll * 10) / 10;
+        rollValueRightRef.current.textContent =
+          roundedRoll < 0 ? `${Math.abs(roundedRoll).toFixed(1)}°` : "";
       }
       if (pitchValueRef.current) {
         const roundedPitch = Math.round(currentPitch * 10) / 10;
@@ -192,20 +216,25 @@ export default function AttitudeIndicator({
         const roundedCameraY = Math.round(currentCameraY * 10) / 10;
         cameraYValueRef.current.textContent = `${roundedCameraY.toFixed(1)} m`;
       }
+      if (coordsValueRef.current) {
+        coordsValueRef.current.textContent = `${currentLat.toFixed(
+          3
+        )}, ${currentLng.toFixed(3)}`;
+      }
 
       // Update warning indicator based on ground distance (or altitude as fallback)
       if (warningContainerRef.current) {
         const currentGroundDistance = groundDistanceRef.current;
         const isDescending = currentPitch < 0;
         const frameDeltaMs = deltaTime * 16.67;
-        
+
         let isLowAltitude = false;
         if (currentGroundDistance !== null) {
           isLowAltitude = currentGroundDistance < LOW_GROUND_DISTANCE_THRESHOLD;
         } else {
           isLowAltitude = currentCameraY < LOW_ALTITUDE_THRESHOLD;
         }
-        
+
         // Hysteresis: require sustained condition before changing state
         if (isLowAltitude && !warningVisibleRef.current) {
           warningCooldownRef.current += frameDeltaMs;
@@ -222,7 +251,7 @@ export default function AttitudeIndicator({
         } else {
           warningCooldownRef.current = 0;
         }
-        
+
         if (warningVisibleRef.current) {
           warningContainerRef.current.style.opacity = "1";
           // Red warning when descending, yellow when level or climbing
@@ -234,9 +263,11 @@ export default function AttitudeIndicator({
         } else {
           warningContainerRef.current.style.opacity = "0";
         }
-        
+
         if (pullUpWarningRef.current) {
-          pullUpWarningRef.current.style.opacity = warningVisibleRef.current ? "1" : "0";
+          pullUpWarningRef.current.style.opacity = warningVisibleRef.current
+            ? "1"
+            : "0";
         }
       }
 
@@ -272,7 +303,7 @@ export default function AttitudeIndicator({
           <div className="h-0.5 w-3 md:w-5 bg-white/80 shadow-[0_0_10px_rgba(0,0,0,0.35)] rounded-full" />
         </div>
       </div>
-      
+
       {/* PULL UP Warning Box */}
       <div
         ref={pullUpWarningRef}
@@ -280,7 +311,9 @@ export default function AttitudeIndicator({
         style={{ opacity: 0 }}
       >
         <AlertTriangle className="size-4 md:size-5 text-red-500" />
-        <span className="text-red-500 font-bold text-sm md:text-base tracking-wider">プールアップ</span>
+        <span className="text-red-500 font-bold text-sm md:text-base tracking-wider">
+          プールアップ
+        </span>
         <AlertTriangle className="size-4 md:size-5 text-red-500" />
       </div>
 
@@ -294,43 +327,59 @@ export default function AttitudeIndicator({
         >
           {ROLL_TICK_MARKS}
         </svg>
-        {/* Roll Indicator Bar */}
-        <div
-          className="w-full max-w-40 h-1 relative bg-muted/[0.4] rounded-full overflow-hidden"
-          title="Roll"
-        >
-          {/* Positive roll bar (left side, extends left from center) */}
+        <div className="w-full flex items-center justify-center gap-2">
+          {/* Left roll value (shown when tilting left, i.e., roll < 0) */}
+          <h3
+            ref={rollValueLeftRef}
+            className="w-12 text-xs md:text-base text-muted text-left text-shadow-sm text-shadow-black/50 font-semibold font-mono tracking-wide"
+          >
+            {roll > 0 ? Math.abs(roll).toFixed(1) + "°" : ""}
+          </h3>
+          {/* Roll Indicator Bar */}
           <div
-            ref={rollFillPositiveRef}
-            className="absolute top-0 h-full bg-secondary/50 will-change-transform"
-            style={{
-              right: "50%",
-              width: "50%",
-              transformOrigin: "right center",
-              transform: "scaleX(0)",
-              opacity: "0",
-            }}
-          />
-          {/* Negative roll bar (right side, extends right from center) */}
-          <div
-            ref={rollFillNegativeRef}
-            className="absolute top-0 h-full bg-secondary/50 will-change-transform"
-            style={{
-              left: "50%",
-              width: "50%",
-              transformOrigin: "left center",
-              transform: "scaleX(0)",
-              opacity: "0",
-            }}
-          />
-          <div className="absolute left-1/2 top-0 w-px h-full bg-white" />
+            className="w-full max-w-40 h-1 relative bg-muted/[0.4] rounded-full overflow-hidden"
+            title="Roll"
+          >
+            {/* Positive roll bar (left side, extends left from center) */}
+            <div
+              ref={rollFillPositiveRef}
+              className="absolute top-0 h-full bg-secondary/50 will-change-transform"
+              style={{
+                right: "50%",
+                width: "50%",
+                transformOrigin: "right center",
+                transform: "scaleX(0)",
+                opacity: "0",
+              }}
+            />
+            {/* Negative roll bar (right side, extends right from center) */}
+            <div
+              ref={rollFillNegativeRef}
+              className="absolute top-0 h-full bg-secondary/50 will-change-transform"
+              style={{
+                left: "50%",
+                width: "50%",
+                transformOrigin: "left center",
+                transform: "scaleX(0)",
+                opacity: "0",
+              }}
+            />
+            <div className="absolute left-1/2 top-0 w-px h-full bg-white" />
+          </div>
+          {/* Right roll value (shown when tilting right, i.e., roll > 0) */}
+          <h3
+            ref={rollValueRightRef}
+            className="w-12 text-xs md:text-base text-muted text-right text-shadow-sm text-shadow-black/50 font-semibold font-mono tracking-wide"
+          >
+            {roll < 0 ? Math.abs(roll).toFixed(1) + "°" : ""}
+          </h3>
         </div>
-        {/* Roll Value */}
+        {/* GPS Value */}
         <h3
-          ref={rollValueRef}
-          className="text-xs md:text-base text-muted text-center text-shadow-sm text-shadow-black/50 font-semibold font-mono tracking-wide"
+          ref={coordsValueRef}
+          className="text-xs text-muted text-center text-shadow-sm text-shadow-black/50 font-semibold font-mono tracking-wide"
         >
-          {roll.toFixed(1)}°
+          {latitude?.toFixed(3) ?? "0.000"}, {longitude?.toFixed(3) ?? "0.000"}
         </h3>
       </div>
 
@@ -380,16 +429,26 @@ export default function AttitudeIndicator({
         >
           {pitch.toFixed(1)}°
         </h3>
-        <label
-          className="absolute top-6 left-1/2 -translate-x-1/2 w-full text-xs md:text-sm text-muted text-shadow-sm text-shadow-black/50 font-mono flex items-center justify-center gap-1"
-        >
+        <label className="absolute top-6 left-1/2 -translate-x-1/2 w-full text-xs md:text-sm text-muted text-shadow-sm text-shadow-black/50 font-mono flex items-center justify-center gap-1">
           <span ref={cameraYValueRef}>{cameraY.toFixed(1)} m</span>
           {/* Low altitude warning indicator */}
           <span
             ref={warningContainerRef}
             className="transition-opacity duration-200 data-[severity=critical]:text-red-500 data-[severity=warning]:text-amber-500"
-            style={{ opacity: (groundDistance !== null ? groundDistance < 10 : cameraY < 100) ? 1 : 0 }}
-            data-severity={(groundDistance !== null ? groundDistance < 10 : cameraY < 100) ? (pitch < 0 ? "critical" : "warning") : undefined}
+            style={{
+              opacity: (
+                groundDistance !== null ? groundDistance < 10 : cameraY < 100
+              )
+                ? 1
+                : 0,
+            }}
+            data-severity={
+              (groundDistance !== null ? groundDistance < 10 : cameraY < 100)
+                ? pitch < 0
+                  ? "critical"
+                  : "warning"
+                : undefined
+            }
           >
             <AlertTriangle className="size-3 md:size-4" />
           </span>

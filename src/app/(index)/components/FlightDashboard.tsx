@@ -11,6 +11,8 @@ import { type PlaneControllerHandle } from "@/components/city/PlaneController";
 
 import { type PlayerState } from "@/types/multiplayer";
 import * as THREE from "three";
+import { enuToLatLngAlt } from "@/lib/geo-utils";
+import { TOKYO_CENTER } from "@/config/tokyo-config";
 
 interface FlightDashboardProps {
   flightSpeed: number;
@@ -53,6 +55,15 @@ export default function FlightDashboard({
   nearbyPlayers,
   localPlayerPosition,
 }: FlightDashboardProps) {
+  const coords = localPlayerPosition
+    ? enuToLatLngAlt(
+        localPlayerPosition,
+        TOKYO_CENTER.lat,
+        TOKYO_CENTER.lng,
+        0
+      )
+    : null;
+
   return (
     <div className="absolute top-0 left-0 right-0 bottom-0 pointer-events-none select-none">
       <CompassBar
@@ -66,7 +77,14 @@ export default function FlightDashboard({
         onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
       />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-        <AttitudeIndicator pitch={pitch} roll={roll} cameraY={cameraY} groundDistance={groundDistance} />
+        <AttitudeIndicator
+          pitch={pitch}
+          roll={roll}
+          cameraY={cameraY}
+          groundDistance={groundDistance}
+          latitude={coords?.lat}
+          longitude={coords?.lng}
+        />
       </div>
 
       <div className="hidden md:block absolute top-18 left-4">
