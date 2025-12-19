@@ -15,6 +15,7 @@ import {
   createContext,
   useContext,
 } from "react";
+import dynamic from "next/dynamic";
 import { Canvas } from "@react-three/fiber";
 import { Environment } from "@react-three/drei";
 import * as THREE from "three";
@@ -36,7 +37,15 @@ import {
   type DistrictDebugInfo,
 } from "@/components/city/DistrictLyriaAudio";
 import { DistrictTracker } from "@/components/city/DistrictTracker";
-import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
+// import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
+// Lazy Loading for TokyoSpatialAudio component
+const TokyoSpatialAudio = dynamic(
+  () =>
+    import("@/components/city/TokyoSpatialAudio").then(
+      (mod) => mod.TokyoSpatialAudio
+    ),
+  { ssr: false }
+);
 import {
   PlaneController,
   type PlaneControllerHandle,
