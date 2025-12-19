@@ -28,6 +28,9 @@ export default function CommonPageContainer({
       >
         {children}
       </main>
+      <h6 className="hidden md:block fixed top-1/2 -translate-y-1/2 right-4 text-lg font-serif font-light text-primary-foreground tracking-[1rem] pointer-events-none select-none [writing-mode:vertical-rl]">
+        東京の音
+      </h6>
       <BackToHomeButton />
       <Footer />
     </div>
