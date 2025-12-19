@@ -89,7 +89,7 @@ export default function VirtualController({
     width: number,
     height: number
   ): "top" | "bottom" | "left" | "right" | "center" => {
-    const edgeThreshold = 0.25; // 25% of screen
+    const edgeThreshold = 0.3; // 30% of screen
     const topZone = y < height * edgeThreshold;
     const bottomZone = y > height * (1 - edgeThreshold);
     const leftZone = x < width * edgeThreshold;
