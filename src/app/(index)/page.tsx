@@ -176,7 +176,7 @@ export default function TokyoPage() {
     wireframe: false,
     showBounds: false,
     collision: true,
-    demoEnabled: true,
+    demoEnabled: false,
   });
   const [cameraY, setCameraY] = useState(200);
   const [heading, setHeading] = useState(0);
@@ -448,179 +448,177 @@ export default function TokyoPage() {
           setFlyingVolume,
         }}
       >
-          <Canvas
-            shadows="soft"
-            camera={{
-              position: initialCameraPosition,
-              fov: 60,
-              near: 1,
-              far: 1e9,
-            }}
-            gl={{
-              logarithmicDepthBuffer: true,
-              antialias: false,
-              powerPreference: "high-performance",
-            }}
-          >
-            <Suspense fallback={<Loader />}>
-              <GoogleTilesScene
-                apiKey={ENV_MAPS_API_KEY}
-                onTilesLoaded={handleTilesLoaded}
-                onStatusChange={setStatus}
-                showMeshes={debugOptions.showMeshes}
-                wireframe={debugOptions.wireframe}
-                collisionGroupRef={collisionGroupRef}
+        <Canvas
+          shadows="soft"
+          camera={{
+            position: initialCameraPosition,
+            fov: 60,
+            near: 1,
+            far: 1e9,
+          }}
+          gl={{
+            logarithmicDepthBuffer: true,
+            antialias: false,
+            powerPreference: "high-performance",
+          }}
+        >
+          <Suspense fallback={<Loader />}>
+            <GoogleTilesScene
+              apiKey={ENV_MAPS_API_KEY}
+              onTilesLoaded={handleTilesLoaded}
+              onStatusChange={setStatus}
+              showMeshes={debugOptions.showMeshes}
+              wireframe={debugOptions.wireframe}
+              collisionGroupRef={collisionGroupRef}
+            />
+
+            <PlaneController
+              ref={planeControllerRef}
+              onSpeedChange={setFlightSpeed}
+              onModeChange={setMovementMode}
+              onCameraYChange={setCameraY}
+              onGroundDistanceChange={setGroundDistance}
+              onHeadingChange={setHeading}
+              onPitchChange={setPitch}
+              onRollChange={setRoll}
+              collisionGroup={collisionGroupRef.current}
+              collisionEnabled={debugOptions.collision}
+              onCollision={(dist: number) => setCollisionDistance(dist)}
+              onPlanePositionChange={handlePlanePositionChange}
+              demoEnabled={debugOptions.demoEnabled}
+              onDemoStateChange={setDemoState}
+              onGyroStateChange={setGyroState}
+              planeColor={planeColor}
+              flyingVolume={flyingVolume}
+            />
+
+            <FlightBoundsHelper visible={debugOptions.showBounds} />
+
+            {generativeEnabled && effectiveLyriaApiKey ? (
+              <DistrictLyriaAudio
+                apiKey={effectiveLyriaApiKey}
+                enabled={generativeEnabled}
+                volume={lyriaVolume} // Use dynamic lyria volume instead of fixed 0.4
+                onStatusUpdate={setLyriaStatus}
+                onDebugUpdate={setDistrictDebug}
+                onCurrentDistrictChange={setCurrentDistrict}
+                debugUpdateInterval={debugMenuOpen ? 3 : 30}
               />
-
-              <PlaneController
-                ref={planeControllerRef}
-                onSpeedChange={setFlightSpeed}
-                onModeChange={setMovementMode}
-                onCameraYChange={setCameraY}
-                onGroundDistanceChange={setGroundDistance}
-                onHeadingChange={setHeading}
-                onPitchChange={setPitch}
-                onRollChange={setRoll}
-                collisionGroup={collisionGroupRef.current}
-                collisionEnabled={debugOptions.collision}
-                onCollision={(dist: number) => setCollisionDistance(dist)}
-                onPlanePositionChange={handlePlanePositionChange}
-                demoEnabled={debugOptions.demoEnabled}
-                onDemoStateChange={setDemoState}
-                onGyroStateChange={setGyroState}
-                planeColor={planeColor}
-                flyingVolume={flyingVolume}
+            ) : (
+              <DistrictTracker
+                onCurrentDistrictChange={setCurrentDistrict}
+                onDebugUpdate={setDistrictDebug}
               />
+            )}
 
-              <FlightBoundsHelper visible={debugOptions.showBounds} />
+            <TimeOfDayEffects />
 
-              {generativeEnabled && effectiveLyriaApiKey ? (
-                <DistrictLyriaAudio
-                  apiKey={effectiveLyriaApiKey}
-                  enabled={generativeEnabled}
-                  volume={lyriaVolume} // Use dynamic lyria volume instead of fixed 0.4
-                  onStatusUpdate={setLyriaStatus}
-                  onDebugUpdate={setDistrictDebug}
-                  onCurrentDistrictChange={setCurrentDistrict}
-                  debugUpdateInterval={debugMenuOpen ? 3 : 30}
-                />
-              ) : (
-                <DistrictTracker
-                  onCurrentDistrictChange={setCurrentDistrict}
-                  onDebugUpdate={setDistrictDebug}
-                />
-              )}
+            <TokyoSpatialAudio
+              enabled={spatialAudioEnabled}
+              enableProcedural={spatialAudioEnabled}
+              showDebug={debugOptions.showBounds}
+              volume={spatialVolume} // Add dynamic spatial volume prop
+              onStatsUpdate={setSpatialAudioStats}
+            />
 
-              <TimeOfDayEffects />
+            <OtherPlayers
+              players={nearbyPlayers}
+              localPlayerPosition={localPlayerPositionRef.current}
+            />
 
-              <TokyoSpatialAudio
-                enabled={spatialAudioEnabled}
-                enableProcedural={spatialAudioEnabled}
-                showDebug={debugOptions.showBounds}
-                volume={spatialVolume} // Add dynamic spatial volume prop
-                onStatsUpdate={setSpatialAudioStats}
-              />
+            {/* Environment for PBR material reflections on the plane */}
+            <Environment preset="city" />
+          </Suspense>
+        </Canvas>
 
-              <OtherPlayers
-                players={nearbyPlayers}
-                localPlayerPosition={localPlayerPositionRef.current}
-              />
-
-              {/* Environment for PBR material reflections on the plane */}
-              <Environment preset="city" />
-            </Suspense>
-          </Canvas>
-
-          {dashboardVisible && (
-            <div 
-              className="transition-opacity duration-500 ease-in-out"
-              style={{ opacity: districtOverlayVisible ? 0 : 1 }}
-            >
-              <FlightDashboard
-                flightSpeed={flightSpeed}
-                pitch={pitch}
-                roll={roll}
-                cameraY={cameraY}
-                groundDistance={groundDistance}
-                mapsApiKey={ENV_MAPS_API_KEY}
-                handleTeleport={handleTeleport}
-                gyroState={gyroState}
-                planeControllerRef={
-                  planeControllerRef as React.RefObject<PlaneControllerHandle>
-                }
-                operationManualOpen={operationManualOpen}
-                setOperationManualOpen={setOperationManualOpen}
-                heading={heading}
-                speedoMeterSize={speedoMeterSize}
-                isMobile={isMobile}
-                nearbyPlayers={nearbyPlayers}
-                localPlayerPosition={localPlayerPositionState}
-              />
-            </div>
-          )}
-
-          <div 
-            className="absolute top-4 right-4 z-50 transition-opacity duration-500 ease-in-out"
+        {dashboardVisible && (
+          <div
+            className="transition-opacity duration-500 ease-in-out"
             style={{ opacity: districtOverlayVisible ? 0 : 1 }}
           >
-            <DashboardToggleButton
-              dashboardVisible={dashboardVisible}
-              setDashboardVisible={setDashboardVisible}
+            <FlightDashboard
+              flightSpeed={flightSpeed}
+              pitch={pitch}
+              roll={roll}
+              cameraY={cameraY}
+              groundDistance={groundDistance}
+              mapsApiKey={ENV_MAPS_API_KEY}
+              handleTeleport={handleTeleport}
+              gyroState={gyroState}
+              planeControllerRef={
+                planeControllerRef as React.RefObject<PlaneControllerHandle>
+              }
+              operationManualOpen={operationManualOpen}
+              setOperationManualOpen={setOperationManualOpen}
+              heading={heading}
+              speedoMeterSize={speedoMeterSize}
+              isMobile={isMobile}
+              nearbyPlayers={nearbyPlayers}
+              localPlayerPosition={localPlayerPositionState}
             />
           </div>
+        )}
 
-          <DistrictIndicator 
-            district={currentDistrict && cameraY < 900 ? currentDistrict : null} 
-            onVisibilityChange={setDistrictOverlayVisible}
+        <div
+          className="absolute top-4 right-4 z-50 transition-opacity duration-500 ease-in-out"
+          style={{ opacity: districtOverlayVisible ? 0 : 1 }}
+        >
+          <DashboardToggleButton
+            dashboardVisible={dashboardVisible}
+            setDashboardVisible={setDashboardVisible}
           />
+        </div>
 
-          {demoState?.active && <DemoTourGuide demoState={demoState} />}
+        <DistrictIndicator
+          district={currentDistrict && cameraY < 900 ? currentDistrict : null}
+          onVisibilityChange={setDistrictOverlayVisible}
+        />
 
-          {isMobile && (
-            <div 
-              className="transition-opacity duration-500 ease-in-out"
-              style={{ opacity: districtOverlayVisible ? 0 : 1 }}
-            >
-              <VirtualController enabled={started} />
-            </div>
-          )}
+        {demoState?.active && <DemoTourGuide demoState={demoState} />}
 
-          {/* AmbientBackgroundAudio disabled - using procedural spatial audio instead */}
+        <div
+          className="transition-opacity duration-500 ease-in-out"
+          style={{ opacity: districtOverlayVisible ? 0 : 1 }}
+        >
+          <VirtualController enabled={started} />
+        </div>
 
-          <DebugMenu
-            options={debugOptions}
-            onOptionsChange={(key, value) =>
-              setDebugOptions((prev) => ({ ...prev, [key]: value }))
+        {/* AmbientBackgroundAudio disabled - using procedural spatial audio instead */}
+
+        <DebugMenu
+          options={debugOptions}
+          onOptionsChange={(key, value) =>
+            setDebugOptions((prev) => ({ ...prev, [key]: value }))
+          }
+          status={status}
+          movementMode={movementMode}
+          cameraY={cameraY}
+          collisionDistance={collisionDistance}
+          apiKey={ENV_MAPS_API_KEY}
+          generativeEnabled={generativeEnabled}
+          districts={districtDebug}
+          onTeleport={handleTeleport}
+          searchDisabled={demoState?.active || false}
+          open={debugMenuOpen}
+          onOpenChange={(open) => {
+            // Set flag when closing to prevent immediate reopen
+            if (!open) {
+              isClosingDebugMenuRef.current = true;
+              // Reset flag after brief delay to allow reopening
+              setTimeout(() => {
+                isClosingDebugMenuRef.current = false;
+              }, 100);
             }
-            status={status}
-            movementMode={movementMode}
-            cameraY={cameraY}
-            collisionDistance={collisionDistance}
-            apiKey={ENV_MAPS_API_KEY}
-            generativeEnabled={generativeEnabled}
-            districts={districtDebug}
-            onTeleport={handleTeleport}
-            searchDisabled={demoState?.active || false}
-            open={debugMenuOpen}
-            onOpenChange={(open) => {
-              // Set flag when closing to prevent immediate reopen
-              if (!open) {
-                isClosingDebugMenuRef.current = true;
-                // Reset flag after brief delay to allow reopening
-                setTimeout(() => {
-                  isClosingDebugMenuRef.current = false;
-                }, 100);
-              }
-              setDebugMenuOpen(open);
-            }}
-            lyriaStatus={lyriaStatus}
-            spatialAudioEnabled={spatialAudioEnabled}
-            spatialAudioStats={spatialAudioStats}
-            pitch={pitch}
-            roll={roll}
-            multiplayerConnected={multiplayerConnected}
-            playerCount={playerCount}
-          />
+            setDebugMenuOpen(open);
+          }}
+          lyriaStatus={lyriaStatus}
+          spatialAudioEnabled={spatialAudioEnabled}
+          spatialAudioStats={spatialAudioStats}
+          pitch={pitch}
+          roll={roll}
+          multiplayerConnected={multiplayerConnected}
+          playerCount={playerCount}
+        />
       </VolumeContext.Provider>
     </div>
   );

@@ -55,7 +55,10 @@ const DEFAULT_MODEL_PATH = "/models/plane_balance.glb";
 const SPEED_MODEL_PATH = "/models/plane_speed.glb";
 
 // Flying audio configuration
-const FLYING_AUDIO_FILES = ["/audio/flying/flying_01.mp3", "/audio/flying/flying_02.mp3"];
+const FLYING_AUDIO_FILES = [
+  "/audio/flying/flying_01.mp3",
+  "/audio/flying/flying_02.mp3",
+];
 const FLYING_AUDIO_VOLUME = 0.15; // Reduced gain for flying sfx
 const FLYING_AUDIO_FADE_DURATION = 0.5; // Fade in/out duration in seconds
 const FLYING_AUDIO_STOP_SPEED_THRESHOLD = 5; // Speed below which audio fades out (m/s)
@@ -92,28 +95,34 @@ const NUM_COLLISION_RAYS = 8;
 const GROUND_RAYCAST_DISTANCE = 300; // Max distance to check for ground
 const GROUND_RAYCAST_INTERVAL = 3; // Check every N frames (~20fps at 60fps)
 
-export const PlaneController = forwardRef<PlaneControllerHandle, PlaneControllerProps>(function PlaneController({
-  onSpeedChange,
-  onModeChange,
-  onCameraYChange,
-  onGroundDistanceChange,
-  onHeadingChange,
-  onPitchChange,
-  onRollChange,
-  collisionGroup,
-  collisionEnabled,
-  onCollision,
-  localPlayerPositionRef,
-  localPlayerQuaternionRef,
-  onPlanePositionChange,
-  demoEnabled = true,
-  onDemoStateChange,
-  onDemoWaypointReached,
-  onDemoComplete,
-  onGyroStateChange,
-  planeColor,
-  flyingVolume = FLYING_AUDIO_VOLUME,
-}, ref) {
+export const PlaneController = forwardRef<
+  PlaneControllerHandle,
+  PlaneControllerProps
+>(function PlaneController(
+  {
+    onSpeedChange,
+    onModeChange,
+    onCameraYChange,
+    onGroundDistanceChange,
+    onHeadingChange,
+    onPitchChange,
+    onRollChange,
+    collisionGroup,
+    collisionEnabled,
+    onCollision,
+    localPlayerPositionRef,
+    localPlayerQuaternionRef,
+    onPlanePositionChange,
+    demoEnabled = true,
+    onDemoStateChange,
+    onDemoWaypointReached,
+    onDemoComplete,
+    onGyroStateChange,
+    planeColor,
+    flyingVolume = FLYING_AUDIO_VOLUME,
+  },
+  ref
+) {
   const { camera } = useThree();
   const planeRef = useRef<THREE.Group>(null);
   const frameCountRef = useRef(0);
@@ -144,7 +153,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
 
   const flyToActiveRef = useRef(false);
   const boostingRef = useRef(false);
-  
+
   const _lookTarget = useRef(new THREE.Vector3()).current;
 
   // Flying audio state
@@ -158,7 +167,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   const targetFadeRef = useRef(1); // Target fade level
   const lastSpeedRef = useRef(0); // Track speed for stopped detection
   const flyingVolumeRef = useRef(flyingVolume); // Ref for volume to avoid callback recreation
-  
+
   // Keep ref in sync with prop
   useEffect(() => {
     flyingVolumeRef.current = flyingVolume;
@@ -182,17 +191,17 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   const playNextFlyingTrack = useCallback(() => {
     const audio = flyingAudioRef.current;
     const buffers = audioBuffersRef.current;
-    
+
     if (!audio || buffers.length === 0) return;
-    
+
     // Don't start new track if we're supposed to be stopped
     if (!audioPlayingRef.current) return;
-    
+
     // Stop current playback if any
     if (audio.isPlaying) {
       audio.stop();
     }
-    
+
     // Get the next buffer (alternating 0 -> 1 -> 0 -> 1...)
     const buffer = buffers[currentTrackIndexRef.current];
     if (buffer) {
@@ -202,9 +211,10 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       audio.setRolloffFactor(1);
       audio.setLoop(false); // Don't loop individual tracks
       audio.play();
-      
+
       // Switch to next track for next play
-      currentTrackIndexRef.current = (currentTrackIndexRef.current + 1) % buffers.length;
+      currentTrackIndexRef.current =
+        (currentTrackIndexRef.current + 1) % buffers.length;
     }
   }, []);
 
@@ -213,7 +223,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     if (audioPlayingRef.current) return;
     audioPlayingRef.current = true;
     targetFadeRef.current = 1;
-    
+
     const audio = flyingAudioRef.current;
     if (audio && !audio.isPlaying && audioBuffersRef.current.length > 0) {
       playNextFlyingTrack();
@@ -231,13 +241,13 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
   useEffect(() => {
     if (audioInitializedRef.current) return;
     if (!planeRef.current) return;
-    
+
     const loadAudioBuffers = async () => {
       try {
         // Get or create AudioContext from the Three.js listener
         const listener = new THREE.AudioListener();
         camera.add(listener);
-        
+
         // Create PositionalAudio and attach to plane
         const positionalAudio = new THREE.PositionalAudio(listener);
         positionalAudio.setRefDistance(5);
@@ -245,25 +255,23 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
         positionalAudio.setVolume(FLYING_AUDIO_VOLUME);
         planeRef.current!.add(positionalAudio);
         flyingAudioRef.current = positionalAudio;
-        
+
         // Get audio context
         const context = listener.context;
         audioContextRef.current = context;
-        
+
         // Load both audio files
         const loadBuffer = async (url: string): Promise<AudioBuffer> => {
           const response = await fetch(url);
           const arrayBuffer = await response.arrayBuffer();
           return await context.decodeAudioData(arrayBuffer);
         };
-        
-        const buffers = await Promise.all(
-          FLYING_AUDIO_FILES.map(loadBuffer)
-        );
-        
+
+        const buffers = await Promise.all(FLYING_AUDIO_FILES.map(loadBuffer));
+
         audioBuffersRef.current = buffers;
         audioInitializedRef.current = true;
-        
+
         // Set up onEnded handler to play next track
         positionalAudio.onEnded = () => {
           // Only continue to next track if we're supposed to be playing
@@ -271,17 +279,17 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
             playNextFlyingTrack();
           }
         };
-        
+
         // Don't auto-start here - let useFrame handle it based on conditions
         // Audio will start when conditions are met (not in demo, not frozen, not simple mode)
       } catch (error) {
         console.error("[PlaneController] Failed to load flying audio:", error);
       }
     };
-    
+
     // Small delay to ensure planeRef is ready
     const timer = setTimeout(loadAudioBuffers, 100);
-    
+
     return () => {
       clearTimeout(timer);
       // Cleanup audio on unmount
@@ -371,8 +379,16 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       }
     };
 
+    const handlePointerDown = () => {
+      skipDemo();
+    };
+
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    window.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("pointerdown", handlePointerDown);
+    };
   }, [demoState.active, skipDemo]);
 
   useFrame((_, delta) => {
@@ -454,12 +470,15 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
       }
     }
 
-    if (collisionGroup && frameCountRef.current % GROUND_RAYCAST_INTERVAL === 0) {
+    if (
+      collisionGroup &&
+      frameCountRef.current % GROUND_RAYCAST_INTERVAL === 0
+    ) {
       _raycaster.set(virtualCam.position, _downDirection);
       _raycaster.far = GROUND_RAYCAST_DISTANCE;
-      
+
       const groundHits = _raycaster.intersectObject(collisionGroup, true);
-      
+
       if (groundHits.length > 0) {
         onGroundDistanceChange?.(groundHits[0].distance);
       } else {
@@ -485,7 +504,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     } else if (isDemoActive) {
       const demoSmoothingSpeed = (1 - DEMO_CAMERA_LAG) * 60;
       const demoLerpFactor = 1 - Math.exp(-demoSmoothingSpeed * delta);
-      
+
       smoothCameraPos.current.lerp(virtualCam.position, demoLerpFactor);
       camera.position.copy(smoothCameraPos.current);
 
@@ -511,7 +530,7 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
 
       const smoothingSpeed = (1 - smoothLag.current) * 60;
       const lerpFactor = 1 - Math.exp(-smoothingSpeed * delta);
-      
+
       smoothCameraPos.current.lerp(_targetCameraPos, lerpFactor);
 
       _euler.setFromQuaternion(virtualCam.quaternion, "YXZ");
@@ -533,32 +552,39 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
     // Check conditions: freeze (Space), simple mode, or very low speed
     const isFrozen = keysRef.current.freeze;
     const isSimple = currentMode === "simple";
-    
+
     // Get current speed from onSpeedChange callback (we track it via lastSpeedRef)
     // Speed is updated via onSpeedChange prop, but we can estimate from position delta
     // For simplicity, use the freeze and mode checks primarily
-    const shouldPlayAudio = !isDemoActive && !isFrozen && !isSimple && audioInitializedRef.current;
-    
+    const shouldPlayAudio =
+      !isDemoActive && !isFrozen && !isSimple && audioInitializedRef.current;
+
     if (shouldPlayAudio && !audioPlayingRef.current) {
       startFlyingAudio();
     } else if (!shouldPlayAudio && audioPlayingRef.current) {
       stopFlyingAudio();
     }
-    
+
     // Update fade level
     const audio = flyingAudioRef.current;
     if (audio) {
       const fadeSpeed = delta / FLYING_AUDIO_FADE_DURATION;
-      
+
       if (audioFadeRef.current < targetFadeRef.current) {
-        audioFadeRef.current = Math.min(audioFadeRef.current + fadeSpeed, targetFadeRef.current);
+        audioFadeRef.current = Math.min(
+          audioFadeRef.current + fadeSpeed,
+          targetFadeRef.current
+        );
       } else if (audioFadeRef.current > targetFadeRef.current) {
-        audioFadeRef.current = Math.max(audioFadeRef.current - fadeSpeed, targetFadeRef.current);
+        audioFadeRef.current = Math.max(
+          audioFadeRef.current - fadeSpeed,
+          targetFadeRef.current
+        );
       }
-      
+
       // Apply volume with fade
       audio.setVolume(flyingVolumeRef.current * audioFadeRef.current);
-      
+
       // Stop audio completely when faded out
       if (audioFadeRef.current <= 0 && audio.isPlaying) {
         audio.stop();
@@ -723,11 +749,15 @@ export const PlaneController = forwardRef<PlaneControllerHandle, PlaneController
 
   const isDemoActive = demoState.active;
   const showPlane = !isDemoActive && currentMode === "elytra";
-  
+
   const modelsLoaded = useMemo(() => {
     let hasGeometry = false;
     defaultScene.traverse((child) => {
-      if (child instanceof THREE.Mesh && child.geometry && child.geometry.attributes.position) {
+      if (
+        child instanceof THREE.Mesh &&
+        child.geometry &&
+        child.geometry.attributes.position
+      ) {
         hasGeometry = true;
       }
     });

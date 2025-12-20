@@ -20,7 +20,7 @@ export default function DashboardToggleButton({
           variant="ghost"
           size="icon"
           onClick={() => setDashboardVisible(!dashboardVisible)}
-          className="fixed top-4 right-4 rounded-full text-white/70 text-shadow-sm hover:bg-black/30 hover:border hover:border-border/50 hover:text-white text-xs font-mono pointer-events-auto"
+          className="fixed top-4 right-4 rounded-full text-white/70 text-shadow-sm hover:bg-black/30 hover:border hover:border-border/50 hover:text-white text-xs font-mono pointer-events-auto z-40"
           aria-label={dashboardVisible ? "Hide dashboard" : "Show dashboard"}
         >
           {dashboardVisible ? (

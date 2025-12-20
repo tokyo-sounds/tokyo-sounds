@@ -25,7 +25,7 @@ export default function DemoTourGuide({ demoState }: { demoState: DemoState }) {
             : "Returning..."}
         </span>
         <span className="text-white/30">|</span>
-        <span>Press ESC or SPACE to skip</span>
+        <span>Click or press ESC/SPACE to skip</span>
       </div>
       <div className="mt-2 w-full bg-white/20 rounded-full h-1">
         <div

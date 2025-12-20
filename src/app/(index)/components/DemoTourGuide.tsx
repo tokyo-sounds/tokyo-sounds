@@ -20,8 +20,8 @@ export default function DemoTourGuide({ demoState }: { demoState: DemoState }) {
         </span>
         <span className="text-white/30">|</span> */}
         <p className="text-primary-foreground/70 text-sm font-noto font-sans uppercase">
-          <span className="hidden md:inline">クリック</span>
-          <span className="inline md:hidden">ESC または SPACE</span>
+          <span className="hidden md:inline">クリック または ESC/SPACE</span>
+          <span className="inline md:hidden">タップ または ESC/SPACE</span>
           でスキップ
         </p>
       </div>
