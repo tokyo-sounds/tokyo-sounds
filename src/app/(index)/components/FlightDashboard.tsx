@@ -93,7 +93,7 @@ export default function FlightDashboard({
           setOperationManualOpen={setOperationManualOpen}
         />
       </div>
-      <div className="hidden md:block absolute top-1/2 -translate-y-1/2 right-4">
+      <div className="hidden md:block absolute top-1/2 -translate-y-1/2 right-4 z-40">
         <TimeOfDayEffectsMenu />
       </div>
       <div className="hidden md:block absolute bottom-6 md:bottom-10 left-6 md:left-10">

@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Rocket } from "lucide-react";
+import {
+  Rocket,
+  ChevronUp,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 
 interface VirtualControllerProps {
   /**
@@ -11,38 +17,47 @@ interface VirtualControllerProps {
   enabled?: boolean;
 }
 
-type ActiveKey = "KeyW" | "KeyS" | "KeyA" | "KeyD" | "ShiftLeft" | null;
-
 /**
  * VirtualController Component
  * Provides touch/pointer-based flight controls by dispatching synthetic keyboard events
- * - Top/Bottom edges: Pitch (W/S)
- * - Left/Right edges: Roll (A/D)
+ * - Up/Down buttons: Pitch (W/S)
+ * - Left/Right buttons: Roll (A/D)
  * - Boost button: Speed boost (ShiftLeft)
- * - Center area: Freeze/Pause (Space - toggle)
  */
 export default function VirtualController({
   enabled = true,
 }: VirtualControllerProps) {
-  const [activeKey, setActiveKey] = useState<ActiveKey>(null);
+  const [upActive, setUpActive] = useState(false);
+  const [downActive, setDownActive] = useState(false);
+  const [leftActive, setLeftActive] = useState(false);
+  const [rightActive, setRightActive] = useState(false);
   const [boostActive, setBoostActive] = useState(false);
-  const [spacePressed, setSpacePressed] = useState(false);
-  const activeKeyRef = useRef<ActiveKey>(null);
+  const upActiveRef = useRef(false);
+  const downActiveRef = useRef(false);
+  const leftActiveRef = useRef(false);
+  const rightActiveRef = useRef(false);
   const boostActiveRef = useRef(false);
-  const spacePressedRef = useRef(false);
 
   // Update refs when state changes
   useEffect(() => {
-    activeKeyRef.current = activeKey;
-  }, [activeKey]);
+    upActiveRef.current = upActive;
+  }, [upActive]);
+
+  useEffect(() => {
+    downActiveRef.current = downActive;
+  }, [downActive]);
+
+  useEffect(() => {
+    leftActiveRef.current = leftActive;
+  }, [leftActive]);
+
+  useEffect(() => {
+    rightActiveRef.current = rightActive;
+  }, [rightActive]);
 
   useEffect(() => {
     boostActiveRef.current = boostActive;
   }, [boostActive]);
-
-  useEffect(() => {
-    spacePressedRef.current = spacePressed;
-  }, [spacePressed]);
 
   // Dispatch synthetic keyboard event
   const dispatchKeyEvent = (
@@ -64,15 +79,6 @@ export default function VirtualController({
     window.dispatchEvent(event);
   };
 
-  // Release any active key
-  const releaseActiveKey = () => {
-    if (activeKeyRef.current) {
-      dispatchKeyEvent("keyup", activeKeyRef.current);
-      setActiveKey(null);
-      activeKeyRef.current = null;
-    }
-  };
-
   // Release boost
   const releaseBoost = () => {
     if (boostActiveRef.current) {
@@ -82,105 +88,49 @@ export default function VirtualController({
     }
   };
 
-  // Determine which zone the pointer is in
-  const getZoneType = (
-    x: number,
-    y: number,
-    width: number,
-    height: number
-  ): "top" | "bottom" | "left" | "right" | "center" => {
-    const edgeThreshold = 0.3; // 30% of screen
-    const topZone = y < height * edgeThreshold;
-    const bottomZone = y > height * (1 - edgeThreshold);
-    const leftZone = x < width * edgeThreshold;
-    const rightZone = x > width * (1 - edgeThreshold);
-
-    // Check if click is in boost button area (bottom-right corner, excluding button itself)
-    const boostButtonSize = 80; // w-20 h-20 = 80px
-    const boostButtonMargin = 24; // bottom-6 right-6 = 24px
-    const isInBoostArea =
-      x > width - boostButtonSize - boostButtonMargin &&
-      x < width - boostButtonMargin &&
-      y > height - boostButtonSize - boostButtonMargin &&
-      y < height - boostButtonMargin;
-
-    // Priority: Pitch (top/bottom) over Roll (left/right)
-    if (topZone) {
-      return "top";
-    } else if (bottomZone && !isInBoostArea) {
-      return "bottom";
-    } else if (leftZone) {
-      return "left";
-    } else if (rightZone && !isInBoostArea) {
-      return "right";
-    } else {
-      return "center";
-    }
-  };
-
-  // Handle pointer down on edge zones or center area
-  const handlePointerDown = (e: React.PointerEvent) => {
+  // Handle control button pointer down
+  const handleControlPointerDown = (
+    keyCode: "KeyW" | "KeyS" | "KeyA" | "KeyD"
+  ) => {
     if (!enabled) return;
 
-    e.preventDefault();
-    const target = e.currentTarget as HTMLElement;
-    const rect = target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const width = rect.width;
-    const height = rect.height;
+    dispatchKeyEvent("keydown", keyCode);
 
-    const zoneType = getZoneType(x, y, width, height);
-
-    switch (zoneType) {
-      case "top":
-        releaseActiveKey();
-        dispatchKeyEvent("keydown", "KeyW");
-        setActiveKey("KeyW");
+    switch (keyCode) {
+      case "KeyW":
+        setUpActive(true);
         break;
-
-      case "bottom":
-        releaseActiveKey();
-        dispatchKeyEvent("keydown", "KeyS");
-        setActiveKey("KeyS");
+      case "KeyS":
+        setDownActive(true);
         break;
-
-      case "left":
-        releaseActiveKey();
-        dispatchKeyEvent("keydown", "KeyA");
-        setActiveKey("KeyA");
+      case "KeyA":
+        setLeftActive(true);
         break;
-
-      case "right":
-        releaseActiveKey();
-        dispatchKeyEvent("keydown", "KeyD");
-        setActiveKey("KeyD");
-        break;
-
-      case "center":
-        // Center area - toggle freeze (Space key)
-        // Space keydown toggles freeze in elytra mode
-        if (!spacePressedRef.current) {
-          dispatchKeyEvent("keydown", "Space");
-          setSpacePressed(true);
-          spacePressedRef.current = true;
-        }
-        break;
-
-      default:
-        // Should never reach here, but TypeScript requires exhaustive check
+      case "KeyD":
+        setRightActive(true);
         break;
     }
   };
 
-  // Handle pointer up
-  const handlePointerUp = () => {
-    releaseActiveKey();
-    // Release Space if it was pressed
-    if (spacePressedRef.current) {
-      dispatchKeyEvent("keyup", "Space");
-      setSpacePressed(false);
-      spacePressedRef.current = false;
+  // Handle control button pointer up
+  const handleControlPointerUp = (
+    keyCode: "KeyW" | "KeyS" | "KeyA" | "KeyD"
+  ) => {
+    dispatchKeyEvent("keyup", keyCode);
+
+    switch (keyCode) {
+      case "KeyW":
+        setUpActive(false);
+        break;
+      case "KeyS":
+        setDownActive(false);
+        break;
+      case "KeyA":
+        setLeftActive(false);
+        break;
+      case "KeyD":
+        setRightActive(false);
+        break;
     }
   };
 
@@ -204,25 +154,43 @@ export default function VirtualController({
     if (!enabled) return;
 
     const handleGlobalPointerUp = () => {
-      releaseActiveKey();
-      releaseBoost();
-      // Release Space if pressed
-      if (spacePressedRef.current) {
-        dispatchKeyEvent("keyup", "Space");
-        setSpacePressed(false);
-        spacePressedRef.current = false;
+      if (upActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyW");
+        setUpActive(false);
       }
+      if (downActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyS");
+        setDownActive(false);
+      }
+      if (leftActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyA");
+        setLeftActive(false);
+      }
+      if (rightActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyD");
+        setRightActive(false);
+      }
+      releaseBoost();
     };
 
     const handleGlobalPointerCancel = () => {
-      releaseActiveKey();
-      releaseBoost();
-      // Release Space if pressed
-      if (spacePressedRef.current) {
-        dispatchKeyEvent("keyup", "Space");
-        setSpacePressed(false);
-        spacePressedRef.current = false;
+      if (upActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyW");
+        setUpActive(false);
       }
+      if (downActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyS");
+        setDownActive(false);
+      }
+      if (leftActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyA");
+        setLeftActive(false);
+      }
+      if (rightActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyD");
+        setRightActive(false);
+      }
+      releaseBoost();
     };
 
     window.addEventListener("pointerup", handleGlobalPointerUp);
@@ -237,35 +205,122 @@ export default function VirtualController({
   // Cleanup on unmount or disable
   useEffect(() => {
     if (!enabled) {
-      releaseActiveKey();
-      releaseBoost();
-      // Release Space if pressed
-      if (spacePressedRef.current) {
-        dispatchKeyEvent("keyup", "Space");
-        setSpacePressed(false);
-        spacePressedRef.current = false;
+      if (upActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyW");
+        setUpActive(false);
       }
+      if (downActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyS");
+        setDownActive(false);
+      }
+      if (leftActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyA");
+        setLeftActive(false);
+      }
+      if (rightActiveRef.current) {
+        dispatchKeyEvent("keyup", "KeyD");
+        setRightActive(false);
+      }
+      releaseBoost();
     }
   }, [enabled]);
 
   if (!enabled) return null;
 
+  // ControlButton component - transparent until pressed
+  const ControlButton = ({
+    icon: Icon,
+    keyCode,
+    position,
+    iconPosition,
+    ariaLabel,
+  }: {
+    icon: React.ComponentType<{ strokeWidth?: number; className?: string }>;
+    keyCode: "KeyW" | "KeyS" | "KeyA" | "KeyD";
+    position: string;
+    iconPosition?: string;
+    ariaLabel: string;
+  }) => {
+    const isActive =
+      (keyCode === "KeyW" && upActive) ||
+      (keyCode === "KeyS" && downActive) ||
+      (keyCode === "KeyA" && leftActive) ||
+      (keyCode === "KeyD" && rightActive);
+
+    return (
+      <button
+        className={`absolute ${position} size-60 rounded-full flight-dashboard-card flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-white active:bg-white/30 active:scale-95 transition-all select-none z-40 pointer-events-auto ${
+          isActive ? "opacity-100" : "opacity-0"
+        }`}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleControlPointerDown(keyCode);
+        }}
+        onPointerUp={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleControlPointerUp(keyCode);
+        }}
+        onPointerCancel={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          handleControlPointerUp(keyCode);
+        }}
+        aria-label={ariaLabel}
+      >
+        <Icon strokeWidth={1.2} className={`size-12 ${iconPosition}`} />
+      </button>
+    );
+  };
+
   return (
-    <div
-      className="absolute inset-0 z-40 touch-none pointer-events-auto"
-      onPointerDown={handlePointerDown}
-      onPointerUp={handlePointerUp}
-      onPointerCancel={handlePointerUp}
-    >
+    <div className="absolute inset-0 z-0 touch-none pointer-events-none select-none">
+      {/* Up Button - Top Center */}
+      <ControlButton
+        icon={ChevronUp}
+        keyCode="KeyW"
+        position="top-0 -translate-y-3/5 left-1/2 -translate-x-1/2"
+        iconPosition="translate-y-full"
+        ariaLabel="Pitch Up"
+      />
+
+      {/* Down Button - Bottom Center (adjusted to avoid dashboard) */}
+      <ControlButton
+        icon={ChevronDown}
+        keyCode="KeyS"
+        position="bottom-0 translate-y-3/5 left-1/2 -translate-x-1/2"
+        iconPosition="-translate-y-full"
+        ariaLabel="Pitch Down"
+      />
+
+      {/* Left Button - Middle Left */}
+      <ControlButton
+        icon={ChevronLeft}
+        keyCode="KeyA"
+        position="left-0 -translate-x-3/5 top-1/2 -translate-y-1/2"
+        iconPosition="translate-x-full"
+        ariaLabel="Roll Left"
+      />
+
+      {/* Right Button - Middle Right */}
+      <ControlButton
+        icon={ChevronRight}
+        keyCode="KeyD"
+        position="right-0 translate-x-3/5 top-1/2 -translate-y-1/2"
+        iconPosition="-translate-x-full"
+        ariaLabel="Roll Right"
+      />
+
       {/* Boost Button - Bottom Right */}
       <button
-        className="absolute bottom-6 right-6 size-20 rounded-full flight-dashboard-card flex items-center justify-center text-white font-semibold text-sm shadow-lg active:bg-white/30 active:scale-95 transition-all select-none z-50"
+        className="absolute bottom-6 right-6 size-20 md:size-15 rounded-full flight-dashboard-card flex items-center justify-center text-white font-semibold text-sm shadow-lg active:bg-white/30 active:scale-95 active:shadow-white transition-all select-none pointer-events-auto z-50"
         onPointerDown={handleBoostPointerDown}
         onPointerUp={handleBoostPointerUp}
         onPointerCancel={handleBoostPointerUp}
         aria-label="Boost"
       >
-        <Rocket strokeWidth={1.8} className="size-8" />
+        <Rocket strokeWidth={1.8} className="size-8 md:size-6" />
       </button>
     </div>
   );
