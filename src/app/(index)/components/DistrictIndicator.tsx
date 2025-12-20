@@ -10,9 +10,9 @@ interface DistrictIndicatorProps {
 
 // Duration constants (in ms)
 const FADE_DURATION = 500;
-const DISPLAY_DURATION = 5000;
+const DISPLAY_DURATION = 2700;
 const DEBOUNCE_DELAY = 300;
-const COOLDOWN_DURATION = 5000; // Cooldown after display ends before showing another
+const COOLDOWN_DURATION = 2700; // Cooldown after display ends before showing another
 
 type Phase = "idle" | "fade-in" | "visible" | "fade-out" | "cooldown";
 

@@ -218,8 +218,8 @@ export default function AttitudeIndicator({
       }
       if (coordsValueRef.current) {
         coordsValueRef.current.textContent = `${currentLat.toFixed(
-          3
-        )}, ${currentLng.toFixed(3)}`;
+          4
+        )}, ${currentLng.toFixed(4)}`;
       }
 
       // Update warning indicator based on ground distance (or altitude as fallback)
@@ -377,9 +377,9 @@ export default function AttitudeIndicator({
         {/* GPS Value */}
         <h3
           ref={coordsValueRef}
-          className="text-xs text-muted text-center text-shadow-sm text-shadow-black/50 font-semibold font-mono tracking-wide"
+          className="text-[7pt] text-muted text-center text-shadow-sm text-shadow-black/50 font-mono tracking-wide"
         >
-          {latitude?.toFixed(3) ?? "0.000"}, {longitude?.toFixed(3) ?? "0.000"}
+          {latitude?.toFixed(4) ?? "0.0"}, {longitude?.toFixed(4) ?? "0.0"}
         </h3>
       </div>
 
