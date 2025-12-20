@@ -249,7 +249,7 @@ export default function VirtualController({
 
     return (
       <button
-        className={`absolute ${position} size-60 rounded-full flight-dashboard-card flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-white active:bg-white/30 active:scale-95 transition-all select-none z-40 pointer-events-auto ${
+        className={`absolute ${position} h-1/2 aspect-square rounded-full flight-dashboard-card flex items-center justify-center text-white font-semibold text-sm shadow-lg shadow-white active:bg-white/30 active:scale-95 transition-all select-none z-40 pointer-events-auto ${
           isActive ? "opacity-100" : "opacity-0"
         }`}
         onPointerDown={(e) => {
