@@ -377,7 +377,7 @@ export default function AttitudeIndicator({
         {/* GPS Value */}
         <h3
           ref={coordsValueRef}
-          className="text-[8pt] text-muted text-center text-shadow-sm text-shadow-black/50 font-mono tracking-wide"
+          className="text-[7pt] text-muted text-center text-shadow-sm text-shadow-black/50 font-mono tracking-wide"
         >
           {latitude?.toFixed(4) ?? "0.0"}, {longitude?.toFixed(4) ?? "0.0"}
         </h3>
