@@ -80,6 +80,7 @@ export default function AttitudeIndicator({
   const pitchFillNegativeRef = useRef<HTMLDivElement>(null);
   const rollValueLeftRef = useRef<HTMLHeadingElement>(null);
   const rollValueRightRef = useRef<HTMLHeadingElement>(null);
+  const rollValueRef = useRef<HTMLHeadingElement>(null);
   const pitchValueRef = useRef<HTMLHeadingElement>(null);
   const cameraYValueRef = useRef<HTMLSpanElement>(null);
   const coordsValueRef = useRef<HTMLHeadingElement>(null);
@@ -136,8 +137,8 @@ export default function AttitudeIndicator({
       const currentRoll = currentRollRef.current;
       const currentPitch = currentPitchRef.current;
       const currentCameraY = currentCameraYRef.current;
-      const currentLat = currentLatitudeRef.current;
-      const currentLng = currentLongitudeRef.current;
+      // const currentLat = currentLatitudeRef.current;
+      // const currentLng = currentLongitudeRef.current;
 
       // Update wings rotation via CSS variable
       if (wingsRef.current) {
@@ -208,6 +209,10 @@ export default function AttitudeIndicator({
         rollValueRightRef.current.textContent =
           roundedRoll < 0 ? `${Math.abs(roundedRoll).toFixed(1)}°` : "";
       }
+      if (rollValueRef.current) {
+        const roundedRoll = Math.round(currentRoll * 10) / 10;
+        rollValueRef.current.textContent = `${roundedRoll.toFixed(1)}°`;
+      }
       if (pitchValueRef.current) {
         const roundedPitch = Math.round(currentPitch * 10) / 10;
         pitchValueRef.current.textContent = `${roundedPitch.toFixed(1)}°`;
@@ -216,11 +221,11 @@ export default function AttitudeIndicator({
         const roundedCameraY = Math.round(currentCameraY * 10) / 10;
         cameraYValueRef.current.textContent = `${roundedCameraY.toFixed(1)} m`;
       }
-      if (coordsValueRef.current) {
-        coordsValueRef.current.textContent = `${currentLat.toFixed(
-          4
-        )}, ${currentLng.toFixed(4)}`;
-      }
+      // if (coordsValueRef.current) {
+      //   coordsValueRef.current.textContent = `${currentLat.toFixed(
+      //     4
+      //   )}, ${currentLng.toFixed(4)}`;
+      // }
 
       // Update warning indicator based on ground distance (or altitude as fallback)
       if (warningContainerRef.current) {
@@ -329,12 +334,12 @@ export default function AttitudeIndicator({
         </svg>
         <div className="w-full flex items-center justify-center gap-2">
           {/* Left roll value (shown when tilting left, i.e., roll < 0) */}
-          <h3
+          {/* <h3
             ref={rollValueLeftRef}
             className="w-12 text-xs md:text-base text-muted text-left text-shadow-sm text-shadow-black/50 font-semibold font-mono tracking-wide"
           >
             {roll > 0 ? Math.abs(roll).toFixed(1) + "°" : ""}
-          </h3>
+          </h3> */}
           {/* Roll Indicator Bar */}
           <div
             className="w-full max-w-40 h-1 relative bg-muted/[0.4] rounded-full overflow-hidden"
@@ -367,20 +372,25 @@ export default function AttitudeIndicator({
             <div className="absolute left-1/2 top-0 w-px h-full bg-white" />
           </div>
           {/* Right roll value (shown when tilting right, i.e., roll > 0) */}
-          <h3
+          {/* <h3
             ref={rollValueRightRef}
             className="w-12 text-xs md:text-base text-muted text-right text-shadow-sm text-shadow-black/50 font-semibold font-mono tracking-wide"
           >
             {roll < 0 ? Math.abs(roll).toFixed(1) + "°" : ""}
-          </h3>
+          </h3> */}
         </div>
-        {/* GPS Value */}
+        {/* Roll Value */}
+        <h3
+          ref={rollValueRef}
+          className="text-xs md:text-base text-muted text-center text-shadow-sm text-shadow-black/50 font-mono tracking-wide"
+        />
+        {/* GPS Value
         <h3
           ref={coordsValueRef}
           className="text-[7pt] text-muted text-center text-shadow-sm text-shadow-black/50 font-mono tracking-wide"
         >
           {latitude?.toFixed(4) ?? "0.0"}, {longitude?.toFixed(4) ?? "0.0"}
-        </h3>
+        </h3> */}
       </div>
 
       {/* Pitch Indicator */}
