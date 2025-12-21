@@ -12,7 +12,7 @@ interface DistrictIndicatorProps {
 const FADE_DURATION = 500;
 const DISPLAY_DURATION = 2700;
 const DEBOUNCE_DELAY = 300;
-const COOLDOWN_DURATION = 2700; // Cooldown after display ends before showing another
+const COOLDOWN_DURATION = 5000; // Cooldown after display ends before showing another
 
 type Phase = "idle" | "fade-in" | "visible" | "fade-out" | "cooldown";
 
@@ -26,13 +26,15 @@ export default function DistrictIndicator({
   district,
   onVisibilityChange,
 }: DistrictIndicatorProps) {
-  const [displayedDistrict, setDisplayedDistrict] = useState<District | null>(null);
+  const [displayedDistrict, setDisplayedDistrict] = useState<District | null>(
+    null
+  );
   const [phase, setPhase] = useState<Phase>("idle");
   const [opacity, setOpacity] = useState(0);
-  
+
   const phaseRef = useRef<Phase>(phase);
   phaseRef.current = phase;
-  
+
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const displayTimerRef = useRef<NodeJS.Timeout | null>(null);
   const fadeOutTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -60,7 +62,7 @@ export default function DistrictIndicator({
 
   useEffect(() => {
     const newDistrictId = district?.id ?? null;
-    
+
     if (newDistrictId === lastDistrictIdRef.current) {
       return;
     }
@@ -77,20 +79,36 @@ export default function DistrictIndicator({
 
     debounceTimerRef.current = setTimeout(() => {
       const currentPhase = phaseRef.current;
-      
+
       if (currentPhase === "idle") {
         lastDistrictIdRef.current = district.id;
         setDisplayedDistrict(district);
         setPhase("fade-in");
         onVisibilityChange?.(true);
       } else if (currentPhase === "fade-out") {
-        lastDistrictIdRef.current = district.id; // Remember we saw this district
-      } else if (currentPhase === "cooldown") {
+        // 新しい district が来た場合、fade-out を中断して新しい表示を開始
         lastDistrictIdRef.current = district.id;
+        clearAllTimers();
+        setDisplayedDistrict(district);
+        setPhase("fade-in");
+        onVisibilityChange?.(true);
+      } else if (currentPhase === "cooldown") {
+        // cooldown 中でも新しい district が来たら表示を開始
+        lastDistrictIdRef.current = district.id;
+        clearAllTimers();
+        setDisplayedDistrict(district);
+        setPhase("fade-in");
+        onVisibilityChange?.(true);
       } else if (currentPhase === "visible" || currentPhase === "fade-in") {
+        // 同じ district の場合は何もしない（既に表示中）
+        if (displayedDistrict?.id === district.id) {
+          lastDistrictIdRef.current = district.id;
+          return;
+        }
+        // 異なる district の場合は更新して表示時間をリセット
         lastDistrictIdRef.current = district.id;
         setDisplayedDistrict(district);
-        
+
         if (displayTimerRef.current) {
           clearTimeout(displayTimerRef.current);
         }
@@ -106,14 +124,14 @@ export default function DistrictIndicator({
         debounceTimerRef.current = null;
       }
     };
-  }, [district, onVisibilityChange]);
+  }, [district, onVisibilityChange, displayedDistrict, clearAllTimers]);
 
   useEffect(() => {
     if (phase === "fade-in") {
       requestAnimationFrame(() => {
         setOpacity(1);
       });
-      
+
       const timer = setTimeout(() => {
         setPhase("visible");
       }, FADE_DURATION);
@@ -145,7 +163,7 @@ export default function DistrictIndicator({
         }
       };
     }
-    
+
     if (phase === "cooldown") {
       cooldownTimerRef.current = setTimeout(() => {
         setPhase("idle");
@@ -156,7 +174,7 @@ export default function DistrictIndicator({
         }
       };
     }
-    
+
     if (phase === "idle") {
       setOpacity(0);
     }
