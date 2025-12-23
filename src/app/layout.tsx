@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackClientApp } from "../stack/client";
 import { Analytics } from "@vercel/analytics/next";
+import { NextIntlClientProvider } from "next-intl";
 
 const robotoSans = Roboto({
   variable: "--font-roboto-sans",
@@ -33,12 +34,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja">
+    <html>
       <body
         className={`${robotoSans.variable} ${robotoMono.variable} ${notoSansJp.variable} bg-linear-to-tr from-orange-600 to-red-800 antialiased`}
       >
         <StackProvider app={stackClientApp}>
-          <StackTheme>{children}</StackTheme>
+          <StackTheme>
+            {children}
+          </StackTheme>
           <Toaster />
         </StackProvider>
         <Analytics />

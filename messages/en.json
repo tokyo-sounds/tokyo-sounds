@@ -1,0 +1,34 @@
+{
+  "HomePage": {
+    "title": "Hello world!"
+  },
+  "LandingPage": {
+    "title": "Landing Page",
+    "description": "Landing Page Description"
+  },
+  "FlightSettingsMenu": {
+    "title": "Debug Menu",
+    "description": "Debug Menu Description"
+  },
+  "FlightDashboard": {
+    "title": "Flight Dashboard",
+    "description": "Flight Dashboard Description"
+  },
+  "AboutPage": {
+    "pageTitle": "TOKYOSOUNDS",
+    "title": "Collected daily sounds of Tokyo into an ASMR site",
+    "description": "This time, we focused on the “charm of Tokyo’s sounds.” Most sightseeing sites are abundant with visual information, but few services have focused on the “sound” itself. However, Tokyo has many sounds that can evoke the atmosphere of the city, such as the brake sound of trains, the crossing, announcements, and the voices of shopping streets. We wanted to create a service that allows people living in Tokyo or visiting for sightseeing to experience the city through sound. The concept is “Tokyo by Sound.” We aim to provide a new experience of exploring Tokyo by “traveling with your ears rather than your eyes.” We record daily sounds and environmental sounds in Tokyo and combine them with 3D-designed cityscapes to make them more intuitive and enjoyable. This allows a wide range of users, including those who want to experience the atmosphere of Tokyo casually, those who want to know the image of the city before visiting, those who like ASMR and environmental sounds, to enjoy the service."
+  },
+  "PatchNotesPage": {
+    "title": "Patch Notes Page",
+    "description": "Patch Notes Page Description"
+  },
+  "LoginPage": {
+    "title": "Login Page",
+    "description": "Login Page Description"
+  },
+  "RegisterPage": {
+    "title": "Register Page",
+    "description": "Register Page Description"
+  }
+}
