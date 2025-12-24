@@ -6,6 +6,7 @@
 import { PASTEL_COLORS } from "../page";
 import Nav from "@/components/layout/nav";
 import HomeHero from "@/components/layout/HomeHero";
+import LanguageSwitcher from "@/components/widget/LanguageSwitcher";
 import {
   Dialog,
   DialogContent,
@@ -46,6 +47,9 @@ export default function LandingPage({
   return (
     <div className="w-full h-full min-h-svh relative flex flex-col items-center justify-center">
       <Nav />
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
       <HomeHero />
       <div className="flex flex-col items-center justify-center z-10">
         <h1 className="text-6xl md:text-7xl text-white font-bold text-center text-shadow-lg animate-in fade-in slide-in-from-bottom duration-500">{App_Info.title_ja}</h1>
