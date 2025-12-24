@@ -7,6 +7,8 @@ import { message } from "@/lib/constraint";
 import { AuthForm } from "@/components/widget/AuthForm";
 import CommonPageContainer from "@/components/layout/CommonPageContainer";
 
+export const dynamic = 'force-dynamic';
+
 export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
