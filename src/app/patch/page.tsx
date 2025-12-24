@@ -2,17 +2,21 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import CommonPageContainer from "@/components/layout/CommonPageContainer";
 import { Timeline } from "@/components/layout/timeline";
-import { patchNotes } from "@/docs/patchnotes";
+import { useTranslations } from "next-intl";
 import SectionHeader from "@/components/layout/SectionHeader";
-import patchSectionHeader from "@/docs/patch-section-header.json";
+import { type TimelineItem } from "@/components/layout/timeline";
 export default function PatchPage() {
+  const t = useTranslations("PatchNotesPage");
+  const patchNotes: TimelineItem[] = t(
+    "patchNotes"
+  ) as unknown as TimelineItem[];
   return (
     <CommonPageContainer>
       <div className="w-full space-y-8">
         <SectionHeader
-          pageTitle={patchSectionHeader.pageTitle}
-          title={patchSectionHeader.title}
-          description={patchSectionHeader.description}
+          pageTitle={t("pageTitle")}
+          title={t("title")}
+          description={t("description")}
         />
         <div className="w-full space-y-4">
           <div className="w-full flex items-center justify-center gap-2">
