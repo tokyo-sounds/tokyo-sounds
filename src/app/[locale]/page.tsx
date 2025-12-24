@@ -1,6 +1,6 @@
 import { use } from "react";
 import { setRequestLocale } from "next-intl/server";
-import { useTranslations } from "next-intl";
+import TokyoPage from "@/app/(index)/page";
 
 export default function IndexPage({
   params,
@@ -12,13 +12,6 @@ export default function IndexPage({
   // Enable static rendering
   setRequestLocale(locale);
 
-  // Once the request locale is set, you
-  // can call hooks from `next-intl`
-  const t = useTranslations("HomePage");
-
-  return (
-    <div>
-      <h1>{t("title")}</h1>
-    </div>
-  );
+  // TokyoPage is a client component, so we can import it directly
+  return <TokyoPage />;
 }

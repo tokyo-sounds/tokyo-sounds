@@ -34,7 +34,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html>
+    <html lang="en">
       <body
         className={`${robotoSans.variable} ${robotoMono.variable} ${notoSansJp.variable} bg-linear-to-tr from-orange-600 to-red-800 antialiased`}
       >

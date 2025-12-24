@@ -1,15 +1,23 @@
-import Link from "next/link";
+import { use } from "react";
+import { setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import CommonPageContainer from "@/components/layout/CommonPageContainer";
 import { Timeline } from "@/components/layout/timeline";
 import { useTranslations } from "next-intl";
 import SectionHeader from "@/components/layout/SectionHeader";
 import { type TimelineItem } from "@/components/layout/timeline";
-export default function PatchPage() {
+
+export default function PatchPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = use(params);
+  setRequestLocale(locale);
+
   const t = useTranslations("PatchNotesPage");
-  const patchNotes: TimelineItem[] = t(
-    "patchNotes"
-  ) as unknown as TimelineItem[];
+  const patchNotes = t.raw("patchNotes") as TimelineItem[];
   return (
     <CommonPageContainer>
       <div className="w-full space-y-8">
