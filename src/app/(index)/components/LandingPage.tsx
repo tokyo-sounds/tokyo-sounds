@@ -1,3 +1,5 @@
+"use client";
+
 /** LandingPage
  *
  * Landing page for Tokyo Sounds
