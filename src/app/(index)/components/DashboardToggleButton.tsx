@@ -5,6 +5,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Eye, EyeClosed } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function DashboardToggleButton({
   dashboardVisible,
@@ -13,6 +14,7 @@ export default function DashboardToggleButton({
   dashboardVisible: boolean;
   setDashboardVisible: (visible: boolean) => void;
 }) {
+  const t = useTranslations("DashboardToggleButton");
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -20,8 +22,10 @@ export default function DashboardToggleButton({
           variant="ghost"
           size="icon"
           onClick={() => setDashboardVisible(!dashboardVisible)}
-          className="fixed top-4 right-4 rounded-full text-white/70 text-shadow-sm hover:bg-black/30 hover:border hover:border-border/50 hover:text-white text-xs font-mono pointer-events-auto z-40"
-          aria-label={dashboardVisible ? "Hide dashboard" : "Show dashboard"}
+          className="rounded-full text-white/70 text-shadow-sm hover:bg-black/30 hover:border hover:border-border/50 hover:text-white text-xs font-mono pointer-events-auto z-40"
+          aria-label={
+            dashboardVisible ? t("hideDashboard") : t("showDashboard")
+          }
         >
           {dashboardVisible ? (
             <Eye className="size-4" />
@@ -31,7 +35,7 @@ export default function DashboardToggleButton({
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        {dashboardVisible ? "UI 非表示" : "UI 表示"}
+        {dashboardVisible ? t("hideUITooltip") : t("showUITooltip")}
       </TooltipContent>
     </Tooltip>
   );

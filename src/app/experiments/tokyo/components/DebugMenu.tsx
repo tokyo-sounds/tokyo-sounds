@@ -22,6 +22,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { CodeXml, Play, Pause, Settings, RotateCcw } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 /** DebugMenu
  *
@@ -88,6 +89,7 @@ export default function DebugMenu({
 }) {
   const { currentTime, setTimeOfDay } = useTimeOfDayStore();
   const timeOptions: TimeOfDay[] = ["morning", "afternoon", "evening"];
+  const t = useTranslations("DebugMenu");
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <Tooltip>
@@ -102,29 +104,29 @@ export default function DebugMenu({
           </SheetTrigger>
         </TooltipTrigger>
         <TooltipContent>
-          <p>メニュー</p>
+          <p>{t("menu")}</p>
         </TooltipContent>
       </Tooltip>
       <SheetContent className="bg-black/70 backdrop-blur-xs px-4 text-white border-none">
         <SheetHeader className="pl-0">
           <SheetTitle className="text-white/70 text-lg font-noto inline-flex items-center gap-2">
-            <Settings className="size-4" /> メニュー
+            <Settings className="size-4" /> {t("menu")}
           </SheetTitle>
         </SheetHeader>
         <Tabs defaultValue="options" className="space-y-2 flex-1">
           <TabsList className="w-full">
             <TabsTrigger value="options" className="inline-flex gap-2 text-sm">
               <Settings className="size-4" />
-              オプション
+              {t("options")}
             </TabsTrigger>
             <TabsTrigger value="console" className="inline-flex gap-2 text-sm">
               <CodeXml className="size-4" />
-              開発者オプション
+              {t("developerOptions")}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="options" className="flex-1 flex flex-col gap-2">
             <div>
-              <DebugMenuLabel>環境設定</DebugMenuLabel>
+              <DebugMenuLabel>{t("environmentSettings")}</DebugMenuLabel>
               <div className="bg-muted/40 text-muted-foreground inline-flex h-9 w-full gap-1 items-center justify-center rounded-lg p-[3px]">
                 {timeOptions.map((time) => (
                   <Button
@@ -142,13 +144,13 @@ export default function DebugMenu({
               </div>
             </div>
             <div className="flex-1">
-              <DebugMenuLabel>AI生成音楽</DebugMenuLabel>
+              <DebugMenuLabel>{t("aiGeneratedMusic")}</DebugMenuLabel>
               {/* District Debug Panel Section */}
               {generativeEnabled && districts.length > 0 ? (
                 <DistrictDebugContent districts={districts} />
               ) : (
                 <div className="w-full h-full flex items-center justify-center text-sm text-center text-muted/50">
-                  未設定またはAI生成音楽が無効です
+                  {t("notConfiguredOrDisabled")}
                 </div>
               )}
             </div>
@@ -158,7 +160,7 @@ export default function DebugMenu({
             className="flex-1 flex flex-col justify-between gap-2"
           >
             <div>
-              <DebugMenuLabel>テレポート</DebugMenuLabel>
+              <DebugMenuLabel>{t("teleport")}</DebugMenuLabel>
               <LocationSearch
                 apiKey={apiKey}
                 onTeleport={onTeleport}
@@ -169,7 +171,7 @@ export default function DebugMenu({
               />
             </div>
             <div className="space-y-1">
-              <DebugMenuLabel>描画設定</DebugMenuLabel>
+              <DebugMenuLabel>{t("renderSettings")}</DebugMenuLabel>
               <div className="grid grid-cols-2 space-y-1 text-xs **:font-mono">
                 <label className="flex items-center gap-2 cursor-pointer px-2">
                   <input
@@ -180,7 +182,7 @@ export default function DebugMenu({
                     }
                     className="size-3"
                   />
-                  <span className="text-muted/50">Meshes</span>
+                  <span className="text-muted/50">{t("meshes")}</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer px-2">
@@ -192,7 +194,7 @@ export default function DebugMenu({
                     }
                     className="size-3"
                   />
-                  <span className="text-muted/50">Wireframe</span>
+                  <span className="text-muted/50">{t("wireframe")}</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer px-2">
@@ -204,7 +206,7 @@ export default function DebugMenu({
                     }
                     className="size-3"
                   />
-                  <span className="text-muted/50">Grids</span>
+                  <span className="text-muted/50">{t("grids")}</span>
                 </label>
 
                 <label className="flex items-center gap-2 cursor-pointer px-2">
@@ -216,29 +218,29 @@ export default function DebugMenu({
                     }
                     className="size-3"
                   />
-                  <span className="text-muted/50">Collision</span>
+                  <span className="text-muted/50">{t("collision")}</span>
                 </label>
               </div>
             </div>
             <div className="flex-1">
-              <DebugMenuLabel>コンソール</DebugMenuLabel>
+              <DebugMenuLabel>{t("console")}</DebugMenuLabel>
               <div className="bg-neutral-950 px-3 py-2 rounded-md *:text-xs *:data-[status-value]:font-mono *:data-[status-value]:text-right *:data-[status-value]:text-accent/70 **:data-[status-label]:text-primary **:data-[status-label]:font-mono">
                 <h4>
-                  状態 <span data-status-label>Status</span>
+                  {t("status")} <span data-status-label>{t("statusLabel")}</span>
                 </h4>
                 <p data-status-value>{status}</p>
                 <h4>
-                  飛行モード <span data-status-label>Flight Mode</span>
+                  {t("flightMode")} <span data-status-label>{t("flightModeLabel")}</span>
                 </h4>
                 <p data-status-value>{movementMode.toUpperCase()}</p>
                 <h4>
-                  カメラ高さ <span data-status-label>Camera Y</span>
+                  {t("cameraHeight")} <span data-status-label>{t("cameraHeightLabel")}</span>
                 </h4>
                 <p data-status-value>{cameraY.toFixed(2)}</p>
                 {generativeEnabled && (
                   <>
                     <h4>
-                      AI生成音楽 <span data-status-label>Lyria</span>
+                      {t("lyria")} <span data-status-label>{t("lyriaLabel")}</span>
                     </h4>
                     <p data-status-value>♪ {lyriaStatus}</p>
                   </>
@@ -246,7 +248,7 @@ export default function DebugMenu({
                 {spatialAudioEnabled && spatialAudioStats.total > 0 && (
                   <>
                     <h4>
-                      空間音響 <span data-status-label>Spatial Audio</span>
+                      {t("spatialAudio")} <span data-status-label>{t("spatialAudioLabel")}</span>
                     </h4>
                     <p data-status-value>
                       {spatialAudioStats.active}/{spatialAudioStats.total}{" "}
@@ -255,15 +257,15 @@ export default function DebugMenu({
                   </>
                 )}
                 <h4>
-                  ピッチ <span data-status-label>Pitch</span>
+                  {t("pitch")} <span data-status-label>{t("pitchLabel")}</span>
                 </h4>
                 <p data-status-value>{pitch.toFixed(2)}°</p>
                 <h4>
-                  ロール <span data-status-label>Roll</span>
+                  {t("roll")} <span data-status-label>{t("rollLabel")}</span>
                 </h4>
                 <p data-status-value>{roll.toFixed(2)}°</p>
                 <h4>
-                  マルチプレイヤー <span data-status-label>Multiplayer</span>
+                  {t("multiplayer")} <span data-status-label>{t("multiplayerLabel")}</span>
                 </h4>
                 <p data-status-value>
                   {multiplayerConnected ? (
@@ -290,13 +292,13 @@ export default function DebugMenu({
                 className="w-full space-x-2 hover:animate-pulse"
               >
                 <Play className="size-4" />
-                デモプレイ
+                {t("demoPlay")}
               </Button>
               <h6 className="text-sm text-muted/40 flex justify-end items-center gap-1">
                 <span className="text-[7pt] font-mono border border-muted/40 rounded px-1.5 py-1">
                   M
                 </span>{" "}
-                ドローンモード
+                {t("droneMode")}
               </h6>
             </div>
           </TabsContent>

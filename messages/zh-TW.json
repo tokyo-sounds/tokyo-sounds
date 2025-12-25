@@ -3,8 +3,23 @@
     "title": "你好，世界！"
   },
   "LandingPage": {
-    "title": "著陸頁",
-    "description": "著陸頁描述"
+    "title": "東京之音",
+    "description": "著陸頁描述",
+    "dialogTitle": "玩家設定",
+    "namePlaceholder": "名稱",
+    "audioSettings": "音訊設定",
+    "enableGenerativeAudio": "啟用AI生成音樂",
+    "enableSpatialAudio": "啟用空間音效",
+    "startButton": "開始",
+    "colors": {
+      "white": "白色",
+      "orange": "橙色",
+      "yellow": "黃色",
+      "green": "綠色",
+      "blue": "藍色",
+      "black": "黑色",
+      "selectColor": "選擇{color}色"
+    }
   },
   "FlightSettingsMenu": {
     "title": "除錯選單",
@@ -223,5 +238,85 @@
   "RegisterPage": {
     "title": "註冊頁面",
     "description": "註冊頁面描述"
+  },
+  "BackToHomeButton": {
+    "buttonText": "首頁",
+    "tooltip": "返回首頁"
+  },
+  "Navigation": {
+    "openMenu": "開啟導航選單",
+    "closeMenu": "關閉導航選單",
+    "links": {
+      "home": "首頁",
+      "about": "關於",
+      "patch": "開發歷史",
+      "chat": "幫助"
+    }
+  },
+  "DashboardToggleButton": {
+    "hideDashboard": "隱藏儀表板",
+    "showDashboard": "顯示儀表板",
+    "hideUITooltip": "隱藏UI",
+    "showUITooltip": "顯示UI"
+  },
+  "DebugMenu": {
+    "menu": "選單",
+    "options": "選項",
+    "developerOptions": "開發者選項",
+    "environmentSettings": "環境設定",
+    "environmentSettingsDescription": "根據時間選擇不同的環境設定",
+    "audioVolumeSettings": "音量設定",
+    "audioVolumeSettingsDescription": "調整音量",
+    "regionParameters": "區域參數",
+    "regionParametersDescription": "區域參數描述",
+    "aiGeneratedMusic": "AI生成音樂",
+    "notConfiguredOrDisabled": "未設定或AI生成音樂已停用",
+    "teleport": "傳送",
+    "renderSettings": "渲染設定",
+    "meshes": "網格",
+    "wireframe": "線框",
+    "grids": "網格",
+    "collision": "碰撞",
+    "console": "控制台",
+    "status": "狀態",
+    "statusLabel": "Status",
+    "flightMode": "飛行模式",
+    "flightModeLabel": "Flight Mode",
+    "cameraHeight": "相機高度",
+    "cameraHeightLabel": "Camera Y",
+    "lyria": "AI生成音樂",
+    "lyriaLabel": "Lyria",
+    "spatialAudio": "空間音效",
+    "spatialAudioLabel": "Spatial Audio",
+    "pitch": "俯仰角",
+    "pitchLabel": "Pitch",
+    "roll": "滾轉角",
+    "rollLabel": "Roll",
+    "multiplayer": "多人遊戲",
+    "multiplayerLabel": "Multiplayer",
+    "demoPlay": "演示播放",
+    "droneMode": "無人機模式"
+  },
+  "OperationManual": {
+    "title": "操作指南",
+    "movement": "移動",
+    "pause": "暫停",
+    "accelerate": "加速",
+    "toggleDisplay": "切換顯示",
+    "menu": "選單"
+  },
+  "TimeOfDayEffectsMenu": {
+    "morning": "早晨",
+    "afternoon": "下午",
+    "evening": "傍晚"
+  },
+  "LocationSearch": {
+    "placeholder": "請輸入東京的地名以進行傳送，祝您旅途愉快！"
+  },
+  "AudioVolumeControls": {
+    "ambientAudio": "常設環境音",
+    "spatialAudio": "地點環境音",
+    "lyriaAudio": "AI生成音樂",
+    "flyingAudio": "飛行音效"
   }
 }

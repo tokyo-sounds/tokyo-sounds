@@ -1,7 +1,6 @@
 "use client";
 
-import { useParams } from "next/navigation";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -9,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Globe, CheckIcon } from "lucide-react";
+import { Languages, CheckIcon } from "lucide-react";
 import { routing } from "@/i18n/routing";
 
 const languages = [
@@ -21,31 +20,22 @@ const languages = [
 
 export default function LanguageSwitcher() {
   const params = useParams();
-  const pathname = usePathname();
-  const router = useRouter();
+  const nextPathname = usePathname(); // Actual browser path with locale, e.g., "/zh-TW/about"
+  const nextRouter = useRouter();
   const currentLocale = (params?.locale as string) || routing.defaultLocale;
 
-  // Ensure pathname is clean (without locale prefix)
-  // usePathname from next-intl should return path without locale, but we'll clean it anyway
-  const cleanPathname = (() => {
-    let path = pathname || "/";
-    // Remove any locale prefix if present
-    for (const locale of routing.locales) {
-      const localePrefix = `/${locale}`;
-      if (path === localePrefix || path.startsWith(`${localePrefix}/`)) {
-        path = path.replace(localePrefix, "") || "/";
-        break;
-      }
-    }
-    return path;
-  })();
-
   const handleLanguageChange = (locale: string) => {
-    // Construct the new path with the target locale
-    // cleanPathname should be like "/about" or "/", not "/zh-TW/about"
+    // Remove current locale from path and add new locale
+    // Handle both root path (e.g., "/zh-TW") and nested paths (e.g., "/zh-TW/about")
+    const pathWithoutLocale =
+      nextPathname.replace(new RegExp(`^/${currentLocale}(/|$)`), "/") || "/";
+
     const newPath =
-      cleanPathname === "/" ? `/${locale}` : `/${locale}${cleanPathname}`;
-    router.replace(newPath);
+      pathWithoutLocale === "/"
+        ? `/${locale}`
+        : `/${locale}${pathWithoutLocale}`;
+
+    nextRouter.replace(newPath);
   };
 
   return (
@@ -53,11 +43,11 @@ export default function LanguageSwitcher() {
       <DropdownMenuTrigger asChild>
         <Button
           size="icon"
-          variant="outline"
-          className="group flight-dashboard-card size-10 md:size-12 rounded-full shadow-lg hover:scale-110 hover:shadow-xl transition-transform will-change-transform"
+          variant="ghost"
+          className="group rounded-full text-white/70 text-shadow-sm hover:bg-black/30 hover:border hover:border-border/50 hover:text-white text-xs font-mono pointer-events-auto z-40 will-change-transform"
           aria-label="Switch language"
         >
-          <Globe className="size-5" />
+          <Languages className="size-4" />
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-[10rem]">

@@ -37,6 +37,7 @@ import {
   type DistrictDebugInfo,
 } from "@/components/city/DistrictLyriaAudio";
 import { DistrictTracker } from "@/components/city/DistrictTracker";
+import LocaleSwitcher from "@/components/widget/LanguageSwitcher";
 // import { TokyoSpatialAudio } from "@/components/city/TokyoSpatialAudio";
 // Lazy Loading for TokyoSpatialAudio component
 const TokyoSpatialAudio = dynamic(
@@ -567,6 +568,7 @@ export default function TokyoPage() {
             dashboardVisible={dashboardVisible}
             setDashboardVisible={setDashboardVisible}
           />
+          <LocaleSwitcher />
         </div>
 
         <DistrictIndicator

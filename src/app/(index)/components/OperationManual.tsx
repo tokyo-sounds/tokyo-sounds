@@ -10,6 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function OperationManual({
   operationManualOpen,
@@ -18,11 +19,12 @@ export default function OperationManual({
   operationManualOpen: boolean;
   setOperationManualOpen: (open: boolean) => void;
 }) {
+  const t = useTranslations("OperationManual");
   return (
     <AccordionItem value="manual" className="hidden md:block border-none">
       <AccordionTrigger className="w-38 py-2 items-center text-muted justify-between hover:no-underline cursor-pointer">
         <Kbd className="text-muted bg-transparent border font-mono">H</Kbd>
-        <span>操作ガイド</span>
+        <span>{t("title")}</span>
       </AccordionTrigger>
       <AccordionContent className="pt-2 pb-3 flex flex-col gap-2">
         <div className="space-y-2">
@@ -48,27 +50,27 @@ export default function OperationManual({
               </Kbd>
             </div>
           </div>
-            <p className="text-muted text-right">移動</p>
+            <p className="text-muted text-right">{t("movement")}</p>
         </div>
         <div className="flex justify-between">
           <Kbd className="text-muted bg-transparent border font-mono">
             SPACE
           </Kbd>
-          <span className="text-muted">一時停止</span>
+          <span className="text-muted">{t("pause")}</span>
         </div>
         <div className="flex justify-between">
           <Kbd className="text-muted bg-transparent border font-mono">
             SHIFT
           </Kbd>
-          <span className="text-muted">加速</span>
+          <span className="text-muted">{t("accelerate")}</span>
         </div>
         <div className="flex justify-between">
           <Kbd className="text-muted bg-transparent border font-mono">TAB</Kbd>
-          <span className="text-muted">表示切替</span>
+          <span className="text-muted">{t("toggleDisplay")}</span>
         </div>
         <div className="flex justify-between">
           <Kbd className="text-muted bg-transparent border font-mono">ESC</Kbd>
-          <span className="text-muted">メニュー</span>
+          <span className="text-muted">{t("menu")}</span>
         </div>
       </AccordionContent>
     </AccordionItem>

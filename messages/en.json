@@ -3,8 +3,23 @@
     "title": "Hello world!"
   },
   "LandingPage": {
-    "title": "Landing Page",
-    "description": "Landing Page Description"
+    "title": "Tokyo Sounds",
+    "description": "Landing Page Description",
+    "dialogTitle": "Player Settings",
+    "namePlaceholder": "Name",
+    "audioSettings": "Audio Settings",
+    "enableGenerativeAudio": "Enable AI-generated music",
+    "enableSpatialAudio": "Enable spatial audio",
+    "startButton": "Start",
+    "colors": {
+      "white": "White",
+      "orange": "Orange",
+      "yellow": "Yellow",
+      "green": "Green",
+      "blue": "Blue",
+      "black": "Black",
+      "selectColor": "Select {color} color"
+    }
   },
   "FlightSettingsMenu": {
     "title": "Debug Menu",
@@ -223,5 +238,85 @@
   "RegisterPage": {
     "title": "Register Page",
     "description": "Register Page Description"
+  },
+  "BackToHomeButton": {
+    "buttonText": "Home",
+    "tooltip": "Back to Home"
+  },
+  "Navigation": {
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
+    "links": {
+      "home": "Home",
+      "about": "About",
+      "patch": "Past Versions",
+      "chat": "Help"
+    }
+  },
+  "DashboardToggleButton": {
+    "hideDashboard": "Hide dashboard",
+    "showDashboard": "Show dashboard",
+    "hideUITooltip": "Hide UI",
+    "showUITooltip": "Show UI"
+  },
+  "DebugMenu": {
+    "menu": "Menu",
+    "options": "Options",
+    "developerOptions": "Developer Options",
+    "environmentSettings": "Environment Settings",
+    "environmentSettingsDescription": "Select different environment settings based on time",
+    "audioVolumeSettings": "Audio Volume Settings",
+    "audioVolumeSettingsDescription": "Adjust audio volume",
+    "regionParameters": "Region Parameters",
+    "regionParametersDescription": "Region parameters description",
+    "aiGeneratedMusic": "AI Generated Music",
+    "notConfiguredOrDisabled": "Not configured or AI-generated music is disabled",
+    "teleport": "Teleport",
+    "renderSettings": "Render Settings",
+    "meshes": "Meshes",
+    "wireframe": "Wireframe",
+    "grids": "Grids",
+    "collision": "Collision",
+    "console": "Console",
+    "status": "Status",
+    "statusLabel": "Status",
+    "flightMode": "Flight Mode",
+    "flightModeLabel": "Flight Mode",
+    "cameraHeight": "Camera Height",
+    "cameraHeightLabel": "Camera Y",
+    "lyria": "Lyria",
+    "lyriaLabel": "Lyria",
+    "spatialAudio": "Spatial Audio",
+    "spatialAudioLabel": "Spatial Audio",
+    "pitch": "Pitch",
+    "pitchLabel": "Pitch",
+    "roll": "Roll",
+    "rollLabel": "Roll",
+    "multiplayer": "Multiplayer",
+    "multiplayerLabel": "Multiplayer",
+    "demoPlay": "Demo Play",
+    "droneMode": "Drone Mode"
+  },
+  "OperationManual": {
+    "title": "Operation Guide",
+    "movement": "Movement",
+    "pause": "Pause",
+    "accelerate": "Accelerate",
+    "toggleDisplay": "Toggle Display",
+    "menu": "Menu"
+  },
+  "TimeOfDayEffectsMenu": {
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening"
+  },
+  "LocationSearch": {
+    "placeholder": "Enter a Tokyo location name to teleport, have a great journey!"
+  },
+  "AudioVolumeControls": {
+    "ambientAudio": "Ambient Audio",
+    "spatialAudio": "Spatial Audio",
+    "lyriaAudio": "Lyria Audio",
+    "flyingAudio": "Flying Audio"
   }
 }

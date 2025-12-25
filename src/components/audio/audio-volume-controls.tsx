@@ -4,8 +4,9 @@ import React from "react";
 import { useVolume } from "@/app/(index)/page"; // Import from the main page
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-
+import { useTranslations } from "next-intl";
 export default function AudioVolumeControls() {
+  const t = useTranslations("AudioVolumeControls");
   const {
     spatialVolume,
     lyriaVolume,
@@ -41,7 +42,7 @@ export default function AudioVolumeControls() {
             htmlFor="spatial-volume"
             className="text-xs text-primary-foreground/50 font-light tracking-wide"
           >
-            場所環境音
+            {t("spatialAudio")}
           </Label>
           <span className="text-xs text-primary-foreground/50 font-light tracking-wide w-10 text-right">
             {Math.round(spatialVolume * 100)}%
@@ -64,7 +65,7 @@ export default function AudioVolumeControls() {
             htmlFor="ambient-volume"
             className="text-xs text-primary-foreground/50 font-light tracking-wide"
           >
-            常設環境音
+            {t("ambientAudio")}
           </Label>
           <span className="text-xs text-primary-foreground/50 font-light tracking-wide w-10 text-right">
             {Math.round(ambientVolume * 100)}%
@@ -87,7 +88,7 @@ export default function AudioVolumeControls() {
             htmlFor="lyria-volume"
             className="text-xs text-primary-foreground/50 font-light tracking-wide"
           >
-            AI生成音楽
+            {t("lyriaAudio")}
           </Label>
           <span className="text-xs text-primary-foreground/50 font-light tracking-wide w-10 text-right">
             {Math.round(lyriaVolume * 100)}%
@@ -110,7 +111,7 @@ export default function AudioVolumeControls() {
             htmlFor="flying-volume"
             className="text-xs text-primary-foreground/50 font-light tracking-wide"
           >
-            飛行音
+            {t("flyingAudio")}
           </Label>
           <span className="text-xs text-primary-foreground/50 font-light tracking-wide w-10 text-right">
             {Math.round(flyingVolume * 100)}%

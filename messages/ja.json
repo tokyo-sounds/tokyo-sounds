@@ -3,8 +3,23 @@
     "title": "こんにちは、世界！"
   },
   "LandingPage": {
-    "title": "Landing Page",
-    "description": "Landing Page Description"
+    "title": "東京の音",
+    "description": "Landing Page Description",
+    "dialogTitle": "プレイヤー設定",
+    "namePlaceholder": "名前",
+    "audioSettings": "音声設定",
+    "enableGenerativeAudio": "AI生成音楽を有効にする",
+    "enableSpatialAudio": "空間音響を有効にする",
+    "startButton": "スタート",
+    "colors": {
+      "white": "白",
+      "orange": "オレンジ",
+      "yellow": "黄色",
+      "green": "緑",
+      "blue": "青",
+      "black": "黒",
+      "selectColor": "{color}色を選択"
+    }
   },
   "FlightSettingsMenu": {
     "title": "Debug Menu",
@@ -223,5 +238,85 @@
   "RegisterPage": {
     "title": "Register Page",
     "description": "Register Page Description"
+  },
+  "BackToHomeButton": {
+    "buttonText": "ホーム",
+    "tooltip": "ホームに戻る"
+  },
+  "Navigation": {
+    "openMenu": "ナビゲーションメニューを開く",
+    "closeMenu": "ナビゲーションメニューを閉じる",
+    "links": {
+      "home": "ホーム",
+      "about": "コンセプト",
+      "patch": "開発履歴",
+      "chat": "ヘルプ"
+    }
+  },
+  "DashboardToggleButton": {
+    "hideDashboard": "ダッシュボードを非表示",
+    "showDashboard": "ダッシュボードを表示",
+    "hideUITooltip": "UI 非表示",
+    "showUITooltip": "UI 表示"
+  },
+  "DebugMenu": {
+    "menu": "メニュー",
+    "options": "オプション",
+    "developerOptions": "開発者オプション",
+    "environmentSettings": "環境設定",
+    "environmentSettingsDescription": "時間帯の選択によって、AI生成音楽も変化します。",
+    "audioVolumeSettings": "音量設定",
+    "audioVolumeSettingsDescription": "調整音量",
+    "regionParameters": "地域パラメーター",
+    "regionParametersDescription": "現在地の地域情報解析結果。",
+    "aiGeneratedMusic": "AI生成音楽",
+    "notConfiguredOrDisabled": "未設定またはAI生成音楽が無効です",
+    "teleport": "テレポート",
+    "renderSettings": "描画設定",
+    "meshes": "Meshes",
+    "wireframe": "Wireframe",
+    "grids": "Grids",
+    "collision": "Collision",
+    "console": "コンソール",
+    "status": "状態",
+    "statusLabel": "Status",
+    "flightMode": "飛行モード",
+    "flightModeLabel": "Flight Mode",
+    "cameraHeight": "カメラ高さ",
+    "cameraHeightLabel": "Camera Y",
+    "lyria": "AI生成音楽",
+    "lyriaLabel": "Lyria",
+    "spatialAudio": "空間音響",
+    "spatialAudioLabel": "Spatial Audio",
+    "pitch": "ピッチ",
+    "pitchLabel": "Pitch",
+    "roll": "ロール",
+    "rollLabel": "Roll",
+    "multiplayer": "マルチプレイヤー",
+    "multiplayerLabel": "Multiplayer",
+    "demoPlay": "デモプレイ",
+    "droneMode": "ドローンモード"
+  },
+  "OperationManual": {
+    "title": "操作ガイド",
+    "movement": "移動",
+    "pause": "一時停止",
+    "accelerate": "加速",
+    "toggleDisplay": "表示切替",
+    "menu": "メニュー"
+  },
+  "TimeOfDayEffectsMenu": {
+    "morning": "朝",
+    "afternoon": "昼",
+    "evening": "夕"
+  },
+  "LocationSearch": {
+    "placeholder": "東京の地名を入力してテレポート、いってらっしゃい！"
+  },
+  "AudioVolumeControls": {
+    "ambientAudio": "常設環境音",
+    "spatialAudio": "場所環境音",
+    "lyriaAudio": "AI生成音楽",
+    "flyingAudio": "飛行音效"
   }
 }

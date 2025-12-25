@@ -6,8 +6,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SendHorizontal } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 export default function BackToHomeButton() {
+  const t = useTranslations("BackToHomeButton");
+
   return (
     <Tooltip>
       <TooltipTrigger>
@@ -19,12 +22,12 @@ export default function BackToHomeButton() {
         >
           <Link href="/">
             <SendHorizontal className="size-4 mr-2 group-hover:translate-x-1 transition-all" />
-            <span>ホーム</span>
+            <span>{t("buttonText")}</span>
           </Link>
         </Button>
       </TooltipTrigger>
       <TooltipContent>
-        <p>ホームに戻る</p>
+        <p>{t("tooltip")}</p>
       </TooltipContent>
     </Tooltip>
   );
