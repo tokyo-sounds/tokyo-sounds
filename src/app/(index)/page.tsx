@@ -24,7 +24,9 @@ import { TOKYO_CENTER, type District } from "@/config/tokyo-config";
 import { DebugOptions } from "./type/FlightPageTypes";
 // Components
 import DashboardToggleButton from "./components/DashboardToggleButton";
-import LandingPage from "./components/LandingPage";
+const LandingPage = dynamic(() => import("./components/LandingPage"), {
+  ssr: false,
+});
 import DemoTourGuide from "./components/DemoTourGuide";
 import FlightDashboard from "./components/FlightDashboard";
 import FlightBoundsHelper from "./components/FlightBoundsHelper";
