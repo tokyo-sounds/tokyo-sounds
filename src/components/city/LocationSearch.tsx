@@ -10,10 +10,9 @@ import { Send } from "lucide-react";
 import {
   InputGroup,
   InputGroupInput,
-  InputGroupAddon,
   InputGroupButton,
 } from "@/components/ui/input-group";
-import { Button } from "@/components/ui/button";
+import { useTranslations } from "next-intl";
 
 interface LocationSearchProps {
   apiKey: string;
@@ -44,7 +43,7 @@ export function LocationSearch({
   const [lastResult, setLastResult] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-
+  const t = useTranslations("LocationSearch");
   const geocodeAddress = useCallback(
     async (address: string): Promise<GeocodingResult | null> => {
       if (!address.trim()) return null;
@@ -111,7 +110,7 @@ export function LocationSearch({
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="東京の地名を入力してテレポート、いってらっしゃい！"
+            placeholder={t("placeholder")}
             disabled={isLoading}
             autoComplete="off"
             data-1p-ignore="true"

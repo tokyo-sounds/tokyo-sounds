@@ -1,27 +1,40 @@
+"use client";
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ArticleContainer from "@/components/layout/ArticleContainer";
-import designConcept from "@/docs/about-design-concept.json";
-import techStack from "@/docs/about-tech-stack.json";
-import memberList from "@/docs/about-member-list.json";
-const tabs = [
-  {
-    label: "デザイン",
-    value: "design",
-    articles: designConcept,
-  },
-  {
-    label: "技術",
-    value: "tech",
-    articles: techStack,
-  },
-  {
-    label: "メンバー",
-    value: "member",
-    articles: memberList,
-  },
-];
+import { useTranslations } from "next-intl";
 
 export default function AboutContainer() {
+  const t = useTranslations("AboutPage");
+
+  const tabs = [
+    {
+      label: t("tabs.design"),
+      value: "design",
+      articles: t.raw("designConcept") as Array<{
+        title: string;
+        subtitle: string;
+        content: string;
+      }>,
+    },
+    {
+      label: t("tabs.tech"),
+      value: "tech",
+      articles: t.raw("techStack") as Array<{
+        title: string;
+        content: string;
+      }>,
+    },
+    {
+      label: t("tabs.member"),
+      value: "member",
+      articles: t.raw("memberList") as Array<{
+        title: string;
+        content: string;
+      }>,
+    },
+  ];
+
   return (
     <section className="w-full h-full flex flex-col items-center justify-center gap-8">
       <Tabs defaultValue="design" className="w-full h-full">
