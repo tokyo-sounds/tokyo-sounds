@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -12,12 +12,26 @@ import { navigationLinks } from "@/lib/constraint";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { MenuIcon, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
+import { useTranslations } from "next-intl";
 
 export default function Nav() {
   const [isOpen, setIsOpen] = useState(false);
   const isMobile = useIsMobile();
   const speedDialRef = useRef<HTMLDivElement>(null);
   const mainButtonRef = useRef<HTMLButtonElement>(null);
+  const t = useTranslations("Navigation");
+
+  // Helper function to map navigation link slugs to translation keys
+  const getLinkLabel = (slug: string): string => {
+    const keyMap: Record<string, string> = {
+      "": "home",
+      about: "about",
+      patch: "patch",
+      chat: "chat",
+    };
+    const translationKey = keyMap[slug] || "home";
+    return t(`links.${translationKey}`);
+  };
 
   // Close on Escape key
   useEffect(() => {
@@ -166,17 +180,21 @@ export default function Nav() {
                         asChild
                         size="icon"
                         className="group size-12 rounded-full flight-dashboard-card shadow-lg hover:scale-110 hover:shadow-xl transition-transform will-change-transform"
-                        aria-label={link.label.ja}
+                        aria-label={getLinkLabel(link.slug)}
                         role="menuitem"
                         onClick={handleItemClick}
                       >
                         <Link href={`/${link.slug}`}>
                           <link.icon className="size-5" />
-                          <span className="sr-only">{link.label.ja}</span>
+                          <span className="sr-only">
+                            {getLinkLabel(link.slug)}
+                          </span>
                         </Link>
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="left">{link.label.ja}</TooltipContent>
+                    <TooltipContent side="left">
+                      {getLinkLabel(link.slug)}
+                    </TooltipContent>
                   </Tooltip>
                 </motion.div>
               );
@@ -196,7 +214,7 @@ export default function Nav() {
         aria-haspopup="menu"
         aria-expanded={isOpen}
         aria-controls="speed-dial-menu"
-        aria-label={isOpen ? "Close navigation menu" : "Open navigation menu"}
+        aria-label={isOpen ? t("closeMenu") : t("openMenu")}
       >
         <AnimatePresence mode="wait" initial={false}>
           {isOpen ? (

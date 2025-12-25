@@ -2,6 +2,7 @@ import { cn } from "@/lib/utils";
 import Nav from "@/components/layout/nav";
 import Footer from "@/components/layout/footer";
 import BackToHomeButton from "@/components/widget/BackToHomeButton";
+import LanguageSwitcher from "@/components/widget/LanguageSwitcher";
 
 export default function CommonPageContainer({
   children,
@@ -31,6 +32,9 @@ export default function CommonPageContainer({
       <h6 className="hidden md:block fixed top-1/2 -translate-y-1/2 right-4 text-lg font-serif font-light text-primary-foreground tracking-[1rem] pointer-events-none select-none [writing-mode:vertical-rl]">
         東京の音
       </h6>
+      <div className="fixed top-4 right-4 z-50">
+        <LanguageSwitcher />
+      </div>
       <BackToHomeButton />
       <Footer />
     </div>

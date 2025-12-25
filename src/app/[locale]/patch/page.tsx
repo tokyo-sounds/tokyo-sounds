@@ -1,18 +1,30 @@
-import Link from "next/link";
+import { use } from "react";
+import { setRequestLocale } from "next-intl/server";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import CommonPageContainer from "@/components/layout/CommonPageContainer";
 import { Timeline } from "@/components/layout/timeline";
-import { patchNotes } from "@/docs/patchnotes";
+import { useTranslations } from "next-intl";
 import SectionHeader from "@/components/layout/SectionHeader";
-import patchSectionHeader from "@/docs/patch-section-header.json";
-export default function PatchPage() {
+import { type TimelineItem } from "@/components/layout/timeline";
+
+export default function PatchPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = use(params);
+  setRequestLocale(locale);
+
+  const t = useTranslations("PatchNotesPage");
+  const patchNotes = t.raw("patchNotes") as TimelineItem[];
   return (
     <CommonPageContainer>
       <div className="w-full space-y-8">
         <SectionHeader
-          pageTitle={patchSectionHeader.pageTitle}
-          title={patchSectionHeader.title}
-          description={patchSectionHeader.description}
+          pageTitle={t("pageTitle")}
+          title={t("title")}
+          description={t("description")}
         />
         <div className="w-full space-y-4">
           <div className="w-full flex items-center justify-center gap-2">

@@ -1,0 +1,322 @@
+{
+  "HomePage": {
+    "title": "こんにちは、世界！"
+  },
+  "LandingPage": {
+    "title": "東京の音",
+    "description": "Landing Page Description",
+    "dialogTitle": "プレイヤー設定",
+    "namePlaceholder": "名前",
+    "audioSettings": "音声設定",
+    "enableGenerativeAudio": "AI生成音楽を有効にする",
+    "enableSpatialAudio": "空間音響を有効にする",
+    "startButton": "スタート",
+    "colors": {
+      "white": "白",
+      "orange": "オレンジ",
+      "yellow": "黄色",
+      "green": "緑",
+      "blue": "青",
+      "black": "黒",
+      "selectColor": "{color}色を選択"
+    }
+  },
+  "FlightSettingsMenu": {
+    "title": "Debug Menu",
+    "description": "Debug Menu Description"
+  },
+  "FlightDashboard": {
+    "title": "Flight Dashboard",
+    "description": "Flight Dashboard Description"
+  },
+  "AboutPage": {
+    "pageTitle": "TOKYOSOUNDS",
+    "title": "東京の日常音を集めたASMRサイト",
+    "description": "今回私たちが注目したのは、「東京の音の魅力」です。観光サイトは数多くありますが、ほとんどが視覚的な情報で、「音」そのものに着目したサービスはほとんどありません。しかし、東京には、電車のブレーキ音、踏切、アナウンス、商店街の声など、その街らしさを感じられる音が多く存在します。 そこで私たちは、東京に住む人や観光で訪れる人が、音を通して街を体験できるサービスを作ろうと考えました。 コンセプトは 『音で巡る東京』 です。東京の街を目ではなく耳で旅するという新しい体験を提供します。サイトでは、東京の日常にある生活音や環境音を収録し、それらを3Dデザインの街並みと組み合わせて より直感的に楽しめるようにしています。これにより、東京の雰囲気を気軽に感じたい人、観光前に街のイメージを知りたい人 ASMR や環境音が好きな人など、幅広いユーザーが利用できるサービスを目指しました。",
+    "tabs": {
+      "design": "デザイン",
+      "tech": "技術",
+      "member": "メンバー"
+    },
+    "designConcept": [
+      {
+        "title": "視覚イメージ",
+        "subtitle": "紙飛行機が紡ぐ自由な旅",
+        "content": "『音で巡る東京』というコンセプトを表現するため、「紙飛行機」を主な視覚イメージとして採用いたしました。ユーザーは東京の空を自由に舞う紙飛行機となり、自由で軽やか、そして心地よい感覚を体験していただけます。"
+      },
+      {
+        "title": "色彩設計",
+        "subtitle": "温かみのある色彩が奏でる東京の物語",
+        "content": "色彩においては、「オレンジ」と「イエロー」を主なトーンとして用いています。これらは暖色系であり、温かみと安らぎ、そして心地よさを感じていただけると同時に、東京の活力と情熱を象徴しています。"
+      },
+      {
+        "title": "ユーザー体験",
+        "subtitle": "没入感のある探索体験",
+        "content": "ユーザー体験の面では、「飛翔」と「3D街景」を核となる要素として、ユーザーが東京の街並みや路地裏を自由に探索できるようにすることで、あたかも実際にその場にいるかのような、臨場感あふれる体験を実現しています。"
+      }
+    ],
+    "techStack": [
+      {
+        "title": "フレームワーク",
+        "content": "本プロジェクトの全体的なアプリケーションフレームワークとして、Next.js 16を採用しています。これにより、サーバーサイドレンダリングと静的サイト生成が可能となり、高速な表示とSEO対策を実現しています。また、App Router機能を活用し、柔軟なページ遷移を実装しています。"
+      },
+      {
+        "title": "フロントエンド開発",
+        "content": "フロントエンドUIは主にShadcn UIコンポーネントライブラリをベースに構築しており、統一感のあるデザインと高いアクセシビリティを確保しています。さらに、アニメーション表現にはMotion（Framer Motion）を利用し、ユーザーインタラクション時の滑らかな動きや遷移効果を実現しています。"
+      },
+      {
+        "title": "3D都市ビジュアライゼーション",
+        "content": "3D都市景観はGoogle Maps 3D Tiles APIを統合し、Three.jsを用いて高精細な都市の立体地図を再現しています。都市の建物や地形の表現に加え、React Three Fiberにより空や環境光、マテリアル設定などの3D空間効果も実装しています。ユーザーは直感的な操作で仮想の東京上空を自由に移動できます。"
+      },
+      {
+        "title": "音声制御",
+        "content": "環境音の再生や制御にはTone.jsを採用し、ユーザーの現在位置と各POI（ポイント・オブ・インタレスト）の距離に応じて、音量やステレオパンニング（左右の聞こえ方）をリアルタイムで動的に調整します。また、AI音声のリアルタイム生成にはGoogle Gemini Lyria Realtime APIを連携し、臨場感のある音響体験を提供しています。"
+      },
+      {
+        "title": "AI音楽生成",
+        "content": "ユーザーの現在地情報や周辺のロケーション属性をリアルタイムで収集し、それらをプロンプトとしてGemini Lyria Realtime APIへ送信することで、そのエリアの雰囲気や特徴に合ったAI生成音楽を即時に生成・ストリーミング再生しています。各エリアごとの個別プロンプト設計も実施しています。"
+      },
+      {
+        "title": "AIチャットボット",
+        "content": "Gemini 2.5 Pro と Vercel AI SDKを連携し、ユーザーの質問に対して回答を提供しています。また、Google Search APIを活用し、ユーザーの質問に対して詳細な回答を提供しています。"
+      }
+    ],
+    "memberList": [
+      {
+        "title": "リュウ　チャーウェイ",
+        "content": "チームリーダーとして、プロジェクト管理、UIデザイン、フロントエンド開発、そしてAIチャットボットの開発を担当しました。全体的な方針づくりや進行管理も行いました。"
+      },
+      {
+        "title": "ナカガワ　ハンター",
+        "content": "主にWebサイト全体の実装を担当しました。AIによる音楽生成やサウンド制御、Google Maps 3D Tiles API の統合など、技術面の多くを手掛けました。"
+      },
+      {
+        "title": "ゼブ　カーン",
+        "content": "v1.0 の主要開発者です。3Dシーンの構築やThree.jsを用いた実装、Web上で動く3D空間の表現を主に担当しています。"
+      },
+      {
+        "title": "鍾　承翰",
+        "content": "プロジェクトで使用する3Dモデルの制作を担当しました。"
+      },
+      {
+        "title": "有園　柊哉",
+        "content": "プレゼンテーションで発表を担当し、さらにTシャツ制作のサポートも行いました。"
+      },
+      {
+        "title": "李　澤彬",
+        "content": "Tシャツのデザインを担当しました。"
+      },
+      {
+        "title": "李　簡行",
+        "content": "収録した環境音の整理を担当しました。"
+      },
+      {
+        "title": "李　森",
+        "content": ""
+      }
+    ]
+  },
+  "PatchNotesPage": {
+    "pageTitle": "開発履歴",
+    "title": "進化の足あと TOKYOSOUNDS開発物語",
+    "description": "TOKYOSOUNDS はどんな風に進化してきた？ここでは、ひとつひとつのアップデートに込められた工夫やストーリー、ユニークな新機能まで、開発の舞台裏をすべて大公開！過去・現在・未来の足あとを、ぜひ一緒に旅してみてください。",
+    "patchNotes": [
+      {
+        "id": "v0.0.1",
+        "date": "2025-09-22",
+        "title": "Version 0.0.1 - 最初の一歩",
+        "description": "✨Tokyo Soundsプロジェクトが始動！3D都市の可視化に着手しました。夢の旅路がここからスタートします！"
+      },
+      {
+        "id": "v1.0.0",
+        "date": "2025-09-29",
+        "title": "Version 1.0.0 - 3D都市が誕生！",
+        "description": "🏙️Three.jsで作られたローポリゴンな3D都市が完成しました。シンプルだけど可愛い、あなただけの東京がここにあります！"
+      },
+      {
+        "id": "v1.1.0",
+        "date": "2025-10-07",
+        "title": "Version 1.1.0 - 複数のシーンが登場",
+        "description": "🎬複数のシーンを追加し、お気に入りのシーンを選べるようになりました。いろんな風景を楽しもう！"
+      },
+      {
+        "id": "v1.2.0",
+        "date": "2025-10-07",
+        "title": "Version 1.2.0 - カメラが自由自在に",
+        "description": "🎥カメラ操作の問題を修正！マウスでドラッグするだけで、好きな角度から都市を眺められます。"
+      },
+      {
+        "id": "v1.3.0",
+        "date": "2025-10-10",
+        "title": "Version 1.3.0 - 音響システム登場",
+        "description": "🎵Tone.jsを使った新しい音響システムを導入しました。より豊かで美しい音の世界が広がります！"
+      },
+      {
+        "id": "v1.3.1",
+        "date": "2025-10-15",
+        "title": "Version 1.3.1 - 立体音響でリアルに",
+        "description": "👂位置と距離に応じて音量とステレオパンニングが自動調整されるように！まるで実際にその場所にいるような臨場感を体験できます！"
+      },
+      {
+        "id": "v1.3.2",
+        "date": "2025-10-16",
+        "title": "Version 1.3.2 - 音声コントロール追加",
+        "description": "🎛️音声の一時停止と再生を自由にコントロールできるようになりました。自分のペースで音楽を楽しもう！"
+      },
+      {
+        "id": "v1.4",
+        "date": "2025-10-18",
+        "title": "Version 1.4 - クイズゲーム登場！",
+        "description": "🎮クイズゲームシステムを追加しました。エリアに関する質問に答えてポイントを獲得し、次のステージに進もう！"
+      },
+      {
+        "id": "v2.0",
+        "date": "2025-11-26",
+        "title": "Version 2.0 - AIが音楽を生み出す",
+        "description": "🎹超大型アップデート！Google Lyria AIを使った生成音響システムが登場！現在地に基づいて、AIがあなただけの音楽を創り出します（オープンソースプロジェクト Space DJ を参考にしました）！"
+      },
+      {
+        "id": "v2.1",
+        "date": "2025-11-28",
+        "title": "Version 2.1 - 空を飛ぼう！",
+        "description": "✈️飛行シミュレーションシステムを追加しました。都市の上空を自由に飛び回り、鳥の目線で東京を楽しもう！"
+      },
+      {
+        "id": "v3.0",
+        "date": "2025-12-4",
+        "title": "Version 3.0 - 本格的な3D東京登場",
+        "description": "🗼Google Tiles APIを使った、より詳細でリアルな3D東京が完成しました。まるで本当の東京にいるような錯覚に陥ります。"
+      },
+      {
+        "id": "v3.0.1",
+        "date": "2025-12-7",
+        "title": "Version 3.0.1 - セキュリティ強化",
+        "description": "🔒セキュリティ脆弱性 'React2Shell'(CVE-2025-55182) に対応するため、Next.jsを16.0.7、Reactを19.2.1にアップグレードしました。安全に楽しめます。"
+      },
+      {
+        "id": "v3.1",
+        "date": "2025-12-8",
+        "title": "Version 3.1 - 昼夜の移り変わり",
+        "description": "🌅昼夜システムを追加しました。ユーザーの選択に応じて都市の外観が変化します。朝の爽やかな風景から、夜の幻想的な光まで、時間と共に変化する東京を体験しよう！"
+      },
+      {
+        "id": "v3.2",
+        "date": "2025-12-10",
+        "title": "Version 3.2 - 瞬間移動が可能に",
+        "description": "🚀ロケーションテレポート機能を追加しました。世界中のどこにでも一瞬で移動できるように！新しい場所を次々と探索しよう！"
+      },
+      {
+        "id": "v3.3",
+        "date": "2025-12-10",
+        "title": "Version 3.3 - 新しいUIデザイン",
+        "description": "✈️実際の飛行機のHUD UIデザインを参考に、よりモダンで使いやすいUIに更新しました。まるでパイロットになったような気分を味わえます！"
+      },
+      {
+        "id": "v3.4",
+        "date": "2025-12-15",
+        "title": "Version 3.4 - マルチプレイヤー対応！",
+        "description": "👥マルチプレイヤーシステムを追加しました。紙飛行機の周辺500メートル以内にいる他のオンラインプレイヤーが見えるようになりました。一人じゃない、みんなで楽しもう！"
+      },
+      {
+        "id": "v3.4.1",
+        "date": "2025-12-17",
+        "title": "Version 3.4.1 - 音量調整メニュー追加",
+        "description": "🔊音量調整メニューを追加しました。AI生成音楽、環境音の音量を調整できるようになりました。"
+      },
+      {
+        "id": "v3.4.2",
+        "date": "2025-12-18",
+        "title": "Version 3.4.2 - UI更新",
+        "description": "🎞場所紹介の画面がより映画のような演出になり、また飛行中に風切り音が追加され、かつてない没入感で飛行体験を楽しめるようになりました。パフォーマンスもさらに向上しています。"
+      }
+    ]
+  },
+  "LoginPage": {
+    "title": "Login Page",
+    "description": "Login Page Description"
+  },
+  "RegisterPage": {
+    "title": "Register Page",
+    "description": "Register Page Description"
+  },
+  "BackToHomeButton": {
+    "buttonText": "ホーム",
+    "tooltip": "ホームに戻る"
+  },
+  "Navigation": {
+    "openMenu": "ナビゲーションメニューを開く",
+    "closeMenu": "ナビゲーションメニューを閉じる",
+    "links": {
+      "home": "ホーム",
+      "about": "コンセプト",
+      "patch": "開発履歴",
+      "chat": "ヘルプ"
+    }
+  },
+  "DashboardToggleButton": {
+    "hideDashboard": "ダッシュボードを非表示",
+    "showDashboard": "ダッシュボードを表示",
+    "hideUITooltip": "UI 非表示",
+    "showUITooltip": "UI 表示"
+  },
+  "DebugMenu": {
+    "menu": "メニュー",
+    "options": "オプション",
+    "developerOptions": "開発者オプション",
+    "environmentSettings": "環境設定",
+    "environmentSettingsDescription": "時間帯の選択によって、AI生成音楽も変化します。",
+    "audioVolumeSettings": "音量設定",
+    "audioVolumeSettingsDescription": "調整音量",
+    "regionParameters": "地域パラメーター",
+    "regionParametersDescription": "現在地の地域情報解析結果。",
+    "aiGeneratedMusic": "AI生成音楽",
+    "notConfiguredOrDisabled": "未設定またはAI生成音楽が無効です",
+    "teleport": "テレポート",
+    "renderSettings": "描画設定",
+    "meshes": "Meshes",
+    "wireframe": "Wireframe",
+    "grids": "Grids",
+    "collision": "Collision",
+    "console": "コンソール",
+    "status": "状態",
+    "statusLabel": "Status",
+    "flightMode": "飛行モード",
+    "flightModeLabel": "Flight Mode",
+    "cameraHeight": "カメラ高さ",
+    "cameraHeightLabel": "Camera Y",
+    "lyria": "AI生成音楽",
+    "lyriaLabel": "Lyria",
+    "spatialAudio": "空間音響",
+    "spatialAudioLabel": "Spatial Audio",
+    "pitch": "ピッチ",
+    "pitchLabel": "Pitch",
+    "roll": "ロール",
+    "rollLabel": "Roll",
+    "multiplayer": "マルチプレイヤー",
+    "multiplayerLabel": "Multiplayer",
+    "demoPlay": "デモプレイ",
+    "droneMode": "ドローンモード"
+  },
+  "OperationManual": {
+    "title": "操作ガイド",
+    "movement": "移動",
+    "pause": "一時停止",
+    "accelerate": "加速",
+    "toggleDisplay": "表示切替",
+    "menu": "メニュー"
+  },
+  "TimeOfDayEffectsMenu": {
+    "morning": "朝",
+    "afternoon": "昼",
+    "evening": "夕"
+  },
+  "LocationSearch": {
+    "placeholder": "東京の地名を入力してテレポート、いってらっしゃい！"
+  },
+  "AudioVolumeControls": {
+    "ambientAudio": "常設環境音",
+    "spatialAudio": "場所環境音",
+    "lyriaAudio": "AI生成音楽",
+    "flyingAudio": "飛行音效"
+  }
+}

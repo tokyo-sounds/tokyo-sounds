@@ -1,0 +1,322 @@
+{
+  "HomePage": {
+    "title": "Hello world!"
+  },
+  "LandingPage": {
+    "title": "Tokyo Sounds",
+    "description": "Landing Page Description",
+    "dialogTitle": "Player Settings",
+    "namePlaceholder": "Name",
+    "audioSettings": "Audio Settings",
+    "enableGenerativeAudio": "Enable AI-generated music",
+    "enableSpatialAudio": "Enable spatial audio",
+    "startButton": "Start",
+    "colors": {
+      "white": "White",
+      "orange": "Orange",
+      "yellow": "Yellow",
+      "green": "Green",
+      "blue": "Blue",
+      "black": "Black",
+      "selectColor": "Select {color} color"
+    }
+  },
+  "FlightSettingsMenu": {
+    "title": "Debug Menu",
+    "description": "Debug Menu Description"
+  },
+  "FlightDashboard": {
+    "title": "Flight Dashboard",
+    "description": "Flight Dashboard Description"
+  },
+  "AboutPage": {
+    "pageTitle": "TOKYOSOUNDS",
+    "title": "Collected daily sounds of Tokyo into an ASMR site",
+    "description": "This time, we focused on the charm of Tokyo's sounds. Most sightseeing sites are abundant with visual information, but few services have focused on the 'sound' itself. However, Tokyo has many sounds that can evoke the atmosphere of the city, such as the brake sound of trains, the crossing, announcements, and the voices of shopping streets. We wanted to create a service that allows people living in Tokyo or visiting for sightseeing to experience the city through sound. The concept is Tokyo by Sound. We aim to provide a new experience of exploring Tokyo by traveling with your ears rather than your eyes. We record daily sounds and environmental sounds in Tokyo and combine them with 3D-designed cityscapes to make them more intuitive and enjoyable. This allows a wide range of users, including those who want to experience the atmosphere of Tokyo casually, those who want to know the image of the city before visiting, those who like ASMR and environmental sounds, to enjoy the service.",
+    "tabs": {
+      "design": "Design",
+      "tech": "Tech",
+      "member": "Member"
+    },
+    "designConcept": [
+      {
+        "title": "Visual Image",
+        "subtitle": "A free journey woven by paper airplanes",
+        "content": "To express the concept of Tokyo by Sound, we adopted paper airplanes as the main visual image. Users become paper airplanes freely dancing in Tokyo's sky, experiencing a sense of freedom, lightness, and comfort."
+      },
+      {
+        "title": "Color Design",
+        "subtitle": "Tokyo's story played by warm colors",
+        "content": "In terms of color, we mainly use orange and yellow as the main tones. These are warm colors that can make people feel warmth, tranquility, and comfort, while also symbolizing Tokyo's vitality and passion."
+      },
+      {
+        "title": "User Experience",
+        "subtitle": "Immersive exploration experience",
+        "content": "In terms of user experience, we use flight and 3D street scenes as core elements, allowing users to freely explore Tokyo's streets and alleys, achieving an immersive experience as if they were actually there."
+      }
+    ],
+    "techStack": [
+      {
+        "title": "Framework",
+        "content": "This project adopts Next.js 16 as the overall application framework. This enables server-side rendering and static site generation, achieving fast display and SEO optimization. In addition, we utilize the App Router feature to implement flexible page navigation."
+      },
+      {
+        "title": "Frontend Development",
+        "content": "The frontend UI is mainly built based on the Shadcn UI component library, ensuring unified design and high accessibility. In addition, we use Motion (Framer Motion) to implement animation effects, achieving smooth movements and transition effects during user interactions."
+      },
+      {
+        "title": "3D City Visualization",
+        "content": "The 3D city landscape integrates Google Maps 3D Tiles API and uses Three.js to recreate high-precision city 3D maps. In addition to the representation of city buildings and terrain, we also implement 3D space effects such as sky, ambient light, and material settings through React Three Fiber. Users can freely move in the virtual Tokyo sky through intuitive operations."
+      },
+      {
+        "title": "Audio Control",
+        "content": "The playback and control of environmental sounds adopt Tone.js, which dynamically adjusts volume and stereo panning (left-right hearing) in real-time according to the user's current position and the distance to each POI (Point of Interest). In addition, we integrate Google Gemini Lyria Realtime API for real-time AI sound generation, providing an immersive audio experience."
+      },
+      {
+        "title": "AI Music Generation",
+        "content": "We collect the user's current location information and surrounding location attributes in real-time, send them as prompts to Gemini Lyria Realtime API, thereby instantly generating and streaming AI-generated music that matches the atmosphere and characteristics of that area. We also design separate prompts for each area."
+      },
+      {
+        "title": "AI Chatbot",
+        "content": "We integrate Gemini 2.5 Pro and Vercel AI SDK to provide answers to users' questions. In addition, we utilize Google Search API to provide detailed answers to users' questions."
+      }
+    ],
+    "memberList": [
+      {
+        "title": "Liu Chawei",
+        "content": "As team leader, responsible for project management, UI design, frontend development, and AI chatbot development. Also responsible for overall policy formulation and progress management."
+      },
+      {
+        "title": "Nakagawa Hunter",
+        "content": "Mainly responsible for the implementation of the entire website. Handles many technical aspects such as AI music generation, sound control, and Google Maps 3D Tiles API integration."
+      },
+      {
+        "title": "Zeb Kahn",
+        "content": "Main developer of v1.0. Mainly responsible for 3D scene construction and implementation using Three.js, as well as the representation of 3D spaces running on the web."
+      },
+      {
+        "title": "Zhong Chenghan",
+        "content": "Responsible for the production of 3D models used in the project."
+      },
+      {
+        "title": "Arizono Shuya",
+        "content": "Responsible for presentations in demonstrations and also supports T-shirt production."
+      },
+      {
+        "title": "Li Zebin",
+        "content": "Responsible for T-shirt design."
+      },
+      {
+        "title": "Li Jianxing",
+        "content": "Responsible for organizing recorded environmental sounds."
+      },
+      {
+        "title": "Li Sen",
+        "content": ""
+      }
+    ]
+  },
+  "PatchNotesPage": {
+    "pageTitle": "Development History",
+    "title": "Evolution Footprints TOKYOSOUNDS Development Story",
+    "description": "How has TOKYOSOUNDS evolved? Here, we reveal all the behind-the-scenes of development, including the ingenuity and stories contained in each update, as well as unique new features! Please join us on a journey through the footprints of the past, present, and future.",
+    "patchNotes": [
+      {
+        "id": "v0.0.1",
+        "date": "2025-09-22",
+        "title": "Version 0.0.1 - First Step",
+        "description": "✨Tokyo Sounds project launched! Started working on 3D city visualization. The journey of dreams starts here!"
+      },
+      {
+        "id": "v1.0.0",
+        "date": "2025-09-29",
+        "title": "Version 1.0.0 - 3D City Born!",
+        "description": "🏙️A low-polygon 3D city made with Three.js is complete. Simple but cute, your own Tokyo is here!"
+      },
+      {
+        "id": "v1.1.0",
+        "date": "2025-10-07",
+        "title": "Version 1.1.0 - Multiple Scenes Appear",
+        "description": "🎬Added multiple scenes, now you can choose your favorite scene. Enjoy various landscapes!"
+      },
+      {
+        "id": "v1.2.0",
+        "date": "2025-10-07",
+        "title": "Version 1.2.0 - Camera Freedom",
+        "description": "🎥Fixed camera operation issues! Just drag with the mouse to view the city from any angle."
+      },
+      {
+        "id": "v1.3.0",
+        "date": "2025-10-10",
+        "title": "Version 1.3.0 - Audio System Appears",
+        "description": "🎵Introduced a new audio system using Tone.js. A richer and more beautiful world of sound is unfolding!"
+      },
+      {
+        "id": "v1.3.1",
+        "date": "2025-10-15",
+        "title": "Version 1.3.1 - Spatial Audio More Realistic",
+        "description": "👂Volume and stereo panning are automatically adjusted based on position and distance! Experience an immersive feeling as if you were really there!"
+      },
+      {
+        "id": "v1.3.2",
+        "date": "2025-10-16",
+        "title": "Version 1.3.2 - Audio Control Added",
+        "description": "🎛️Now you can freely control audio pause and play. Enjoy music at your own pace!"
+      },
+      {
+        "id": "v1.4",
+        "date": "2025-10-18",
+        "title": "Version 1.4 - Quiz Game Appears!",
+        "description": "🎮Added a quiz game system. Answer questions about areas to earn points and advance to the next stage!"
+      },
+      {
+        "id": "v2.0",
+        "date": "2025-11-26",
+        "title": "Version 2.0 - AI Generates Music",
+        "description": "🎹Mega update! AI-generated audio system using Google Lyria AI appears! Based on your current location, AI creates exclusive music for you (referenced the open-source project Space DJ)!"
+      },
+      {
+        "id": "v2.1",
+        "date": "2025-11-28",
+        "title": "Version 2.1 - Fly to the Sky!",
+        "description": "✈️Added flight simulation system. Fly freely over the city and enjoy Tokyo from a bird's eye view!"
+      },
+      {
+        "id": "v3.0",
+        "date": "2025-12-4",
+        "title": "Version 3.0 - Real 3D Tokyo Appears",
+        "description": "🗼A more detailed and realistic 3D Tokyo made with Google Tiles API is complete. It creates an illusion as if you were really in Tokyo."
+      },
+      {
+        "id": "v3.0.1",
+        "date": "2025-12-7",
+        "title": "Version 3.0.1 - Security Enhanced",
+        "description": "🔒To address the security vulnerability 'React2Shell' (CVE-2025-55182), we upgraded Next.js to 16.0.7 and React to 19.2.1. You can now enjoy it safely."
+      },
+      {
+        "id": "v3.1",
+        "date": "2025-12-8",
+        "title": "Version 3.1 - Day and Night Changes",
+        "description": "🌅Added day and night system. The city's appearance changes according to user selection. From the refreshing morning scenery to the fantastic night lights, experience Tokyo that changes with time!"
+      },
+      {
+        "id": "v3.2",
+        "date": "2025-12-10",
+        "title": "Version 3.2 - Instant Teleportation Possible",
+        "description": "🚀Added location teleportation feature. Instantly move anywhere in the world! Keep exploring new places!"
+      },
+      {
+        "id": "v3.3",
+        "date": "2025-12-10",
+        "title": "Version 3.3 - New UI Design",
+        "description": "✈️Referencing actual aircraft HUD UI design, updated to a more modern and user-friendly UI. Feel like you've become a pilot!"
+      },
+      {
+        "id": "v3.4",
+        "date": "2025-12-15",
+        "title": "Version 3.4 - Multiplayer Support!",
+        "description": "👥Added multiplayer system. You can now see other online players within 500 meters around your paper airplane. Not alone, let's enjoy together!"
+      },
+      {
+        "id": "v3.4.1",
+        "date": "2025-12-17",
+        "title": "Version 3.4.1 - Volume Control Menu Added",
+        "description": "🔊Added volume control menu. You can now adjust the volume of AI-generated music and environmental sounds."
+      },
+      {
+        "id": "v3.4.2",
+        "date": "2025-12-18",
+        "title": "Version 3.4.2 - UI Update",
+        "description": "🎞The location introduction screen has become more cinematic, and wind sounds have been added during flight, allowing you to enjoy the flight experience with unprecedented immersion. Performance has also been further improved."
+      }
+    ]
+  },
+  "LoginPage": {
+    "title": "Login Page",
+    "description": "Login Page Description"
+  },
+  "RegisterPage": {
+    "title": "Register Page",
+    "description": "Register Page Description"
+  },
+  "BackToHomeButton": {
+    "buttonText": "Home",
+    "tooltip": "Back to Home"
+  },
+  "Navigation": {
+    "openMenu": "Open navigation menu",
+    "closeMenu": "Close navigation menu",
+    "links": {
+      "home": "Home",
+      "about": "About",
+      "patch": "Past Versions",
+      "chat": "Help"
+    }
+  },
+  "DashboardToggleButton": {
+    "hideDashboard": "Hide dashboard",
+    "showDashboard": "Show dashboard",
+    "hideUITooltip": "Hide UI",
+    "showUITooltip": "Show UI"
+  },
+  "DebugMenu": {
+    "menu": "Menu",
+    "options": "Options",
+    "developerOptions": "Developer Options",
+    "environmentSettings": "Environment Settings",
+    "environmentSettingsDescription": "Select different environment settings based on time",
+    "audioVolumeSettings": "Audio Volume Settings",
+    "audioVolumeSettingsDescription": "Adjust audio volume",
+    "regionParameters": "Region Parameters",
+    "regionParametersDescription": "Region parameters description",
+    "aiGeneratedMusic": "AI Generated Music",
+    "notConfiguredOrDisabled": "Not configured or AI-generated music is disabled",
+    "teleport": "Teleport",
+    "renderSettings": "Render Settings",
+    "meshes": "Meshes",
+    "wireframe": "Wireframe",
+    "grids": "Grids",
+    "collision": "Collision",
+    "console": "Console",
+    "status": "Status",
+    "statusLabel": "Status",
+    "flightMode": "Flight Mode",
+    "flightModeLabel": "Flight Mode",
+    "cameraHeight": "Camera Height",
+    "cameraHeightLabel": "Camera Y",
+    "lyria": "Lyria",
+    "lyriaLabel": "Lyria",
+    "spatialAudio": "Spatial Audio",
+    "spatialAudioLabel": "Spatial Audio",
+    "pitch": "Pitch",
+    "pitchLabel": "Pitch",
+    "roll": "Roll",
+    "rollLabel": "Roll",
+    "multiplayer": "Multiplayer",
+    "multiplayerLabel": "Multiplayer",
+    "demoPlay": "Demo Play",
+    "droneMode": "Drone Mode"
+  },
+  "OperationManual": {
+    "title": "Operation Guide",
+    "movement": "Movement",
+    "pause": "Pause",
+    "accelerate": "Accelerate",
+    "toggleDisplay": "Toggle Display",
+    "menu": "Menu"
+  },
+  "TimeOfDayEffectsMenu": {
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening"
+  },
+  "LocationSearch": {
+    "placeholder": "Enter a Tokyo location name to teleport, have a great journey!"
+  },
+  "AudioVolumeControls": {
+    "ambientAudio": "Ambient Audio",
+    "spatialAudio": "Spatial Audio",
+    "lyriaAudio": "Lyria Audio",
+    "flyingAudio": "Flying Audio"
+  }
+}

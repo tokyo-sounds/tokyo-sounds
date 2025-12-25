@@ -1,0 +1,322 @@
+{
+  "HomePage": {
+    "title": "你好，世界！"
+  },
+  "LandingPage": {
+    "title": "東京之音",
+    "description": "著陸頁描述",
+    "dialogTitle": "玩家設定",
+    "namePlaceholder": "名稱",
+    "audioSettings": "音訊設定",
+    "enableGenerativeAudio": "啟用AI生成音樂",
+    "enableSpatialAudio": "啟用空間音效",
+    "startButton": "開始",
+    "colors": {
+      "white": "白色",
+      "orange": "橙色",
+      "yellow": "黃色",
+      "green": "綠色",
+      "blue": "藍色",
+      "black": "黑色",
+      "selectColor": "選擇{color}色"
+    }
+  },
+  "FlightSettingsMenu": {
+    "title": "除錯選單",
+    "description": "除錯選單描述"
+  },
+  "FlightDashboard": {
+    "title": "飛行儀表板",
+    "description": "飛行儀表板描述"
+  },
+  "AboutPage": {
+    "pageTitle": "TOKYOSOUNDS",
+    "title": "收集東京日常聲音的ASMR網站",
+    "description": "這次我們關注的是「東京聲音的魅力」。雖然有很多旅遊網站，但大多數都是視覺資訊，很少有服務專注於「聲音」本身。然而，東京有很多能夠感受到城市氛圍的聲音，比如電車的煞車聲、平交道、廣播、商店街的聲音等。因此，我們想創建一個服務，讓住在東京或來旅遊的人能夠「透過聲音體驗城市」。概念是「用聲音遊覽東京」。我們提供一種新的體驗，讓東京的街道「用耳朵而不是眼睛旅行」。在網站上，我們錄製了東京日常的生活聲音和環境聲音，並將它們與3D設計的街景相結合，使其更加直觀和有趣。這樣，想要輕鬆感受東京氛圍的人、想在旅遊前了解城市形象的人、喜歡ASMR和環境聲音的人等，廣泛的用戶都可以享受這項服務。",
+    "tabs": {
+      "design": "設計",
+      "tech": "技術",
+      "member": "成員"
+    },
+    "designConcept": [
+      {
+        "title": "視覺形象",
+        "subtitle": "紙飛機編織的自由之旅",
+        "content": "為了表現「用聲音遊覽東京」這一概念，我們採用了「紙飛機」作為主要的視覺形象。用戶成為在東京天空中自由飛舞的紙飛機，體驗自由、輕盈、舒適的感覺。"
+      },
+      {
+        "title": "色彩設計",
+        "subtitle": "溫暖色彩奏響的東京故事",
+        "content": "在色彩方面，我們主要使用「橙色」和「黃色」作為主色調。這些是暖色系，能夠讓人感受到溫暖、安寧和舒適，同時也象徵著東京的活力和熱情。"
+      },
+      {
+        "title": "用戶體驗",
+        "subtitle": "沉浸式探索體驗",
+        "content": "在用戶體驗方面，我們以「飛行」和「3D街景」為核心要素，讓用戶能夠自由探索東京的街道和小巷，實現彷彿身臨其境的沉浸式體驗。"
+      }
+    ],
+    "techStack": [
+      {
+        "title": "框架",
+        "content": "本專案採用 Next.js 16 作為整體應用框架。這使得伺服器端渲染和靜態網站生成成為可能，實現了快速顯示和SEO優化。此外，我們還利用 App Router 功能實現了靈活的頁面導航。"
+      },
+      {
+        "title": "前端開發",
+        "content": "前端UI主要基於 Shadcn UI 元件庫構建，確保了統一的設計和高度的可訪問性。此外，我們使用 Motion（Framer Motion）來實現動畫效果，實現了用戶互動時的流暢動作和過渡效果。"
+      },
+      {
+        "title": "3D城市視覺化",
+        "content": "3D城市景觀整合了 Google Maps 3D Tiles API，使用 Three.js 重現了高精度的城市立體地圖。除了城市建築和地形的表現外，我們還透過 React Three Fiber 實現了天空、環境光、材質設定等3D空間效果。用戶可以透過直觀的操作在虛擬的東京上空自由移動。"
+      },
+      {
+        "title": "音訊控制",
+        "content": "環境聲音的播放和控制採用 Tone.js，根據用戶的當前位置和各個POI（興趣點）的距離，即時動態調整音量和立體聲平移（左右聽覺）。此外，我們還整合了 Google Gemini Lyria Realtime API 用於AI聲音的即時生成，提供沉浸式的音訊體驗。"
+      },
+      {
+        "title": "AI音樂生成",
+        "content": "我們即時收集用戶的當前位置資訊和周邊位置屬性，將它們作為提示發送到 Gemini Lyria Realtime API，從而即時生成和串流播放符合該區域氛圍和特徵的AI生成音樂。我們還為每個區域設計了單獨的提示。"
+      },
+      {
+        "title": "AI聊天機器人",
+        "content": "我們整合了 Gemini 2.5 Pro 和 Vercel AI SDK，為用戶的問題提供答案。此外，我們還利用 Google Search API，為用戶的問題提供詳細答案。"
+      }
+    ],
+    "memberList": [
+      {
+        "title": "劉 查威",
+        "content": "作為團隊負責人，負責專案管理、UI設計、前端開發以及AI聊天機器人的開發。還負責整體方針制定和進度管理。"
+      },
+      {
+        "title": "中川 亨特",
+        "content": "主要負責整個網站的實現。負責AI音樂生成、聲音控制、Google Maps 3D Tiles API 整合等技術方面的許多工作。"
+      },
+      {
+        "title": "澤布 卡恩",
+        "content": "v1.0 的主要開發者。主要負責3D場景的構建和使用 Three.js 的實現，以及Web上運行的3D空間的表現。"
+      },
+      {
+        "title": "鍾 承翰",
+        "content": "負責專案中使用的3D模型的製作。"
+      },
+      {
+        "title": "有園 柊哉",
+        "content": "在演示中負責發表，還支援了T恤的製作。"
+      },
+      {
+        "title": "李 澤彬",
+        "content": "負責T恤的設計。"
+      },
+      {
+        "title": "李 簡行",
+        "content": "負責整理錄製的環境聲音。"
+      },
+      {
+        "title": "李 森",
+        "content": ""
+      }
+    ]
+  },
+  "PatchNotesPage": {
+    "pageTitle": "開發歷史",
+    "title": "進化的足跡 TOKYOSOUNDS開發故事",
+    "description": "TOKYOSOUNDS 是如何進化的？在這裡，我們將公開每一個更新中包含的巧思和故事，以及獨特的新功能，所有開發的幕後花絮！請和我們一起踏上過去、現在、未來的足跡之旅。",
+    "patchNotes": [
+      {
+        "id": "v0.0.1",
+        "date": "2025-09-22",
+        "title": "版本 0.0.1 - 第一步",
+        "description": "✨Tokyo Sounds專案啟動！開始著手3D城市的視覺化。夢想的旅程從這裡開始！"
+      },
+      {
+        "id": "v1.0.0",
+        "date": "2025-09-29",
+        "title": "版本 1.0.0 - 3D城市誕生！",
+        "description": "🏙️使用Three.js製作的低多邊形3D城市完成了。簡單但可愛，只屬於你的東京就在這裡！"
+      },
+      {
+        "id": "v1.1.0",
+        "date": "2025-10-07",
+        "title": "版本 1.1.0 - 多個場景登場",
+        "description": "🎬添加了多個場景，現在可以選擇你喜歡的場景了。享受各種風景吧！"
+      },
+      {
+        "id": "v1.2.0",
+        "date": "2025-10-07",
+        "title": "版本 1.2.0 - 相機自由自在",
+        "description": "🎥修復了相機操作的問題！只需用滑鼠拖動，就可以從任何角度欣賞城市。"
+      },
+      {
+        "id": "v1.3.0",
+        "date": "2025-10-10",
+        "title": "版本 1.3.0 - 音響系統登場",
+        "description": "🎵引入了使用Tone.js的新音響系統。更豐富、更美麗的音效世界正在展開！"
+      },
+      {
+        "id": "v1.3.1",
+        "date": "2025-10-15",
+        "title": "版本 1.3.1 - 立體音響更真實",
+        "description": "👂根據位置和距離自動調整音量和立體聲平移！就像真的在那個地方一樣，體驗身臨其境的感覺！"
+      },
+      {
+        "id": "v1.3.2",
+        "date": "2025-10-16",
+        "title": "版本 1.3.2 - 添加音訊控制",
+        "description": "🎛️現在可以自由控制音訊的暫停和播放。按照自己的節奏享受音樂吧！"
+      },
+      {
+        "id": "v1.4",
+        "date": "2025-10-18",
+        "title": "版本 1.4 -  quiz遊戲登場！",
+        "description": "🎮添加了quiz遊戲系統。回答關於區域的問題獲得積分，進入下一關吧！"
+      },
+      {
+        "id": "v2.0",
+        "date": "2025-11-26",
+        "title": "版本 2.0 - AI生成音樂",
+        "description": "🎹超大型更新！使用Google Lyria AI的生成音響系統登場！根據當前位置，AI為你創作專屬音樂（參考了開源專案 Space DJ）！"
+      },
+      {
+        "id": "v2.1",
+        "date": "2025-11-28",
+        "title": "版本 2.1 - 飛向天空！",
+        "description": "✈️添加了飛行模擬系統。在城市上空自由飛行，以鳥的視角享受東京吧！"
+      },
+      {
+        "id": "v3.0",
+        "date": "2025-12-4",
+        "title": "版本 3.0 - 真正的3D東京登場",
+        "description": "🗼使用Google Tiles API製作的更詳細、更真實的3D東京完成了。就像真的在東京一樣，讓人產生錯覺。"
+      },
+      {
+        "id": "v3.0.1",
+        "date": "2025-12-7",
+        "title": "版本 3.0.1 - 安全強化",
+        "description": "🔒為了應對安全漏洞'React2Shell'(CVE-2025-55182)，我們將Next.js升級到16.0.7，React升級到19.2.1。可以安全地享受了。"
+      },
+      {
+        "id": "v3.1",
+        "date": "2025-12-8",
+        "title": "版本 3.1 - 晝夜變化",
+        "description": "🌅添加了晝夜系統。根據用戶的選擇，城市的外觀會發生變化。從早晨清爽的風景到夜晚夢幻的光線，體驗隨時間變化的東京吧！"
+      },
+      {
+        "id": "v3.2",
+        "date": "2025-12-10",
+        "title": "版本 3.2 - 瞬間移動成為可能",
+        "description": "🚀添加了位置傳送功能。可以瞬間移動到世界任何地方！不斷探索新地點吧！"
+      },
+      {
+        "id": "v3.3",
+        "date": "2025-12-10",
+        "title": "版本 3.3 - 新UI設計",
+        "description": "✈️參考實際飛機的HUD UI設計，更新為更現代、更易用的UI。就像成為飛行員一樣的感覺！"
+      },
+      {
+        "id": "v3.4",
+        "date": "2025-12-15",
+        "title": "版本 3.4 - 多人遊戲支援！",
+        "description": "👥添加了多人遊戲系統。可以看到紙飛機周圍500米內的其他線上玩家。不是一個人，大家一起享受吧！"
+      },
+      {
+        "id": "v3.4.1",
+        "date": "2025-12-17",
+        "title": "版本 3.4.1 - 添加音量調整選單",
+        "description": "🔊添加了音量調整選單。現在可以調整AI生成音樂、環境聲音的音量了。"
+      },
+      {
+        "id": "v3.4.2",
+        "date": "2025-12-18",
+        "title": "版本 3.4.2 - UI更新",
+        "description": "🎞地點介紹的畫面變得更加電影化，飛行中還添加了風聲，可以以前所未有的沉浸感享受飛行體驗。效能也進一步提升。"
+      }
+    ]
+  },
+  "LoginPage": {
+    "title": "登入頁面",
+    "description": "登入頁面描述"
+  },
+  "RegisterPage": {
+    "title": "註冊頁面",
+    "description": "註冊頁面描述"
+  },
+  "BackToHomeButton": {
+    "buttonText": "首頁",
+    "tooltip": "返回首頁"
+  },
+  "Navigation": {
+    "openMenu": "開啟導航選單",
+    "closeMenu": "關閉導航選單",
+    "links": {
+      "home": "首頁",
+      "about": "關於",
+      "patch": "開發歷史",
+      "chat": "幫助"
+    }
+  },
+  "DashboardToggleButton": {
+    "hideDashboard": "隱藏儀表板",
+    "showDashboard": "顯示儀表板",
+    "hideUITooltip": "隱藏UI",
+    "showUITooltip": "顯示UI"
+  },
+  "DebugMenu": {
+    "menu": "選單",
+    "options": "選項",
+    "developerOptions": "開發者選項",
+    "environmentSettings": "環境設定",
+    "environmentSettingsDescription": "根據時間選擇不同的環境設定",
+    "audioVolumeSettings": "音量設定",
+    "audioVolumeSettingsDescription": "調整音量",
+    "regionParameters": "區域參數",
+    "regionParametersDescription": "區域參數描述",
+    "aiGeneratedMusic": "AI生成音樂",
+    "notConfiguredOrDisabled": "未設定或AI生成音樂已停用",
+    "teleport": "傳送",
+    "renderSettings": "渲染設定",
+    "meshes": "網格",
+    "wireframe": "線框",
+    "grids": "網格",
+    "collision": "碰撞",
+    "console": "控制台",
+    "status": "狀態",
+    "statusLabel": "Status",
+    "flightMode": "飛行模式",
+    "flightModeLabel": "Flight Mode",
+    "cameraHeight": "相機高度",
+    "cameraHeightLabel": "Camera Y",
+    "lyria": "AI生成音樂",
+    "lyriaLabel": "Lyria",
+    "spatialAudio": "空間音效",
+    "spatialAudioLabel": "Spatial Audio",
+    "pitch": "俯仰角",
+    "pitchLabel": "Pitch",
+    "roll": "滾轉角",
+    "rollLabel": "Roll",
+    "multiplayer": "多人遊戲",
+    "multiplayerLabel": "Multiplayer",
+    "demoPlay": "演示播放",
+    "droneMode": "無人機模式"
+  },
+  "OperationManual": {
+    "title": "操作指南",
+    "movement": "移動",
+    "pause": "暫停",
+    "accelerate": "加速",
+    "toggleDisplay": "切換顯示",
+    "menu": "選單"
+  },
+  "TimeOfDayEffectsMenu": {
+    "morning": "早晨",
+    "afternoon": "下午",
+    "evening": "傍晚"
+  },
+  "LocationSearch": {
+    "placeholder": "請輸入東京的地名以進行傳送，祝您旅途愉快！"
+  },
+  "AudioVolumeControls": {
+    "ambientAudio": "常設環境音",
+    "spatialAudio": "地點環境音",
+    "lyriaAudio": "AI生成音樂",
+    "flyingAudio": "飛行音效"
+  }
+}

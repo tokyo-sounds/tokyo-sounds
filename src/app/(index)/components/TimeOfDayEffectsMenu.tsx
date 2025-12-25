@@ -2,7 +2,6 @@
 
 import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
 import { TimeOfDay } from "@/config/tokyo-config";
-import { TIME_OF_DAY_PRESETS } from "@/config/tokyo-config";
 import { Button } from "@/components/ui/button";
 import {
   Tooltip,
@@ -10,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Sun, Sunrise, Sunset, LucideIcon } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 const TIME_OF_DAY_ICONS: Record<TimeOfDay, LucideIcon> = {
   morning: Sunrise,
@@ -20,6 +20,7 @@ const TIME_OF_DAY_ICONS: Record<TimeOfDay, LucideIcon> = {
 export default function TimeOfDayEffectsMenu() {
   const { currentTime, setTimeOfDay } = useTimeOfDayStore();
   const timeOptions: TimeOfDay[] = ["morning", "afternoon", "evening"];
+  const t = useTranslations("TimeOfDayEffectsMenu");
   return (
     <div className="flex flex-col gap-1 pointer-events-auto">
       {timeOptions.map((time) => {
@@ -45,7 +46,7 @@ export default function TimeOfDayEffectsMenu() {
               side="left"
               className="pointer-events-none select-none"
             >
-              <p>{TIME_OF_DAY_PRESETS[time].nameJa}</p>
+              <p>{t(time)}</p>
             </TooltipContent>
           </Tooltip>
         );
