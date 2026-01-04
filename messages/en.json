@@ -11,7 +11,7 @@
     "enableGenerativeAudio": "Enable AI-generated music",
     "enableSpatialAudio": "Enable spatial audio",
     "startButton": "Start",
-    "startFlying": "Start Flying",
+    "startFlying": "Fly",
     "colors": {
       "white": "White",
       "orange": "Orange",
@@ -109,7 +109,7 @@
     "tabs": {
       "design": "Design",
       "tech": "Tech",
-      "member": "Member"
+      "member": "Members"
     },
     "designConcept": [
       {
@@ -143,7 +143,7 @@
       },
       {
         "title": "Audio Control",
-        "content": "The playback and control of environmental sounds adopt Tone.js, which dynamically adjusts volume and stereo panning (left-right hearing) in real-time according to the user's current position and the distance to each POI (Point of Interest). In addition, we integrate Google Gemini Lyria Realtime API for real-time AI sound generation, providing an immersive audio experience."
+        "content": "The audio engine was developed in-house, utilizing Tone.js for loading, playback, and control of audio, and Three.js' Positional Audio API for Spatial Audio (directional) playback based on the user's position and each POI (Point of Interest). Additionally, we integrate Google Gemini Lyria Realtime API for real-time AI sound generation, providing an immersive audio experience."
       },
       {
         "title": "AI Music Generation",

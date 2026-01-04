@@ -143,7 +143,7 @@
       },
       {
         "title": "音声制御",
-        "content": "環境音の再生や制御にはTone.jsを採用し、ユーザーの現在位置と各POI（ポイント・オブ・インタレスト）の距離に応じて、音量やステレオパンニング（左右の聞こえ方）をリアルタイムで動的に調整します。また、AI音声のリアルタイム生成にはGoogle Gemini Lyria Realtime APIを連携し、臨場感のある音響体験を提供しています。"
+        "content": "オーディオエンジンは自分開発であり、オーディオの読み込み・再生・制御にはTone.jsを、ユーザーの位置と各POI（Point of Interest）に基づく空間オーディオ（指向性）再生にはThree.jsのPositional Audio APIを採用しています。さらに、リアルタイムAIサウンド生成のためにGoogle Gemini Lyria Realtime APIを統合し、没入感のあるオーディオ体験を提供します。"
       },
       {
         "title": "AI音楽生成",
