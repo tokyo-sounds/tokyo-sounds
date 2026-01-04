@@ -65,6 +65,7 @@ import { useMultiplayer } from "@/hooks/useMultiplayer";
 import { useIsMobile } from "@/hooks/use-mobile";
 // Stores
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
+import { useChatPopupStore } from "@/stores/use-chat-popup-store";
 // Utils
 import { type MovementMode } from "@/lib/flight";
 import { latLngAltToENU } from "@/lib/geo-utils";
@@ -258,6 +259,16 @@ export default function TokyoPage() {
       localStorage.setItem(STORAGE_KEYS.planeColor, planeColor);
     }
   }, [planeColor, mounted]);
+
+  // Hide chat popup during flight simulation
+  const { hide: hideChatPopup, show: showChatPopup } = useChatPopupStore();
+  useEffect(() => {
+    if (started) {
+      hideChatPopup();
+    } else {
+      showChatPopup();
+    }
+  }, [started, hideChatPopup, showChatPopup]);
 
   const handleStart = useCallback(async () => {
     try {

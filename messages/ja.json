@@ -11,6 +11,7 @@
     "enableGenerativeAudio": "AI生成音楽を有効にする",
     "enableSpatialAudio": "空間音響を有効にする",
     "startButton": "スタート",
+    "startFlying": "飛ぼう",
     "colors": {
       "white": "白",
       "orange": "オレンジ",
@@ -19,6 +20,78 @@
       "blue": "青",
       "black": "黒",
       "selectColor": "{color}色を選択"
+    },
+    "navbar": {
+      "brand": "TOKYO SOUNDS",
+      "about": "コンセプト",
+      "changelog": "開発履歴",
+      "help": "ヘルプ"
+    },
+    "hero": {
+      "japaneseLabel": "東京の音",
+      "title": "TOKYO SOUNDS",
+      "subtitle": "東京を飛ぶ。AIが奏でる音風景を体験しよう。",
+      "scroll": "スクロール"
+    },
+    "about": {
+      "sectionLabel": "プロジェクト紹介",
+      "titlePrefix": "東京を体験する",
+      "titleHighlight": "新しいカタチ",
+      "description": "Tokyo Soundsは、フォトリアルな3D都市ビジュアライゼーションとAI生成音楽を組み合わせ、日本の首都を巡る没入型オーディオビジュアル体験を創り出します。",
+      "features": [
+        {
+          "title": "3D東京",
+          "description": "Google Maps 3D Tilesを使用したフォトリアルな3D東京を探索"
+        },
+        {
+          "title": "AI音楽",
+          "description": "現在地に合わせてリアルタイムで変化するAI生成音楽"
+        },
+        {
+          "title": "空間音響",
+          "description": "位置に応じて変化する没入型3Dサウンド"
+        },
+        {
+          "title": "ジェネレーティブ",
+          "description": "Google Gemini Lyriaによるユニークな音風景"
+        }
+      ]
+    },
+    "tech": {
+      "sectionLabel": "技術スタック",
+      "titlePrefix": "最新技術で",
+      "titleHighlight": "構築",
+      "technologies": [
+        { "name": "Next.js 16", "category": "フレームワーク" },
+        { "name": "Three.js", "category": "3Dグラフィックス" },
+        { "name": "React Three Fiber", "category": "3D統合" },
+        { "name": "Google Maps 3D Tiles", "category": "都市データ" },
+        { "name": "Gemini Lyria", "category": "AI音楽" },
+        { "name": "Tone.js", "category": "音声エンジン" },
+        { "name": "Tailwind CSS", "category": "スタイリング" },
+        { "name": "Motion", "category": "アニメーション" }
+      ],
+      "stats": [
+        { "value": "3D", "label": "都市ビジュアライゼーション" },
+        { "value": "AI", "label": "生成音楽" },
+        { "value": "リアルタイム", "label": "音声ストリーミング" },
+        { "value": "マルチプレイ", "label": "体験" }
+      ]
+    },
+    "team": {
+      "sectionLabel": "チーム紹介",
+      "titlePrefix": "チーム",
+      "titleHighlight": "218"
+    },
+    "cta": {
+      "title": "飛び立つ準備はできた？",
+      "description": "かつてない東京体験を。都市を飛び回り、各地区ならではのAI生成サウンドスケープを発見しよう。"
+    },
+    "footer": {
+      "copyright": "© 2026 Tokyo Sounds. HAL東京.",
+      "about": "コンセプト",
+      "changelog": "開発履歴",
+      "help": "ヘルプ"
     }
   },
   "FlightSettingsMenu": {
@@ -83,36 +156,69 @@
     ],
     "memberList": [
       {
-        "title": "リュウ　チャーウェイ",
-        "content": "チームリーダーとして、プロジェクト管理、UIデザイン、フロントエンド開発、そしてAIチャットボットの開発を担当しました。全体的な方針づくりや進行管理も行いました。"
+        "name": "リュウ　チャーウェイ",
+        "role": "チームリーダー",
+        "description": "チームリーダーとして、プロジェクト管理、UIデザイン、フロントエンド開発、そしてAIチャットボットの開発を担当しました。全体的な方針づくりや進行管理も行いました。",
+        "profileImage": "/images/members/liu-chawei.jpg",
+        "socials": {
+          "github": "https://github.com/liuchiawei"
+        }
       },
       {
-        "title": "ナカガワ　ハンター",
-        "content": "主にWebサイト全体の実装を担当しました。AIによる音楽生成やサウンド制御、Google Maps 3D Tiles API の統合など、技術面の多くを手掛けました。"
+        "name": "ナカガワ　ハンター",
+        "role": "リードデベロッパー",
+        "description": "サウンドエンジン、マルチプレイヤー、3D Tiles 都市、AI生成、飛行物理、フロントエンドの設計者兼開発者。ウェブサイト全体の実装を担当。",
+        "profileImage": "/images/members/nakagawa-hunter.jpeg",
+        "socials": {
+          "github": "https://github.com/itkla",
+          "website": "https://klae.ooo"
+        }
       },
       {
-        "title": "ゼブ　カーン",
-        "content": "v1.0 の主要開発者です。3Dシーンの構築やThree.jsを用いた実装、Web上で動く3D空間の表現を主に担当しています。"
+        "name": "ゼブ　カーン",
+        "role": "3Dデベロッパー",
+        "description": "v1.0 の主要開発者です。3Dシーンの構築やThree.jsを用いた実装、Web上で動く3D空間の表現を主に担当しています。",
+        "profileImage": "/images/members/zeb-khan.jpeg",
+        "socials": {
+          "github": "https://github.com/ths41461"
+        }
       },
       {
-        "title": "鍾　承翰",
-        "content": "プロジェクトで使用する3Dモデルの制作を担当しました。"
+        "name": "鍾　承翰",
+        "role": "3Dモデラー",
+        "description": "プロジェクトで使用する3Dモデルの制作を担当しました。",
+        "profileImage": "/images/members/zhong-chenghan.jpg",
+        "socials": {
+          "linkedin": "https://linkedin.com/in/chenghan"
+        }
       },
       {
-        "title": "有園　柊哉",
-        "content": "プレゼンテーションで発表を担当し、さらにTシャツ制作のサポートも行いました。"
+        "name": "有園　柊哉",
+        "role": "プレゼンター",
+        "description": "プレゼンテーションで発表を担当し、さらにTシャツ制作のサポートも行いました。",
+        "profileImage": "/images/members/arizono-shuya.jpg",
+        "socials": {}
       },
       {
-        "title": "李　澤彬",
-        "content": "Tシャツのデザインを担当しました。"
+        "name": "李　澤彬",
+        "role": "デザイナー",
+        "description": "Tシャツのデザインを担当しました。",
+        "profileImage": "/images/members/li-zebin.jpg",
+        "socials": {}
       },
       {
-        "title": "李　簡行",
-        "content": "収録した環境音の整理を担当しました。"
+        "name": "李　簡行",
+        "role": "サウンドエンジニア",
+        "description": "収録した環境音の整理を担当しました。",
+        "profileImage": "/images/members/li-jianxing.jpg",
+        "socials": {}
       },
       {
-        "title": "李　森",
-        "content": ""
+        "name": "李　森",
+        "role": "チームメンバー",
+        "description": "プロジェクトの様々な側面をサポートしています。",
+        "profileImage": "/images/members/li-sen.jpg",
+        "socials": {}
       }
     ]
   },
@@ -318,5 +424,15 @@
     "spatialAudio": "場所環境音",
     "lyriaAudio": "AI生成音楽",
     "flyingAudio": "飛行音效"
+  },
+  "ChatPopup": {
+    "title": "Tokyo Sounds",
+    "subtitle": "AIアシスタント",
+    "welcomeTitle": "Tokyo Soundsへようこそ",
+    "welcomeMessage": "プロジェクトについて何でもお聞きください",
+    "placeholder": "質問を入力...",
+    "openChat": "チャットを開く",
+    "closeChat": "チャットを閉じる",
+    "sendMessage": "メッセージを送信"
   }
 }

@@ -28,10 +28,20 @@ export default function AboutContainer() {
     {
       label: t("tabs.member"),
       value: "member",
-      articles: t.raw("memberList") as Array<{
-        title: string;
-        content: string;
-      }>,
+      articles: (t.raw("memberList") as Array<{
+        name: string;
+        role: string;
+        description: string;
+        profileImage: string;
+        socials: {
+          github?: string;
+          linkedin?: string;
+          website?: string;
+        };
+      }>).map(member => ({
+        title: member.name,
+        content: member.description,
+      })),
     },
   ];
 
