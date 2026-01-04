@@ -3,7 +3,6 @@
 import { useRef, useState, useEffect } from "react";
 import { motion, useInView, AnimatePresence } from "motion/react";
 import { 
-  Plane, 
   Palette, 
   Sparkles, 
   Users, 
@@ -14,17 +13,13 @@ import {
   Layers,
   Map,
   Music,
-  Volume2,
   MessageSquare,
-  Menu,
-  X,
-  ArrowUp
+  ArrowUp,
+  Plane
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "next/navigation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import LanguageSwitcher from "@/components/widget/LanguageSwitcher";
-import ChipTab from "@/components/common/ChipTab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Dialog,
@@ -32,6 +27,9 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import FloatingNavbar from "@/components/layout/FloatingNavbar";
+import MobileNavMenu from "@/components/layout/MobileNavMenu";
+import SiteFooter from "@/components/layout/SiteFooter";
 
 // Types
 type TeamMember = {
@@ -61,221 +59,6 @@ type TechStack = {
 const DESIGN_ICONS = [Plane, Palette, Sparkles];
 // Tech stack icons
 const TECH_ICONS = [Layers, Code2, Map, Music, Sparkles, MessageSquare];
-
-function FloatingNavbar() {
-  const t = useTranslations("LandingPage");
-  const router = useRouter();
-  const [hoveredLink, setHoveredLink] = useState<string | null>(null);
-
-  const navLinks = [
-    { href: "/", label: t("navbar.brand"), isHome: true },
-    { href: "/about", label: t("navbar.about") },
-    { href: "/patch", label: t("navbar.changelog") },
-    { href: "/chat", label: t("navbar.help") },
-  ];
-
-  const handleStartClick = () => {
-    router.push("/");
-  };
-
-  return (
-    <motion.div
-      className="hidden md:fixed md:top-8 md:left-0 md:right-0 md:z-100 md:flex md:justify-center md:px-4"
-      initial={{ opacity: 0, y: -40 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ 
-        duration: 0.6, 
-        ease: [0.25, 0.46, 0.45, 0.94],
-        delay: 0.1,
-      }}
-    >
-      <motion.nav
-        className="relative flex items-center gap-2 px-3 py-3 bg-white/90 backdrop-blur-2xl rounded-2xl shadow-xl shadow-gray-900/5 border border-white/50"
-        initial={{ scale: 0.9 }}
-        animate={{ scale: 1 }}
-        transition={{ 
-          duration: 0.4, 
-          ease: [0.25, 0.46, 0.45, 0.94],
-          delay: 0.05
-        }}
-      >
-        <div className="absolute inset-0 rounded-2xl bg-linear-to-b from-white/80 to-transparent pointer-events-none" />
-        <motion.a 
-          href="/"
-          className="relative z-10 flex items-center gap-2 px-4 py-2.5 rounded-xl hover:bg-orange-50 transition-colors duration-300 group"
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <div className="w-8 h-8 rounded-lg bg-linear-to-br from-orange-400 to-orange-600 flex items-center justify-center shadow-md shadow-orange-200/50 group-hover:shadow-lg group-hover:shadow-orange-300/50 transition-shadow duration-300">
-            <Plane className="w-4 h-4 text-white" />
-          </div>
-          <span className="text-base font-bold bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
-            {t("navbar.brand")}
-          </span>
-        </motion.a>
-
-        <div className="w-px h-8 bg-linear-to-b from-transparent via-gray-200 to-transparent" />
-
-        <div className="relative z-10 flex items-center gap-1 px-2">
-          {navLinks.filter(l => !l.isHome).map((link) => (
-            <motion.a 
-              key={link.href}
-              href={link.href}
-              className={`relative px-5 py-2.5 text-sm font-medium rounded-xl transition-colors duration-300 ${
-                link.href === "/about" ? "text-orange-600" : "text-gray-600"
-              }`}
-              onHoverStart={() => setHoveredLink(link.href)}
-              onHoverEnd={() => setHoveredLink(null)}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <AnimatePresence>
-                {hoveredLink === link.href && (
-                  <motion.div
-                    className="absolute inset-0 bg-gray-100 rounded-xl"
-                    layoutId="navHoverAbout"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  />
-                )}
-              </AnimatePresence>
-              <span className={`relative z-10 transition-colors duration-300 ${hoveredLink === link.href ? 'text-gray-900' : ''}`}>
-                {link.label}
-              </span>
-              {link.href === "/about" && (
-                <motion.div 
-                  className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-orange-500"
-                  layoutId="activeIndicator"
-                />
-              )}
-            </motion.a>
-          ))}
-        </div>
-
-        <div className="w-px h-8 bg-linear-to-b from-transparent via-gray-200 to-transparent" />
-
-        <motion.button
-          onClick={handleStartClick}
-          className="relative z-10 flex items-center gap-2.5 px-6 py-2.5 bg-linear-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/25 overflow-hidden group"
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-        >
-          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
-          
-          <div className="absolute inset-0 bg-linear-to-t from-orange-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          
-          <Plane className="relative z-10 w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-          <span className="relative z-10">{t("startFlying")}</span>
-        </motion.button>
-      </motion.nav>
-    </motion.div>
-  );
-}
-
-function MobileNavMenu() {
-  const t = useTranslations("LandingPage");
-  const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
-  const [selected, setSelected] = useState("About");
-  
-  const navItems = [
-    { label: t("navbar.about"), href: "/about" },
-    { label: t("navbar.changelog"), href: "/patch" },
-    { label: t("navbar.help"), href: "/chat" },
-  ];
-
-  const handleNavClick = (href: string, label: string) => {
-    setSelected(label);
-    setIsOpen(false);
-    setTimeout(() => {
-      router.push(href);
-    }, 150);
-  };
-
-  return (
-    <>
-      <motion.button
-        onClick={() => setIsOpen(!isOpen)}
-        className="fixed top-4 right-4 z-50 w-11 h-11 flex items-center justify-center bg-white/90 backdrop-blur-md rounded-xl shadow-lg border border-gray-100 md:hidden"
-        whileTap={{ scale: 0.95 }}
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3 }}
-      >
-        <AnimatePresence mode="wait">
-          {isOpen ? (
-            <motion.div
-              key="close"
-              initial={{ rotate: -90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: 90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <X className="w-5 h-5 text-gray-700" />
-            </motion.div>
-          ) : (
-            <motion.div
-              key="menu"
-              initial={{ rotate: 90, opacity: 0 }}
-              animate={{ rotate: 0, opacity: 1 }}
-              exit={{ rotate: -90, opacity: 0 }}
-              transition={{ duration: 0.15 }}
-            >
-              <Menu className="w-5 h-5 text-gray-700" />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.button>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -10, scale: 0.95 }}
-            transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-18 right-4 z-50 bg-white/95 backdrop-blur-xl rounded-2xl shadow-xl border border-gray-100 overflow-hidden md:hidden"
-          >
-            <div className="p-2 flex flex-col gap-1 min-w-[140px]">
-              {navItems.map((item) => (
-                <div
-                  key={item.href}
-                  onClick={() => handleNavClick(item.href, item.label)}
-                  className="px-1 py-1"
-                >
-                  <ChipTab
-                    text={item.label}
-                    selected={item.href === "/about"}
-                    setSelected={() => {}}
-                  />
-                </div>
-              ))}
-              
-              <div className="pt-2 mt-1 border-t border-gray-100 px-2">
-                <LanguageSwitcher variant="dark" />
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm md:hidden"
-            onClick={() => setIsOpen(false)}
-          />
-        )}
-      </AnimatePresence>
-    </>
-  );
-}
 
 function RevealText({ 
   children, 
@@ -704,31 +487,6 @@ function TabsSection() {
   );
 }
 
-function Footer() {
-  const t = useTranslations("LandingPage");
-
-  return (
-    <footer className="relative py-8 px-6 bg-gray-900 text-white mt-12">
-      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="text-gray-400 text-sm">
-          {t("footer.copyright")}
-        </div>
-        <div className="flex items-center gap-6">
-          <a href="/about" className="text-orange-400 text-sm transition-colors">
-            {t("footer.about")}
-          </a>
-          <a href="/patch" className="text-gray-400 hover:text-orange-400 text-sm transition-colors">
-            {t("footer.changelog")}
-          </a>
-          <a href="/chat" className="text-gray-400 hover:text-orange-400 text-sm transition-colors">
-            {t("footer.help")}
-          </a>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
 function BackToTopButton() {
   const [isVisible, setIsVisible] = useState(false);
 
@@ -792,8 +550,8 @@ export default function AboutContainer() {
         />
       </div>
 
-      <FloatingNavbar />
-      <MobileNavMenu />
+      <FloatingNavbar activePath="/about" />
+      <MobileNavMenu activePath="/about" />
       
       <div className="hidden md:block md:fixed md:top-4 md:right-4 md:z-100">
         <LanguageSwitcher variant="dark" />
@@ -804,7 +562,7 @@ export default function AboutContainer() {
         <TabsSection />
       </main>
 
-      <Footer />
+      <SiteFooter activePath="/about" className="mt-12" />
 
       <BackToTopButton />
     </div>
