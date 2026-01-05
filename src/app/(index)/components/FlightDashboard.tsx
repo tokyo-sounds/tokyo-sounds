@@ -71,6 +71,8 @@ export default function FlightDashboard({
         isGyroAvailable={gyroState.isAvailable}
         isMobile={isMobile}
         onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
+        nearbyPlayers={nearbyPlayers}
+        localPlayerPosition={localPlayerPosition}
       />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <AttitudeIndicator
@@ -97,15 +99,6 @@ export default function FlightDashboard({
           heading={heading}
           size={speedoMeterSize}
           mapsApiKey={mapsApiKey}
-          nearbyPlayers={nearbyPlayers}
-          localPlayerPosition={localPlayerPosition}
-        />
-      </div>
-
-      <div className="hidden md:block absolute bottom-6 md:bottom-10 right-6 md:right-10">
-        <Compass
-          heading={heading}
-          size={speedoMeterSize}
           nearbyPlayers={nearbyPlayers}
           localPlayerPosition={localPlayerPosition}
         />
