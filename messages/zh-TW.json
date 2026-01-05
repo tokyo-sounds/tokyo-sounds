@@ -412,7 +412,20 @@
     "multiplayer": "多人遊戲",
     "multiplayerLabel": "Multiplayer",
     "demoPlay": "演示播放",
-    "droneMode": "無人機模式"
+    "droneMode": "無人機模式",
+    "bodyControl": "身體控制",
+    "bodyControlTitle": "身體控制",
+    "bodyControlDescription": "透過攝影機使用身體姿勢控制飛機",
+    "primeBodyControl": "準備",
+    "loadingModel": "載入模型中...",
+    "activateBodyControl": "啟動",
+    "deactivateBodyControl": "停用",
+    "retryBodyControl": "重試",
+    "modelVariant": "模型變體",
+    "modelLite": "Lite（最快）",
+    "modelFull": "Full（平衡）",
+    "modelHeavy": "Heavy（最準確）",
+    "lowFpsWarning": "偵測到FPS較低。請考慮切換到較輕的模型。"
   },
   "OperationManual": {
     "title": "操作指南",

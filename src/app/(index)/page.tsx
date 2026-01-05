@@ -59,10 +59,12 @@ import { OtherPlayers } from "@/components/city/OtherPlayers";
 // import { AmbientBackgroundAudioProvider } from "@/components/city/AmbientBackgroundAudioContext";
 // import { AmbientBackgroundAudio } from "@/components/city/AmbientBackgroundAudio";
 import VirtualController from "@/components/widget/VirtualController";
+import PoseControlHUD from "@/components/city/PoseControlHUD";
 // Hooks
 import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { useMultiplayer } from "@/hooks/useMultiplayer";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useMediaPipePose } from "@/hooks/useMediaPipePose";
 // Stores
 import { useGenerativeAudioStore } from "@/stores/use-generative-audio-store";
 import { useChatPopupStore } from "@/stores/use-chat-popup-store";
@@ -390,6 +392,21 @@ export default function TokyoPage() {
   // Track closing state to prevent immediate reopen after Esc closes menu
   const isClosingDebugMenuRef = useRef(false);
 
+  // Body Control (MediaPipe Pose)
+  const {
+    state: poseState,
+    error: poseError,
+    landmarks: poseLandmarks,
+    flightInput: poseFlightInput,
+    fps: poseFps,
+    videoRef: poseVideoRef,
+    modelVariant: poseModelVariant,
+    prime: primePose,
+    activate: activatePose,
+    deactivate: deactivatePose,
+    setModelVariant: setPoseModelVariant,
+  } = useMediaPipePose();
+
   // Set operationManualOpen to true after hydration
   useEffect(() => {
     if (mounted) {
@@ -504,6 +521,7 @@ export default function TokyoPage() {
               onGyroStateChange={setGyroState}
               planeColor={planeColor}
               flyingVolume={flyingVolume}
+              poseInput={poseState === "active" ? poseFlightInput : null}
             />
 
             <FlightBoundsHelper visible={debugOptions.showBounds} />
@@ -631,7 +649,25 @@ export default function TokyoPage() {
           roll={roll}
           multiplayerConnected={multiplayerConnected}
           playerCount={playerCount}
+          poseState={poseState}
+          poseError={poseError}
+          poseModelVariant={poseModelVariant}
+          onPrimePose={primePose}
+          onActivatePose={activatePose}
+          onDeactivatePose={deactivatePose}
+          onPoseModelVariantChange={setPoseModelVariant}
         />
+
+        {(poseState === "ready" || poseState === "active") && (
+          <PoseControlHUD
+            videoRef={poseVideoRef}
+            landmarks={poseLandmarks}
+            flightInput={poseFlightInput}
+            fps={poseFps}
+            onDeactivate={deactivatePose}
+            isVisible={poseState === "active"}
+          />
+        )}
       </VolumeContext.Provider>
     </div>
   );

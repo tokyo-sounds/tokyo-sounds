@@ -412,7 +412,20 @@
     "multiplayer": "マルチプレイヤー",
     "multiplayerLabel": "Multiplayer",
     "demoPlay": "デモプレイ",
-    "droneMode": "ドローンモード"
+    "droneMode": "ドローンモード",
+    "bodyControl": "ボディコントロール",
+    "bodyControlTitle": "ボディコントロール",
+    "bodyControlDescription": "Webカメラで体の姿勢を使って飛行機を操作",
+    "primeBodyControl": "準備",
+    "loadingModel": "モデル読み込み中...",
+    "activateBodyControl": "開始",
+    "deactivateBodyControl": "停止",
+    "retryBodyControl": "再試行",
+    "modelVariant": "モデルバリアント",
+    "modelLite": "Lite（最速）",
+    "modelFull": "Full（バランス）",
+    "modelHeavy": "Heavy（最高精度）",
+    "lowFpsWarning": "FPSが低下しています。より軽量なモデルへの切り替えを検討してください。"
   },
   "OperationManual": {
     "title": "操作ガイド",

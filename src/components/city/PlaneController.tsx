@@ -22,6 +22,7 @@ import * as THREE from "three";
 import { useFlight } from "@/hooks/useFlight";
 import { useDemoFlythrough, type DemoState } from "@/hooks/useDemoFlythrough";
 import { type MovementMode } from "@/lib/flight";
+import { type PoseFlightInput } from "@/lib/pose-to-flight";
 import { type DemoWaypoint } from "@/config/tokyo-config";
 
 export interface PlaneControllerHandle {
@@ -87,6 +88,7 @@ interface PlaneControllerProps {
   onGyroStateChange?: (state: GyroState) => void;
   planeColor?: string;
   flyingVolume?: number;
+  poseInput?: PoseFlightInput | null; // Body control input from MediaPipe Pose
 }
 
 const COLLISION_DISTANCE = 2;
@@ -120,6 +122,7 @@ export const PlaneController = forwardRef<
     onGyroStateChange,
     planeColor,
     flyingVolume = FLYING_AUDIO_VOLUME,
+    poseInput,
   },
   ref
 ) {
@@ -351,6 +354,7 @@ export const PlaneController = forwardRef<
     },
     onSpeedChange,
     onModeChange,
+    poseInput,
   });
 
   useEffect(() => {

@@ -409,7 +409,20 @@
     "multiplayer": "Multiplayer",
     "multiplayerLabel": "Multiplayer",
     "demoPlay": "Demo Play",
-    "droneMode": "Drone Mode"
+    "droneMode": "Drone Mode",
+    "bodyControl": "Body Control",
+    "bodyControlTitle": "Body Control",
+    "bodyControlDescription": "Control the plane using your body posture via webcam",
+    "primeBodyControl": "Prime",
+    "loadingModel": "Loading Model...",
+    "activateBodyControl": "Activate",
+    "deactivateBodyControl": "Deactivate",
+    "retryBodyControl": "Retry",
+    "modelVariant": "Model Variant",
+    "modelLite": "Lite (fastest)",
+    "modelFull": "Full (balanced)",
+    "modelHeavy": "Heavy (most accurate)",
+    "lowFpsWarning": "Low FPS detected. Consider switching to a lighter model."
   },
   "OperationManual": {
     "title": "Operation Guide",

@@ -411,7 +411,20 @@
     "multiplayer": "多人游戏",
     "multiplayerLabel": "Multiplayer",
     "demoPlay": "演示播放",
-    "droneMode": "无人机模式"
+    "droneMode": "无人机模式",
+    "bodyControl": "身体控制",
+    "bodyControlTitle": "身体控制",
+    "bodyControlDescription": "通过摄像头使用身体姿势控制飞机",
+    "primeBodyControl": "准备",
+    "loadingModel": "加载模型中...",
+    "activateBodyControl": "激活",
+    "deactivateBodyControl": "停用",
+    "retryBodyControl": "重试",
+    "modelVariant": "模型变体",
+    "modelLite": "Lite（最快）",
+    "modelFull": "Full（平衡）",
+    "modelHeavy": "Heavy（最准确）",
+    "lowFpsWarning": "检测到FPS较低。请考虑切换到较轻的模型。"
   },
   "OperationManual": {
     "title": "操作指南",
