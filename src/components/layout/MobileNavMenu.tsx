@@ -19,6 +19,7 @@ export default function MobileNavMenu({ activePath }: MobileNavMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   
   const navItems = [
+    { label: t("navbar.home"), href: "/" },
     { label: t("navbar.about"), href: "/about" },
     { label: t("navbar.changelog"), href: "/patch" },
     { label: t("navbar.help"), href: "/chat" },

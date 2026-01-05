@@ -23,6 +23,7 @@
     },
     "navbar": {
       "brand": "TOKYO SOUNDS",
+      "home": "ホーム",
       "about": "コンセプト",
       "changelog": "開発履歴",
       "help": "ヘルプ"
