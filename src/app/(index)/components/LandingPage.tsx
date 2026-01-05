@@ -469,11 +469,24 @@ const globalStartTime = Date.now();
 const getGlobalTime = () => (Date.now() - globalStartTime) / 1000;
 
 const baseColor = new THREE.Color("#f3f4f6");
+const blackColor = new THREE.Color("#000000");
 const activeColors = [
   new THREE.Color("#f97316"),
   new THREE.Color("#fb923c"),
   new THREE.Color("#fdba74"),
 ];
+
+/**
+ * Helper to dispose a cloned THREE.js scene's geometries
+ * Materials should be disposed separately as they may be shared
+ */
+function disposeClonedScene(scene: THREE.Object3D) {
+  scene.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      child.geometry?.dispose();
+    }
+  });
+}
 
 function FadingBuilding({
   position,
@@ -520,7 +533,7 @@ function FadingBuilding({
     const activeColor = activeColors[activeMaterialIndex];
     materialRef.current.color.copy(baseColor).lerp(activeColor, fadeRef.current);
     
-    materialRef.current.emissive.copy(new THREE.Color("#000000")).lerp(activeColor, fadeRef.current);
+    materialRef.current.emissive.copy(blackColor).lerp(activeColor, fadeRef.current);
     materialRef.current.emissiveIntensity = fadeRef.current * 0.3;
   });
   
@@ -643,8 +656,9 @@ function FloatingPlane() {
   useEffect(() => {
     return () => {
       material.dispose();
+      disposeClonedScene(clonedScene);
     };
-  }, [material]);
+  }, [material, clonedScene]);
 
   const baseRotationY = Math.PI * 0.25;
   const baseRotationX = Math.PI * 0.11;
@@ -781,8 +795,9 @@ function HoveringPaperPlane() {
     return () => {
       material.dispose();
       contrailMaterials.forEach(m => m.dispose());
+      disposeClonedScene(clonedScene);
     };
-  }, [material, contrailMaterials]);
+  }, [material, contrailMaterials, clonedScene]);
   
   useFrame(() => {
     if (!groupRef.current) return;
@@ -853,8 +868,9 @@ function WingmanPlane({ color, side }: { color: number; side: 'left' | 'right' }
         materialRef.current.dispose();
       }
       contrailMaterialsRef.current.forEach(m => m.dispose());
+      disposeClonedScene(clonedScene);
     };
-  }, []);
+  }, [clonedScene]);
   
   const easeInOutCubic = (t: number) => t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
