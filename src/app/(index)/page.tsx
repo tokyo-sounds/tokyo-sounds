@@ -551,13 +551,11 @@ export default function TokyoPage() {
             style={{ opacity: districtOverlayVisible ? 0 : 1 }}
           >
             <FlightDashboard
-              flightSpeed={flightSpeed}
               pitch={pitch}
               roll={roll}
               cameraY={cameraY}
               groundDistance={groundDistance}
               mapsApiKey={ENV_MAPS_API_KEY}
-              handleTeleport={handleTeleport}
               gyroState={gyroState}
               planeControllerRef={
                 planeControllerRef as React.RefObject<PlaneControllerHandle>
