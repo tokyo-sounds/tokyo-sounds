@@ -226,6 +226,16 @@
     "pageTitle": "開発履歴",
     "title": "進化の足あと TOKYOSOUNDS開発物語",
     "description": "TOKYOSOUNDS はどんな風に進化してきた？ここでは、ひとつひとつのアップデートに込められた工夫やストーリー、ユニークな新機能まで、開発の舞台裏をすべて大公開！過去・現在・未来の足あとを、ぜひ一緒に旅してみてください。",
+    "demoVersions": {
+      "title": "デモバージョン",
+      "subtitle": "過去のバージョンを体験する",
+      "v1": "オリジナルのThree.js都市",
+      "v2": "AI音楽統合版"
+    },
+    "versionHistory": {
+      "title": "バージョン履歴",
+      "subtitle": "すべてのアップデートとマイルストーン"
+    },
     "patchNotes": [
       {
         "id": "v0.0.1",

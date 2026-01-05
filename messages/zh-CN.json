@@ -225,6 +225,16 @@
     "pageTitle": "开发历史",
     "title": "进化的足迹 TOKYOSOUNDS开发故事",
     "description": "TOKYOSOUNDS 是如何进化的？在这里，我们将公开每一个更新中包含的巧思和故事，以及独特的新功能，所有开发的幕后花絮！请和我们一起踏上过去、现在、未来的足迹之旅。",
+    "demoVersions": {
+      "title": "演示版本",
+      "subtitle": "体验 Tokyo Sounds 的历史版本",
+      "v1": "原始 Three.js 城市",
+      "v2": "AI 音乐集成版"
+    },
+    "versionHistory": {
+      "title": "版本历史",
+      "subtitle": "所有更新和里程碑"
+    },
     "patchNotes": [
       {
         "id": "v0.0.1",

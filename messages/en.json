@@ -223,6 +223,16 @@
     "pageTitle": "Development History",
     "title": "Evolution Footprints TOKYOSOUNDS Development Story",
     "description": "How has TOKYOSOUNDS evolved? Here, we reveal all the behind-the-scenes of development, including the ingenuity and stories contained in each update, as well as unique new features! Please join us on a journey through the footprints of the past, present, and future.",
+    "demoVersions": {
+      "title": "Demo Versions",
+      "subtitle": "Experience previous versions of Tokyo Sounds",
+      "v1": "Original Three.js City",
+      "v2": "AI Music Integration"
+    },
+    "versionHistory": {
+      "title": "Version History",
+      "subtitle": "All updates and milestones"
+    },
     "patchNotes": [
       {
         "id": "v0.0.1",
