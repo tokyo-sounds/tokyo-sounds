@@ -1,9 +1,13 @@
 "use client";
 
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { memo, useMemo, useEffect, useRef, useCallback } from "react";
+import { memo, useMemo, useEffect, useRef } from "react";
 import { type PlayerState } from "@/types/multiplayer";
 import * as THREE from "three";
+import { latLngAltToENU } from "@/lib/geo-utils";
+import { TOKYO_CENTER } from "@/config/tokyo-config";
+import { TOKYO_LANDMARKS, LANDMARK_VISIBILITY } from "@/config/landmarks-config";
 
 /** CompassBar
  *
@@ -59,6 +63,11 @@ const PLAYER_DOT_SIZE = 4; // Size of player indicator dots
 const PLAYER_ARROW_SIZE = 6; // Size of indicator container
 const ALTITUDE_THRESHOLD = 20; // Meters difference to show altitude indicator
 
+// Landmark indicator constants
+const LANDMARK_ICON_SIZE = 18; // Size of landmark icons in pixels
+const LANDMARK_FADE_START = LANDMARK_VISIBILITY.COMPASS_BAR_DISTANCE; // 5000m - starts appearing
+const LANDMARK_FADE_END = 1000; // Fully visible at 1km
+
 // Optimized cardinal direction lookup
 const getCardinal = (h: number): string => {
   const normalized = ((h % 360) + 360) % 360;
@@ -109,6 +118,25 @@ function CompassBar({
   const headingTextRef = useRef<HTMLSpanElement>(null);
   const cardinalRef = useRef<HTMLSpanElement>(null);
   const playerMarkersRef = useRef<HTMLDivElement>(null);
+  const landmarkMarkersRef = useRef<HTMLDivElement>(null);
+
+  // Data refs to avoid RAF dependency changes - explicit types
+  const playerMarkersDataRef = useRef<Array<{
+    id: string;
+    color: string;
+    name: string;
+    bearing: number;
+    heading: number;
+    altitudeIndicator: "above" | "below" | "same";
+  }>>([]);
+  const landmarkMarkersDataRef = useRef<Array<{
+    id: string;
+    name: string;
+    icon: string;
+    bearing: number;
+    distance: number;
+    opacity: number;
+  }>>([]);
 
   // Round pitch/roll for display (heading is smoothed)
   const roundedPitch = Math.round(pitch);
@@ -154,6 +182,64 @@ function CompassBar({
     });
   }, [nearbyPlayers, localPlayerPosition]);
 
+  // Calculate landmark marker data (positions relative to heading with distance-based opacity)
+  const landmarkMarkers = useMemo(() => {
+    if (!localPlayerPosition) return [];
+
+    return TOKYO_LANDMARKS.map((landmark) => {
+      // Convert landmark lat/lng to ENU coordinates
+      const landmarkENU = latLngAltToENU(
+        landmark.lat,
+        landmark.lng,
+        landmark.groundAlt,
+        TOKYO_CENTER.lat,
+        TOKYO_CENTER.lng,
+        0
+      );
+
+      // Calculate direction from local player to landmark (in XZ plane)
+      const dx = landmarkENU.x - localPlayerPosition.x;
+      const dz = landmarkENU.z - localPlayerPosition.z;
+
+      // Calculate distance
+      const distance = Math.sqrt(dx * dx + dz * dz);
+
+      // Calculate opacity based on distance (fade in from 5km to 1km)
+      let opacity = 0;
+      if (distance <= LANDMARK_FADE_END) {
+        opacity = 1;
+      } else if (distance < LANDMARK_FADE_START) {
+        // Linear interpolation between fade start and fade end
+        opacity = 1 - (distance - LANDMARK_FADE_END) / (LANDMARK_FADE_START - LANDMARK_FADE_END);
+      }
+
+      // Skip if not visible
+      if (opacity <= 0) return null;
+
+      // Calculate world bearing (0° = North/-Z, 90° = East/+X)
+      const worldBearing = (Math.atan2(dx, -dz) * 180) / Math.PI;
+      const normalizedBearing = normalizeHeading(worldBearing);
+
+      return {
+        id: landmark.id,
+        name: landmark.name,
+        icon: landmark.icon,
+        bearing: normalizedBearing,
+        distance,
+        opacity,
+      };
+    }).filter((marker): marker is NonNullable<typeof marker> => marker !== null);
+  }, [localPlayerPosition]);
+
+  // Sync marker data to refs for stable RAF access
+  useEffect(() => {
+    playerMarkersDataRef.current = playerMarkers;
+  }, [playerMarkers]);
+
+  useEffect(() => {
+    landmarkMarkersDataRef.current = landmarkMarkers;
+  }, [landmarkMarkers]);
+
   // Update target heading and velocity when prop changes
   useEffect(() => {
     const now = performance.now();
@@ -177,38 +263,7 @@ function CompassBar({
     lastSampleRef.current = { time: now, heading };
   }, [heading]);
 
-  // Update player marker positions (called from animation loop)
-  const updatePlayerMarkers = useCallback(
-    (displayHeading: number) => {
-      if (!playerMarkersRef.current || playerMarkers.length === 0) return;
-
-      const children = playerMarkersRef.current.children;
-      const halfRange = VISIBLE_RANGE / 2;
-      const centerX = COMPASS_WIDTH / 2;
-
-      for (let i = 0; i < playerMarkers.length && i < children.length; i++) {
-        const marker = playerMarkers[i];
-        const child = children[i] as HTMLElement;
-
-        // Calculate relative bearing (how far off from current heading)
-        let relativeBearing = shortestAngleDelta(displayHeading, marker.bearing);
-
-        // Check if within visible range
-        if (Math.abs(relativeBearing) <= halfRange) {
-          // Position in pixels from center
-          const pixelOffset = relativeBearing * PIXELS_PER_DEGREE;
-          child.style.transform = `translateX(${centerX + pixelOffset}px) translateX(-50%)`;
-          child.style.opacity = "1";
-        } else {
-          // Hide if outside visible range
-          child.style.opacity = "0";
-        }
-      }
-    },
-    [playerMarkers]
-  );
-
-  // RAF animation loop
+  // RAF animation loop - no dependencies to keep it stable like master branch
   useEffect(() => {
     const animate = () => {
       const target = targetHeadingRef.current;
@@ -243,8 +298,59 @@ function CompassBar({
         cardinalRef.current.textContent = getCardinal(displayHeading);
       }
 
-      // Update player marker positions
-      updatePlayerMarkers(displayHeading);
+      // Update player marker positions (inline, reading from ref)
+      const currentPlayerMarkers = playerMarkersDataRef.current;
+      if (playerMarkersRef.current && currentPlayerMarkers.length > 0) {
+        const children = playerMarkersRef.current.children;
+        const halfRange = VISIBLE_RANGE / 2;
+        const centerX = COMPASS_WIDTH / 2;
+
+        for (let i = 0; i < currentPlayerMarkers.length && i < children.length; i++) {
+          const marker = currentPlayerMarkers[i];
+          const child = children[i] as HTMLElement;
+
+          // Calculate relative bearing (how far off from current heading)
+          const relativeBearing = shortestAngleDelta(displayHeading, marker.bearing);
+
+          // Check if within visible range
+          if (Math.abs(relativeBearing) <= halfRange) {
+            // Position in pixels from center
+            const pixelOffset = relativeBearing * PIXELS_PER_DEGREE;
+            child.style.transform = `translateX(${centerX + pixelOffset}px) translateX(-50%)`;
+            child.style.opacity = "1";
+          } else {
+            // Hide if outside visible range
+            child.style.opacity = "0";
+          }
+        }
+      }
+
+      // Update landmark marker positions (inline, reading from ref)
+      const currentLandmarkMarkers = landmarkMarkersDataRef.current;
+      if (landmarkMarkersRef.current && currentLandmarkMarkers.length > 0) {
+        const children = landmarkMarkersRef.current.children;
+        const halfRange = VISIBLE_RANGE / 2;
+        const centerX = COMPASS_WIDTH / 2;
+
+        for (let i = 0; i < currentLandmarkMarkers.length && i < children.length; i++) {
+          const marker = currentLandmarkMarkers[i];
+          const child = children[i] as HTMLElement;
+
+          // Calculate relative bearing (how far off from current heading)
+          const relativeBearing = shortestAngleDelta(displayHeading, marker.bearing);
+
+          // Check if within visible range
+          if (Math.abs(relativeBearing) <= halfRange) {
+            // Position in pixels from center
+            const pixelOffset = relativeBearing * PIXELS_PER_DEGREE;
+            child.style.transform = `translateX(${centerX + pixelOffset}px) translateX(-50%)`;
+            child.style.opacity = String(marker.opacity);
+          } else {
+            // Hide if outside visible range
+            child.style.opacity = "0";
+          }
+        }
+      }
 
       rafIdRef.current = requestAnimationFrame(animate);
     };
@@ -256,7 +362,7 @@ function CompassBar({
         cancelAnimationFrame(rafIdRef.current);
       }
     };
-  }, [updatePlayerMarkers]);
+  }, []);
 
   // Memoize computed values for pitch/roll display
   const displayValues = useMemo(
@@ -471,6 +577,41 @@ function CompassBar({
                   />
                 )}
               </svg>
+            </div>
+          ))}
+        </div>
+
+        {/* Landmark markers overlay - positioned absolutely, updated via RAF */}
+        <div
+          ref={landmarkMarkersRef}
+          className="absolute inset-0 pointer-events-none z-30"
+        >
+          {landmarkMarkers.map((marker) => (
+            <div
+              key={marker.id}
+              className="absolute top-1/2 -translate-y-1/2 transition-opacity duration-150"
+              style={{ opacity: 0 }} // Initial hidden, RAF will show if visible
+            >
+              <div
+                className="relative"
+                style={{
+                  width: LANDMARK_ICON_SIZE,
+                  height: LANDMARK_ICON_SIZE,
+                  transform: "translateX(-50%)",
+                  marginTop: -LANDMARK_ICON_SIZE / 2,
+                }}
+              >
+                <Image
+                  src={marker.icon}
+                  alt={marker.name}
+                  width={LANDMARK_ICON_SIZE}
+                  height={LANDMARK_ICON_SIZE}
+                  className="drop-shadow-md"
+                  style={{
+                    filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+                  }}
+                />
+              </div>
             </div>
           ))}
         </div>

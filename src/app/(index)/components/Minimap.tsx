@@ -1,12 +1,16 @@
 "use client";
 
 import { useMemo, useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 import { type PlayerState } from "@/types/multiplayer";
 import * as THREE from "three";
-import { enuToLatLngAlt } from "@/lib/geo-utils";
+import { enuToLatLngAlt, latLngAltToENU } from "@/lib/geo-utils";
 import { TOKYO_CENTER } from "@/config/tokyo-config";
+import { TOKYO_LANDMARKS } from "@/config/landmarks-config";
 
 const PLAYER_ARROW_SIZE = 12;
+
+const LANDMARK_ICON_SIZE = 20; // Size of landmark icons in pixels
 
 const MAP_ZOOM_LEVEL = 16;
 
@@ -88,6 +92,7 @@ export default function Minimap({
 
   const rotatingMapRef = useRef<HTMLDivElement>(null);
   const playersOverlayRef = useRef<SVGSVGElement>(null);
+  const landmarksOverlayRef = useRef<HTMLDivElement>(null);
   const cardinalDirectionsRef = useRef<HTMLDivElement>(null);
 
   const currentAngleRef = useRef(-heading);
@@ -126,6 +131,9 @@ export default function Minimap({
     }
     if (playersOverlayRef.current) {
       playersOverlayRef.current.style.transform = transform;
+    }
+    if (landmarksOverlayRef.current) {
+      landmarksOverlayRef.current.style.transform = transform;
     }
     if (cardinalDirectionsRef.current) {
       cardinalDirectionsRef.current.style.transform = transform;
@@ -285,6 +293,46 @@ export default function Minimap({
     }>;
   }, [nearbyPlayers, localPlayerPosition, size]);
 
+  const landmarkMarkers = useMemo(() => {
+    if (!localPlayerPosition) return [];
+
+    const centerX = size / 2;
+    const centerY = size / 2;
+    const metersPerPixel = getMetersPerPixel(TOKYO_CENTER.lat, MAP_ZOOM_LEVEL);
+
+    return TOKYO_LANDMARKS.map((landmark) => {
+      const landmarkENU = latLngAltToENU(
+        landmark.lat,
+        landmark.lng,
+        landmark.groundAlt,
+        TOKYO_CENTER.lat,
+        TOKYO_CENTER.lng,
+        0
+      );
+
+      const dx = landmarkENU.x - localPlayerPosition.x; // East offset
+      const dz = landmarkENU.z - localPlayerPosition.z; // South offset (negative = North)
+      
+      const pixelOffsetX = dx / metersPerPixel;
+      const pixelOffsetY = dz / metersPerPixel; // +Z = South = down in screen
+      
+      const markerX = centerX + pixelOffsetX;
+      const markerY = centerY + pixelOffsetY;
+      
+      const distanceFromCenter = Math.sqrt(pixelOffsetX * pixelOffsetX + pixelOffsetY * pixelOffsetY);
+      const isVisible = distanceFromCenter < size * 0.7;
+
+      return {
+        id: landmark.id,
+        name: landmark.name,
+        icon: landmark.icon,
+        x: markerX,
+        y: markerY,
+        isVisible,
+      };
+    }).filter((marker) => marker.isVisible);
+  }, [localPlayerPosition, size]);
+
   const centerX = size / 2;
   const centerY = size / 2;
 
@@ -360,6 +408,36 @@ export default function Minimap({
           </g>
         ))}
       </svg>
+
+      <div
+        ref={landmarksOverlayRef}
+        className="absolute inset-0 pointer-events-none transform-gpu will-change-transform"
+        style={{ transformOrigin: "center center" }}
+      >
+        {landmarkMarkers.map((marker) => (
+          <div
+            key={marker.id}
+            className="absolute"
+            style={{
+              left: marker.x - LANDMARK_ICON_SIZE / 2,
+              top: marker.y - LANDMARK_ICON_SIZE / 2,
+              width: LANDMARK_ICON_SIZE,
+              height: LANDMARK_ICON_SIZE,
+            }}
+          >
+            <Image
+              src={marker.icon}
+              alt={marker.name}
+              width={LANDMARK_ICON_SIZE}
+              height={LANDMARK_ICON_SIZE}
+              className="drop-shadow-lg"
+              style={{
+                filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.8))",
+              }}
+            />
+          </div>
+        ))}
+      </div>
 
       <svg
         width={size}
