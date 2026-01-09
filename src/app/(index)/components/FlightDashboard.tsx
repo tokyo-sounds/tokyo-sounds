@@ -1,12 +1,11 @@
 "use client";
 
-import SpeedoMeter from "./SpeedoMeter";
+import Minimap from "./Minimap";
 import Compass from "./Compass";
 import CompassBar from "./CompassBar";
 import AttitudeIndicator from "./AttitudeIndicator";
 import InformationContainer from "./InformationContainer";
 import TimeOfDayEffectsMenu from "./TimeOfDayEffectsMenu";
-import { type DemoState } from "@/hooks/useDemoFlythrough";
 import { type PlaneControllerHandle } from "@/components/city/PlaneController";
 
 import { type PlayerState } from "@/types/multiplayer";
@@ -15,7 +14,6 @@ import { enuToLatLngAlt } from "@/lib/geo-utils";
 import { TOKYO_CENTER } from "@/config/tokyo-config";
 
 interface FlightDashboardProps {
-  flightSpeed: number;
   heading: number;
   speedoMeterSize: number;
   operationManualOpen: boolean;
@@ -25,8 +23,6 @@ interface FlightDashboardProps {
   cameraY: number;
   groundDistance: number | null;
   mapsApiKey: string;
-  handleTeleport: (lat: number, lng: number, alt: number) => void;
-  demoState?: DemoState;
   gyroState: {
     isActive: boolean;
     isAvailable: boolean;
@@ -40,13 +36,13 @@ interface FlightDashboardProps {
 }
 
 export default function FlightDashboard({
-  flightSpeed,
   heading,
   speedoMeterSize,
   pitch,
   roll,
   cameraY,
   groundDistance,
+  mapsApiKey,
   gyroState,
   planeControllerRef,
   isMobile,
@@ -75,6 +71,8 @@ export default function FlightDashboard({
         isGyroAvailable={gyroState.isAvailable}
         isMobile={isMobile}
         onRecalibrateGyro={() => planeControllerRef.current?.recalibrateGyro()}
+        nearbyPlayers={nearbyPlayers}
+        localPlayerPosition={localPlayerPosition}
       />
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
         <AttitudeIndicator
@@ -97,13 +95,10 @@ export default function FlightDashboard({
         <TimeOfDayEffectsMenu />
       </div>
       <div className="hidden md:block absolute bottom-6 md:bottom-10 left-6 md:left-10">
-        <SpeedoMeter flightSpeed={flightSpeed} size={speedoMeterSize} />
-      </div>
-
-      <div className="hidden md:block absolute bottom-6 md:bottom-10 right-6 md:right-10">
-        <Compass
+        <Minimap
           heading={heading}
           size={speedoMeterSize}
+          mapsApiKey={mapsApiKey}
           nearbyPlayers={nearbyPlayers}
           localPlayerPosition={localPlayerPosition}
         />

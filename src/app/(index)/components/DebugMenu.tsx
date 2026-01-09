@@ -8,6 +8,8 @@ import { type DistrictDebugInfo } from "@/components/city/DistrictLyriaAudio";
 import DistrictDebugContent from "./DistricDebugContent";
 import { DebugOptions } from "../type/FlightPageTypes";
 import AudioVolumeControls from "@/components/audio/audio-volume-controls";
+import { type PoseControllerState } from "@/hooks/useMediaPipePose";
+import { type PoseModelVariant } from "@/lib/pose-to-flight";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import {
@@ -22,7 +24,14 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CodeXml, Play, Settings } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { CodeXml, Play, Settings, Loader2, AlertCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
 
 /** DebugMenu
@@ -58,6 +67,14 @@ export default function DebugMenu({
   roll,
   multiplayerConnected,
   playerCount,
+  // Body control props (simplified - preview moved to HUD)
+  poseState,
+  poseError,
+  poseModelVariant,
+  onPrimePose,
+  onActivatePose,
+  onDeactivatePose,
+  onPoseModelVariantChange,
 }: {
   options: DebugOptions;
   onOptionsChange: (key: keyof DebugOptions, value: boolean) => void;
@@ -83,6 +100,14 @@ export default function DebugMenu({
   roll: number;
   multiplayerConnected?: boolean;
   playerCount?: number;
+  // Body control props (simplified)
+  poseState: PoseControllerState;
+  poseError: string | null;
+  poseModelVariant: PoseModelVariant;
+  onPrimePose: () => void;
+  onActivatePose: () => void;
+  onDeactivatePose: () => void;
+  onPoseModelVariantChange: (variant: PoseModelVariant) => void;
 }) {
   const { currentTime, setTimeOfDay } = useTimeOfDayStore();
   const timeOptions: TimeOfDay[] = ["morning", "afternoon", "evening"];
@@ -297,6 +322,63 @@ export default function DebugMenu({
             </div>
 
             <div className="space-y-2 pb-2">
+              {/* Body Control Section */}
+              <div className="border-t border-neutral-700 pt-2 mt-2">
+                <DebugMenuLabel>{t("bodyControlTitle")}</DebugMenuLabel>
+                <div className="flex gap-2 items-center">
+                  <Select
+                    value={poseModelVariant}
+                    onValueChange={(value) => onPoseModelVariantChange(value as PoseModelVariant)}
+                    disabled={poseState === "loading" || poseState === "active"}
+                  >
+                    <SelectTrigger className="flex-1 bg-neutral-900 border-neutral-700 h-9">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="lite">{t("modelLite")}</SelectItem>
+                      <SelectItem value="full">{t("modelFull")}</SelectItem>
+                      <SelectItem value="heavy">{t("modelHeavy")}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  {poseState === "idle" && (
+                    <Button onClick={onPrimePose} size="sm" variant="outline">
+                      {t("primeBodyControl")}
+                    </Button>
+                  )}
+                  
+                  {poseState === "loading" && (
+                    <Button disabled size="sm" variant="outline">
+                      <Loader2 className="animate-spin size-4" />
+                    </Button>
+                  )}
+                  
+                  {poseState === "ready" && (
+                    <Button onClick={onActivatePose} size="sm" variant="default">
+                      {t("activateBodyControl")}
+                    </Button>
+                  )}
+                  
+                  {poseState === "active" && (
+                    <Button onClick={onDeactivatePose} size="sm" variant="destructive">
+                      {t("deactivateBodyControl")}
+                    </Button>
+                  )}
+                  
+                  {poseState === "error" && (
+                    <Button onClick={onPrimePose} size="sm" variant="outline">
+                      {t("retryBodyControl")}
+                    </Button>
+                  )}
+                </div>
+                {poseState === "error" && poseError && (
+                  <div className="flex items-center gap-2 text-destructive text-xs mt-1">
+                    <AlertCircle className="size-3" />
+                    <span>{poseError}</span>
+                  </div>
+                )}
+              </div>
+
               <Button
                 variant="outline"
                 size="lg"

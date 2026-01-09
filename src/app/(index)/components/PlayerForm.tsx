@@ -17,8 +17,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { SendHorizontal, Send } from "lucide-react";
+import { SendHorizontal, Send, Plane } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { motion } from "motion/react";
 
 interface PlayerFormProps {
   playerName: string;
@@ -30,6 +31,8 @@ interface PlayerFormProps {
   spatialAudioEnabled: boolean;
   setSpatialAudioEnabled: (spatialAudioEnabled: boolean) => void;
   handleStart: () => void;
+  isOpen?: boolean;
+  setIsOpen?: (isOpen: boolean) => void;
 }
 
 export default function PlayerForm({
@@ -42,19 +45,30 @@ export default function PlayerForm({
   spatialAudioEnabled,
   setSpatialAudioEnabled,
   handleStart,
+  isOpen,
+  setIsOpen,
 }: PlayerFormProps) {
   const t = useTranslations("LandingPage");
 
+  const dialogProps = setIsOpen 
+    ? { open: isOpen, onOpenChange: setIsOpen }
+    : {};
+
   return (
-    <Dialog>
+    <Dialog {...dialogProps}>
       <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          size="icon"
-          className="rounded-full translate-y-18 p-6"
+        <motion.button
+          className="relative flex items-center gap-2.5 px-6 py-3 bg-linear-to-r from-orange-500 to-orange-600 text-white font-semibold rounded-xl shadow-lg shadow-orange-500/25 overflow-hidden group cursor-pointer"
+          whileHover={{ scale: 1.03 }}
+          whileTap={{ scale: 0.97 }}
         >
-          <Send className="size-4" />
-        </Button>
+          <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
+          
+          <div className="absolute inset-0 bg-linear-to-t from-orange-600/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          
+          <Plane className="relative z-10 w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+          <span className="relative z-10">{t("startFlying")}</span>
+        </motion.button>
       </DialogTrigger>
       <DialogContent className="flight-dashboard-card shadow-xl slide-in-from-bottom-2">
         <DialogHeader>

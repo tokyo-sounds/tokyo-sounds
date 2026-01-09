@@ -11,6 +11,7 @@
     "enableGenerativeAudio": "Enable AI-generated music",
     "enableSpatialAudio": "Enable spatial audio",
     "startButton": "Start",
+    "startFlying": "Fly",
     "colors": {
       "white": "White",
       "orange": "Orange",
@@ -19,6 +20,79 @@
       "blue": "Blue",
       "black": "Black",
       "selectColor": "Select {color} color"
+    },
+    "navbar": {
+      "brand": "TOKYO SOUNDS",
+      "home": "Home",
+      "about": "About",
+      "changelog": "Changelog",
+      "help": "Help"
+    },
+    "hero": {
+      "japaneseLabel": "東京の音",
+      "title": "TOKYO SOUNDS",
+      "subtitle": "Fly through Tokyo. Experience AI-generated soundscapes.",
+      "scroll": "Scroll"
+    },
+    "about": {
+      "sectionLabel": "About the Project",
+      "titlePrefix": "A New Way to",
+      "titleHighlight": "Experience Tokyo",
+      "description": "Tokyo Sounds combines photorealistic 3D city visualization with AI-generated music to create an immersive audio-visual journey through Japan's capital.",
+      "features": [
+        {
+          "title": "3D Tokyo",
+          "description": "Explore photorealistic 3D Tokyo using Google Maps 3D Tiles"
+        },
+        {
+          "title": "AI Music",
+          "description": "Real-time AI-generated music that adapts to your location"
+        },
+        {
+          "title": "Spatial Audio",
+          "description": "Immersive 3D sound that responds to your position"
+        },
+        {
+          "title": "Generative",
+          "description": "Powered by Google Gemini Lyria for unique soundscapes"
+        }
+      ]
+    },
+    "tech": {
+      "sectionLabel": "Technology Stack",
+      "titlePrefix": "Built with",
+      "titleHighlight": "Modern Tech",
+      "technologies": [
+        { "name": "Next.js 16", "category": "Framework" },
+        { "name": "Three.js", "category": "3D Graphics" },
+        { "name": "React Three Fiber", "category": "3D Integration" },
+        { "name": "Google Maps 3D Tiles", "category": "City Data" },
+        { "name": "Gemini Lyria", "category": "AI Music" },
+        { "name": "Tone.js", "category": "Audio Engine" },
+        { "name": "Tailwind CSS", "category": "Styling" },
+        { "name": "Motion", "category": "Animations" }
+      ],
+      "stats": [
+        { "value": "3D", "label": "City Visualization" },
+        { "value": "AI", "label": "Generated Music" },
+        { "value": "Real-time", "label": "Audio Streaming" },
+        { "value": "Multiplayer", "label": "Experience" }
+      ]
+    },
+    "team": {
+      "sectionLabel": "Our Team",
+      "titlePrefix": "The",
+      "titleHighlight": "218"
+    },
+    "cta": {
+      "title": "Ready to Take Flight?",
+      "description": "Experience Tokyo like never before. Soar through the city and discover unique AI-generated soundscapes."
+    },
+    "footer": {
+      "copyright": "© 2026 Tokyo Sounds. HAL Tokyo.",
+      "about": "About",
+      "changelog": "Changelog",
+      "help": "Help"
     }
   },
   "FlightSettingsMenu": {
@@ -36,7 +110,7 @@
     "tabs": {
       "design": "Design",
       "tech": "Tech",
-      "member": "Member"
+      "member": "Members"
     },
     "designConcept": [
       {
@@ -70,7 +144,7 @@
       },
       {
         "title": "Audio Control",
-        "content": "The playback and control of environmental sounds adopt Tone.js, which dynamically adjusts volume and stereo panning (left-right hearing) in real-time according to the user's current position and the distance to each POI (Point of Interest). In addition, we integrate Google Gemini Lyria Realtime API for real-time AI sound generation, providing an immersive audio experience."
+        "content": "The audio engine was developed in-house, utilizing Tone.js for loading, playback, and control of audio, and Three.js' Positional Audio API for Spatial Audio (directional) playback based on the user's position and each POI (Point of Interest). Additionally, we integrate Google Gemini Lyria Realtime API for real-time AI sound generation, providing an immersive audio experience."
       },
       {
         "title": "AI Music Generation",
@@ -83,36 +157,66 @@
     ],
     "memberList": [
       {
-        "title": "Liu Chawei",
-        "content": "As team leader, responsible for project management, UI design, frontend development, and AI chatbot development. Also responsible for overall policy formulation and progress management."
+        "name": "Liu Chiawei",
+        "role": "Team Lead",
+        "description": "Project management, UI design, frontend development, and AI chatbot development. Responsible for overall policy formulation and progress management.",
+        "profileImage": "/images/members/liu-chiawei.jpeg",
+        "socials": {
+          "github": "https://github.com/liuchiawei"
+        }
       },
       {
-        "title": "Nakagawa Hunter",
-        "content": "Mainly responsible for the implementation of the entire website. Handles many technical aspects such as AI music generation, sound control, and Google Maps 3D Tiles API integration."
+        "name": "Hunter Nakagawa",
+        "role": "Lead Developer",
+        "description": "Architect and designer of sound engine, multiplayer, 3D city, AI generation, flight physics, and frontend. Responsible for the implementation of the entire website.",
+        "profileImage": "/images/members/nakagawa-hunter.jpeg",
+        "socials": {
+          "github": "https://github.com/itkla",
+          "website": "https://klae.ooo"
+        }
       },
       {
-        "title": "Zeb Kahn",
-        "content": "Main developer of v1.0. Mainly responsible for 3D scene construction and implementation using Three.js, as well as the representation of 3D spaces running on the web."
+        "name": "Zeb Khan",
+        "role": "3D Developer",
+        "description": "Main developer of v1.0. Responsible for 3D scene construction and implementation using Three.js, as well as the representation of 3D spaces running on the web.",
+        "profileImage": "/images/members/zeb-khan.jpg",
+        "socials": {
+          "github": "https://github.com/ths41461"
+        }
       },
       {
-        "title": "Zhong Chenghan",
-        "content": "Responsible for the production of 3D models used in the project."
+        "name": "Zhong Chenghan",
+        "role": "3D Modeler",
+        "description": "Responsible for the production of 3D models used in the project, including the paper airplane and environmental assets.",
+        "profileImage": "/images/members/zhong-chenghan.jpg"
       },
       {
-        "title": "Arizono Shuya",
-        "content": "Responsible for presentations in demonstrations and also supports T-shirt production."
+        "name": "Arizono Touya",
+        "role": "Presenter",
+        "description": "Responsible for presentations in demonstrations and supports promotional material production.",
+        "profileImage": "/images/members/arizono-touya.jpg",
+        "socials": {}
       },
       {
-        "title": "Li Zebin",
-        "content": "Responsible for T-shirt design."
+        "name": "Li Zebin",
+        "role": "Designer",
+        "description": "Responsible for T-shirt design and promotional graphics.",
+        "profileImage": "/images/members/li-zebin.jpg",
+        "socials": {}
       },
       {
-        "title": "Li Jianxing",
-        "content": "Responsible for organizing recorded environmental sounds."
+        "name": "Li Jianxing",
+        "role": "Sound Engineer",
+        "description": "Responsible for recording and organizing environmental sounds captured throughout Tokyo.",
+        "profileImage": "/images/members/li-jianxing.jpg",
+        "socials": {}
       },
       {
-        "title": "Li Sen",
-        "content": ""
+        "name": "Li Sen",
+        "role": "Team Member",
+        "description": "Supporting team member contributing to various aspects of the project.",
+        "profileImage": "/images/members/li-sen.jpg",
+        "socials": {}
       }
     ]
   },
@@ -120,6 +224,16 @@
     "pageTitle": "Development History",
     "title": "Evolution Footprints TOKYOSOUNDS Development Story",
     "description": "How has TOKYOSOUNDS evolved? Here, we reveal all the behind-the-scenes of development, including the ingenuity and stories contained in each update, as well as unique new features! Please join us on a journey through the footprints of the past, present, and future.",
+    "demoVersions": {
+      "title": "Demo Versions",
+      "subtitle": "Experience previous versions of Tokyo Sounds",
+      "v1": "Original Three.js City",
+      "v2": "AI Music Integration"
+    },
+    "versionHistory": {
+      "title": "Version History",
+      "subtitle": "All updates and milestones"
+    },
     "patchNotes": [
       {
         "id": "v0.0.1",
@@ -295,7 +409,20 @@
     "multiplayer": "Multiplayer",
     "multiplayerLabel": "Multiplayer",
     "demoPlay": "Demo Play",
-    "droneMode": "Drone Mode"
+    "droneMode": "Drone Mode",
+    "bodyControl": "Body Control",
+    "bodyControlTitle": "Body Control",
+    "bodyControlDescription": "Control the plane using your body posture via webcam",
+    "primeBodyControl": "Prime",
+    "loadingModel": "Loading Model...",
+    "activateBodyControl": "Activate",
+    "deactivateBodyControl": "Deactivate",
+    "retryBodyControl": "Retry",
+    "modelVariant": "Model Variant",
+    "modelLite": "Lite (fastest)",
+    "modelFull": "Full (balanced)",
+    "modelHeavy": "Heavy (most accurate)",
+    "lowFpsWarning": "Low FPS detected. Consider switching to a lighter model."
   },
   "OperationManual": {
     "title": "Operation Guide",
@@ -318,5 +445,15 @@
     "spatialAudio": "Spatial Audio",
     "lyriaAudio": "Lyria Audio",
     "flyingAudio": "Flying Audio"
+  },
+  "ChatPopup": {
+    "title": "Tokyo Sounds",
+    "subtitle": "AI Assistant",
+    "welcomeTitle": "Welcome to Tokyo Sounds",
+    "welcomeMessage": "Feel free to ask anything about the project",
+    "placeholder": "Type your question...",
+    "openChat": "Open chat",
+    "closeChat": "Close chat",
+    "sendMessage": "Send message"
   }
 }

@@ -11,6 +11,7 @@
     "enableGenerativeAudio": "啟用AI生成音樂",
     "enableSpatialAudio": "啟用空間音效",
     "startButton": "開始",
+    "startFlying": "開始飛行",
     "colors": {
       "white": "白色",
       "orange": "橙色",
@@ -19,6 +20,79 @@
       "blue": "藍色",
       "black": "黑色",
       "selectColor": "選擇{color}色"
+    },
+    "navbar": {
+      "brand": "TOKYO SOUNDS",
+      "home": "首頁",
+      "about": "關於",
+      "changelog": "開發歷史",
+      "help": "幫助"
+    },
+    "hero": {
+      "japaneseLabel": "東京の音",
+      "title": "TOKYO SOUNDS",
+      "subtitle": "飛越東京。體驗AI生成的聲音景觀。",
+      "scroll": "滾動"
+    },
+    "about": {
+      "sectionLabel": "專案介紹",
+      "titlePrefix": "體驗東京的",
+      "titleHighlight": "全新方式",
+      "description": "Tokyo Sounds將逼真的3D城市視覺化與AI生成音樂相結合，打造一場沉浸式的日本首都視聽之旅。",
+      "features": [
+        {
+          "title": "3D東京",
+          "description": "使用Google Maps 3D Tiles探索逼真的3D東京"
+        },
+        {
+          "title": "AI音樂",
+          "description": "根據您的位置即時變化的AI生成音樂"
+        },
+        {
+          "title": "空間音效",
+          "description": "隨位置變化的沉浸式3D聲音"
+        },
+        {
+          "title": "生成式",
+          "description": "由Google Gemini Lyria驅動的獨特聲音景觀"
+        }
+      ]
+    },
+    "tech": {
+      "sectionLabel": "技術棧",
+      "titlePrefix": "採用",
+      "titleHighlight": "現代技術構建",
+      "technologies": [
+        { "name": "Next.js 16", "category": "框架" },
+        { "name": "Three.js", "category": "3D圖形" },
+        { "name": "React Three Fiber", "category": "3D整合" },
+        { "name": "Google Maps 3D Tiles", "category": "城市資料" },
+        { "name": "Gemini Lyria", "category": "AI音樂" },
+        { "name": "Tone.js", "category": "音訊引擎" },
+        { "name": "Tailwind CSS", "category": "樣式" },
+        { "name": "Motion", "category": "動畫" }
+      ],
+      "stats": [
+        { "value": "3D", "label": "城市視覺化" },
+        { "value": "AI", "label": "生成音樂" },
+        { "value": "即時", "label": "音訊串流" },
+        { "value": "多人", "label": "體驗" }
+      ]
+    },
+    "team": {
+      "sectionLabel": "團隊介紹",
+      "titlePrefix": "團隊",
+      "titleHighlight": "218"
+    },
+    "cta": {
+      "title": "準備好起飛了嗎？",
+      "description": "前所未有的東京體驗。翱翔城市上空，發現各區域獨特的AI生成聲音景觀。"
+    },
+    "footer": {
+      "copyright": "© 2026 Tokyo Sounds. HAL東京.",
+      "about": "關於",
+      "changelog": "開發歷史",
+      "help": "幫助"
     }
   },
   "FlightSettingsMenu": {
@@ -83,36 +157,69 @@
     ],
     "memberList": [
       {
-        "title": "劉 查威",
-        "content": "作為團隊負責人，負責專案管理、UI設計、前端開發以及AI聊天機器人的開發。還負責整體方針制定和進度管理。"
+        "name": "劉 查威",
+        "role": "團隊負責人",
+        "description": "作為團隊負責人，負責專案管理、UI設計、前端開發以及AI聊天機器人的開發。還負責整體方針制定和進度管理。",
+        "profileImage": "/images/members/liu-chiawei.jpeg",
+        "socials": {
+          "github": "https://github.com/liuchiawei"
+        }
       },
       {
-        "title": "中川 亨特",
-        "content": "主要負責整個網站的實現。負責AI音樂生成、聲音控制、Google Maps 3D Tiles API 整合等技術方面的許多工作。"
+        "name": "中川 亨特",
+        "role": "首席開發者",
+        "description": "主要負責整個網站的實現。負責AI音樂生成、聲音控制、Google Maps 3D Tiles API 整合等技術方面的許多工作。",
+        "profileImage": "/images/members/nakagawa-hunter.jpeg",
+        "socials": {
+          "github": "https://github.com/itkla",
+          "website": "https://klae.ooo"
+        }
       },
       {
-        "title": "澤布 卡恩",
-        "content": "v1.0 的主要開發者。主要負責3D場景的構建和使用 Three.js 的實現，以及Web上運行的3D空間的表現。"
+        "name": "澤布 卡恩",
+        "role": "3D開發者",
+        "description": "v1.0 的主要開發者。主要負責3D場景的構建和使用 Three.js 的實現，以及Web上運行的3D空間的表現。",
+        "profileImage": "/images/members/zeb-khan.jpeg",
+        "socials": {
+          "github": "https://github.com/ths41461"
+        }
       },
       {
-        "title": "鍾 承翰",
-        "content": "負責專案中使用的3D模型的製作。"
+        "name": "鍾 承翰",
+        "role": "3D建模師",
+        "description": "負責專案中使用的3D模型的製作。",
+        "profileImage": "/images/members/zhong-chenghan.jpg",
+        "socials": {
+          "linkedin": "https://linkedin.com/in/chenghan"
+        }
       },
       {
-        "title": "有園 柊哉",
-        "content": "在演示中負責發表，還支援了T恤的製作。"
+        "name": "有園 柊哉",
+        "role": "演示者",
+        "description": "在演示中負責發表，還支援了T恤的製作。",
+        "profileImage": "/images/members/arizono-shuya.jpg",
+        "socials": {}
       },
       {
-        "title": "李 澤彬",
-        "content": "負責T恤的設計。"
+        "name": "李 澤彬",
+        "role": "設計師",
+        "description": "負責T恤的設計。",
+        "profileImage": "/images/members/li-zebin.jpg",
+        "socials": {}
       },
       {
-        "title": "李 簡行",
-        "content": "負責整理錄製的環境聲音。"
+        "name": "李 簡行",
+        "role": "聲音工程師",
+        "description": "負責整理錄製的環境聲音。",
+        "profileImage": "/images/members/li-jianxing.jpg",
+        "socials": {}
       },
       {
-        "title": "李 森",
-        "content": ""
+        "name": "李 森",
+        "role": "團隊成員",
+        "description": "支援專案的各個方面。",
+        "profileImage": "/images/members/li-sen.jpg",
+        "socials": {}
       }
     ]
   },
@@ -120,6 +227,16 @@
     "pageTitle": "開發歷史",
     "title": "進化的足跡 TOKYOSOUNDS開發故事",
     "description": "TOKYOSOUNDS 是如何進化的？在這裡，我們將公開每一個更新中包含的巧思和故事，以及獨特的新功能，所有開發的幕後花絮！請和我們一起踏上過去、現在、未來的足跡之旅。",
+    "demoVersions": {
+      "title": "演示版本",
+      "subtitle": "體驗 Tokyo Sounds 的歷史版本",
+      "v1": "原始 Three.js 城市",
+      "v2": "AI 音樂整合版"
+    },
+    "versionHistory": {
+      "title": "版本歷史",
+      "subtitle": "所有更新和里程碑"
+    },
     "patchNotes": [
       {
         "id": "v0.0.1",
@@ -295,7 +412,20 @@
     "multiplayer": "多人遊戲",
     "multiplayerLabel": "Multiplayer",
     "demoPlay": "演示播放",
-    "droneMode": "無人機模式"
+    "droneMode": "無人機模式",
+    "bodyControl": "身體控制",
+    "bodyControlTitle": "身體控制",
+    "bodyControlDescription": "透過攝影機使用身體姿勢控制飛機",
+    "primeBodyControl": "準備",
+    "loadingModel": "載入模型中...",
+    "activateBodyControl": "啟動",
+    "deactivateBodyControl": "停用",
+    "retryBodyControl": "重試",
+    "modelVariant": "模型變體",
+    "modelLite": "Lite（最快）",
+    "modelFull": "Full（平衡）",
+    "modelHeavy": "Heavy（最準確）",
+    "lowFpsWarning": "偵測到FPS較低。請考慮切換到較輕的模型。"
   },
   "OperationManual": {
     "title": "操作指南",
@@ -318,5 +448,15 @@
     "spatialAudio": "地點環境音",
     "lyriaAudio": "AI生成音樂",
     "flyingAudio": "飛行音效"
+  },
+  "ChatPopup": {
+    "title": "Tokyo Sounds",
+    "subtitle": "AI助手",
+    "welcomeTitle": "歡迎來到Tokyo Sounds",
+    "welcomeMessage": "請隨時詢問關於專案的任何問題",
+    "placeholder": "輸入您的問題...",
+    "openChat": "開啟聊天",
+    "closeChat": "關閉聊天",
+    "sendMessage": "傳送訊息"
   }
 }

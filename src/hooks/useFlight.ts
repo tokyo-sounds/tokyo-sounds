@@ -39,12 +39,14 @@ import {
   type MovementMode,
   type FlyToTarget,
 } from "@/lib/flight";
+import { type PoseFlightInput } from "@/lib/pose-to-flight";
 
 export interface UseFlightOptions {
   camera: THREE.Camera | null;
   config?: FlightConfig;
   onSpeedChange?: (speed: number) => void;
   onModeChange?: (mode: MovementMode) => void;
+  poseInput?: PoseFlightInput | null; // External pose control input
 }
 
 export interface FlightState {
@@ -82,10 +84,16 @@ export function useFlight({
   config: configOverrides,
   onSpeedChange,
   onModeChange,
+  poseInput,
 }: UseFlightOptions) {
   const config = createFlightConfig(configOverrides);
   const [currentMode, setCurrentMode] = useState<MovementMode>(config.mode);
   const modeRef = useRef<MovementMode>(config.mode);
+  const poseInputRef = useRef<PoseFlightInput | null>(null);
+
+  useEffect(() => {
+    poseInputRef.current = poseInput ?? null;
+  }, [poseInput]);
 
   const keysRef = useRef<FlightKeyState>({
     // Elytra mode keys
@@ -526,6 +534,26 @@ export function useFlight({
           const bankMultiplier = config.invertGyroYaw ? -1 : 1;
           rawBankInput +=
             normalizedGamma * config.gyroSensitivity * bankMultiplier;
+        }
+
+        rawPitchInput = Math.max(-1, Math.min(1, rawPitchInput));
+        rawBankInput = Math.max(-1, Math.min(1, rawBankInput));
+      }
+
+      const pose = poseInputRef.current;
+      if (pose && pose.confidence > 0.5) {
+        const hasKeyboardPitch = keys.pitchUp || keys.pitchDown;
+        const hasKeyboardBank = keys.bankLeft || keys.bankRight;
+
+        if (!hasKeyboardPitch && Math.abs(pose.pitch) > 0.05) {
+          rawPitchInput += pose.pitch;
+        }
+        if (!hasKeyboardBank && Math.abs(pose.bank) > 0.05) {
+          rawBankInput += pose.bank;
+        }
+
+        if (pose.boost && !keys.boost) {
+          keys.boost = true;
         }
 
         rawPitchInput = Math.max(-1, Math.min(1, rawPitchInput));
