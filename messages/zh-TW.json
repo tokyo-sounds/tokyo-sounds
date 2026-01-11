@@ -157,12 +157,13 @@
     ],
     "memberList": [
       {
-        "name": "劉 查威",
+        "name": "劉 家瑋",
         "role": "團隊負責人",
-        "description": "作為團隊負責人，負責專案管理、UI設計、前端開發以及AI聊天機器人的開發。還負責整體方針制定和進度管理。",
-        "profileImage": "/images/members/liu-chiawei.jpeg",
+        "description": "團隊負責人，負責專案管理、UI設計、前端開發以及AI聊天機器人的開發。還負責整體方針制定和進度管理。",
+        "profileImage": "/images/members/liu-chiawei.jpg",
         "socials": {
-          "github": "https://github.com/liuchiawei"
+          "github": "https://github.com/liuchiawei",
+          "website": "https://liuchiawei.vercel.app/"
         }
       },
       {

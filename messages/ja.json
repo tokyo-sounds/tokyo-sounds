@@ -162,7 +162,8 @@
         "description": "チームリーダーとして、プロジェクト管理、UIデザイン、フロントエンド開発、そしてAIチャットボットの開発を担当しました。全体的な方針づくりや進行管理も行いました。",
         "profileImage": "/images/members/liu-chawei.jpg",
         "socials": {
-          "github": "https://github.com/liuchiawei"
+          "github": "https://github.com/liuchiawei",
+          "website": "https://liuchiawei.vercel.app/"
         }
       },
       {

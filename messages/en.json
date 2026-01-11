@@ -160,9 +160,10 @@
         "name": "Liu Chiawei",
         "role": "Team Lead",
         "description": "Project management, UI design, frontend development, and AI chatbot development. Responsible for overall policy formulation and progress management.",
-        "profileImage": "/images/members/liu-chiawei.jpeg",
+        "profileImage": "/images/members/liu-chiawei.jpg",
         "socials": {
-          "github": "https://github.com/liuchiawei"
+          "github": "https://github.com/liuchiawei",
+          "website": "https://liuchiawei.vercel.app/"
         }
       },
       {
