@@ -7,7 +7,7 @@
  * Shows detected landmarks, connections, and flight control values.
  */
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useMemo } from "react";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
 import { POSE_CONNECTIONS, type PoseFlightInput } from "@/lib/pose-to-flight";
 import { cn } from "@/lib/utils";
@@ -19,6 +19,8 @@ interface BodyControlPreviewProps {
   fps?: number;
   className?: string;
   showControls?: boolean;
+  isCalibrating?: boolean;
+  calibrationProgress?: number;
 }
 
 /**
@@ -49,9 +51,29 @@ export default function BodyControlPreview({
   fps = 0,
   className,
   showControls = true,
+  isCalibrating = false,
+  calibrationProgress = 0,
 }: BodyControlPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  const mirrorStyle = useMemo(() => ({ transform: "scaleX(-1)" }), []);
+  
+  const horizonStyle = useMemo(() => ({
+    transform: `rotate(${(flightInput?.bank ?? 0) * 30}deg)`,
+  }), [flightInput?.bank]);
+  
+  const pitchBarStyle = useMemo(() => {
+    const pitch = flightInput?.pitch ?? 0;
+    return {
+      height: `${Math.abs(pitch) * 50}%`,
+      top: pitch >= 0 ? `${50 - Math.abs(pitch) * 50}%` : '50%',
+    };
+  }, [flightInput?.pitch]);
+  
+  const calibrationBarStyle = useMemo(() => ({
+    width: `${calibrationProgress * 100}%`,
+  }), [calibrationProgress]);
 
   const setVideoRef = useCallback((element: HTMLVideoElement | null) => {
     if (videoRef) {
@@ -134,14 +156,50 @@ export default function BodyControlPreview({
         className="w-full h-auto rounded-md bg-neutral-900"
         playsInline
         muted
-        style={{ transform: "scaleX(-1)" }}
+        style={mirrorStyle}
       />
 
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full pointer-events-none"
-        style={{ transform: "scaleX(-1)" }}
+        style={mirrorStyle}
       />
+
+      {flightInput && !isCalibrating && (
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <div
+            className="relative w-3/4 h-1"
+            style={horizonStyle}
+          >
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-cyan-400/80 to-transparent rounded-full" />
+            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 border-2 border-cyan-400 rounded-full bg-transparent" />
+            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-cyan-400 rounded-full" />
+            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-cyan-400 rounded-full" />
+          </div>
+          <div className="absolute left-4 top-1/2 -translate-y-1/2 h-24 w-1 bg-neutral-700/50 rounded-full">
+            <div
+              className="absolute left-0 w-full bg-blue-400/80 rounded-full transition-all duration-75"
+              style={pitchBarStyle}
+            />
+            <div className="absolute left-0 w-full h-0.5 bg-neutral-400/50 top-1/2 -translate-y-1/2" />
+          </div>
+        </div>
+      )}
+
+      {isCalibrating && (
+        <div className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-md">
+          <div className="text-center text-white">
+            <div className="text-sm font-medium mb-2">Calibrating...</div>
+            <div className="w-32 h-2 bg-neutral-700 rounded-full overflow-hidden mx-auto">
+              <div 
+                className="h-full bg-cyan-400 transition-all duration-100"
+                style={calibrationBarStyle}
+              />
+            </div>
+            <div className="text-xs text-white/60 mt-2">Hold still in neutral position</div>
+          </div>
+        </div>
+      )}
 
       {showControls && flightInput && (
         <div className="absolute bottom-2 left-2 right-2 bg-black/60 backdrop-blur-sm rounded-md p-2 text-xs font-mono text-white">

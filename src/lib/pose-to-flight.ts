@@ -2,13 +2,20 @@
  * Pose to Flight Control Mapping
  *
  * Converts MediaPipe Pose landmarks into flight control signals.
- * Maps body posture to pitch, bank, and boost controls.
+ * Uses intuitive body-as-airplane control scheme.
  *
  * Control mapping:
- * - Arms UP (Y pose) → Pitch UP (climb)
- * - Arms DOWN (inverted Y) → Pitch DOWN (dive)
- * - Lean shoulders left/right → Bank left/right
- * - Both hands FORWARD (in front of body) → Boost
+ * - PITCH: Average arm angle from horizontal
+ *   - Both arms UP → Pitch UP (climb)
+ *   - Both arms DOWN → Pitch DOWN (dive)
+ *   - Arms horizontal → Neutral
+ * 
+ * - BANK: Angle of the line from left wrist to right wrist
+ *   - Right hand higher (tilt arms OR lean torso) → Bank RIGHT
+ *   - Left hand higher → Bank LEFT
+ *   - Hands level → Neutral
+ * 
+ * - BOOST: Both hands FORWARD at chest level
  */
 
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
@@ -81,28 +88,27 @@ export const POSE_CONNECTIONS: [number, number][] = [
  * Configuration for pose-to-flight control mapping
  */
 export interface PoseFlightConfig {
-  // Pitch control (arm angle up/down)
+  // Pitch control (average arm angle from horizontal)
   pitchSensitivity: number; // Multiplier for pitch response (default: 1.0)
-  pitchDeadZone: number; // Ignore arm angles in neutral zone (0-1, default: 0.15)
+  pitchDeadZone: number; // Degrees of dead zone around neutral (default: 5)
   invertPitch: boolean; // Swap up/down (default: false)
-  pitchMaxAngle: number; // Degrees from horizontal for full pitch (default: 60)
+  pitchMaxAngle: number; // Degrees from horizontal for full pitch (default: 45)
 
-  // Bank control (shoulder tilt)
-  bankSensitivity: number; // Multiplier for bank response (default: 0.8)
-  bankDeadZone: number; // Ignore tilt angles below this (0-1, default: 0.25)
+  // Bank control (angle of line from left wrist to right wrist)
+  // Works with arm tilt, torso lean, or both combined
+  bankSensitivity: number; // Multiplier for bank response (default: 1.0)
+  bankDeadZone: number; // Degrees of dead zone around level (default: 5)
   invertBank: boolean; // Swap left/right (default: false)
-  bankMaxTilt: number; // Max shoulder tilt ratio for full bank (default: 0.4)
+  bankMaxAngle: number; // Degrees of tilt for full bank (default: 30)
 
   // Boost control (hands forward at chest level)
-  boostZThreshold: number; // How far forward hands must be (Z difference, default: 0.08)
+  boostZThreshold: number; // How far forward hands must be (Z difference, default: 0.05)
   boostMinConfidence: number; // Minimum wrist visibility for boost detection (default: 0.5)
-  boostPitchDamping: number; // How much to reduce pitch when boosting (0-1, default: 0.1)
+  boostPitchDamping: number; // Pitch multiplier when boosting, 1.0 = no damping (default: 0.5)
 
-  // Smoothing - higher = smoother but laggier
-  smoothingFactor: number; // 0-1 (default: 0.7)
-  
-  // Additional smoothing for output ramping
-  outputSmoothing: number; // 0-1, smooths final output (default: 0.85)
+  // Smoothing - lower = more responsive, higher = smoother
+  // At 30fps with factor 0.3: reaches 90% of target in ~3 frames (~100ms)
+  smoothingFactor: number; // 0-1, portion of previous value to keep (default: 0.3)
 
   // Confidence threshold
   minConfidence: number; // Minimum visibility to use a landmark (0-1, default: 0.5)
@@ -144,25 +150,37 @@ export const POSE_MODEL_URLS: Record<PoseModelVariant, string> = {
 
 /**
  * Default configuration for pose-to-flight mapping
- * Tuned for gradual, proportional control
+ * 
+ * Tuned for 1:1, natural body control:
+ * - Tilt the line between your hands (via arm tilt OR torso lean) = bank
+ * - Raise/lower both arms = pitch
+ * - 30° tilt = full bank, 45° arm angle = full pitch
+ * - 5° dead zones filter noise without feeling unresponsive
+ * - Low smoothing factor (0.3) for responsive, direct control
  */
 export const DEFAULT_POSE_FLIGHT_CONFIG: PoseFlightConfig = {
+  // Pitch: average arm angle from horizontal
+  // Both arms 45° up = full pitch up, both arms 45° down = full pitch down
   pitchSensitivity: 1.0,
-  pitchDeadZone: 0.2, // 20% dead zone around neutral
+  pitchDeadZone: 5, // 5° dead zone
   invertPitch: false,
-  pitchMaxAngle: 50, // Degrees from horizontal for full pitch
+  pitchMaxAngle: 45, // 45° = full pitch
 
-  bankSensitivity: 0.7, // Reduced - was way too sensitive
-  bankDeadZone: 0.25, // 25% dead zone - ignore small tilts
-  invertBank: false,
-  bankMaxTilt: 0.5, // Shoulder tilt ratio for full bank (need significant lean)
+  // Bank: angle of wrist-to-wrist line
+  // Direct 1:1 mapping: your lean angle = plane's bank angle
+  // A 30° lean gives 30° equivalent bank (normalized to -1 to 1 range)
+  bankSensitivity: 1.0,
+  bankDeadZone: 3, // Small dead zone just for noise filtering
+  invertBank: true, // Inverted for natural feel with mirrored video
+  bankMaxAngle: 60, // 60° = full bank (but you'll rarely lean this far, so it's effectively 1:1)
 
-  boostZThreshold: 0.06, // Hands need to be this far forward (normalized Z)
+  // Boost: hands forward at chest level
+  boostZThreshold: 0.08, // Moderate threshold - hands clearly forward but not extreme
   boostMinConfidence: 0.5,
-  boostPitchDamping: 0.1, // When boosting, pitch is reduced to 10% sensitivity
+  boostPitchDamping: 0.5,
 
-  smoothingFactor: 0.75, // High smoothing for gradual response
-  outputSmoothing: 0.88, // Additional output smoothing
+  // Smoothing: responsive but not twitchy
+  smoothingFactor: 0.3, // 70% of new value per frame
 
   minConfidence: 0.5,
 };
@@ -206,18 +224,32 @@ function getDistance2D(
 }
 
 /**
- * Apply dead zone with smooth transition
- * Returns 0 within dead zone, then smoothly ramps up
+ * Apply dead zone with linear ramp-out
+ * Returns 0 within dead zone, then linear mapping to remaining range
+ * 
+ * @param angleDegrees - The input angle in degrees
+ * @param deadZoneDegrees - Dead zone size in degrees
+ * @param maxAngleDegrees - Maximum angle for full output
+ * @returns Value from -1 to 1
  */
-function applyDeadZone(value: number, deadZone: number): number {
-  const absValue = Math.abs(value);
-  if (absValue < deadZone) return 0;
+function applyDeadZoneLinear(
+  angleDegrees: number,
+  deadZoneDegrees: number,
+  maxAngleDegrees: number
+): number {
+  const absAngle = Math.abs(angleDegrees);
   
-  // Smooth ramp after dead zone using smoothstep-like function
-  const normalized = (absValue - deadZone) / (1 - deadZone);
-  // Apply slight curve for more natural feel
-  const curved = normalized * normalized * (3 - 2 * normalized); // smoothstep
-  return Math.sign(value) * curved;
+  // Inside dead zone = zero output
+  if (absAngle <= deadZoneDegrees) return 0;
+  
+  // Linear mapping from dead zone edge to max angle
+  // e.g., if deadZone=5° and maxAngle=30°, then:
+  //   5° → 0, 17.5° → 0.5, 30° → 1.0
+  const angleAfterDeadZone = absAngle - deadZoneDegrees;
+  const rangeAfterDeadZone = maxAngleDegrees - deadZoneDegrees;
+  
+  const normalized = angleAfterDeadZone / rangeAfterDeadZone;
+  return Math.sign(angleDegrees) * Math.min(normalized, 1);
 }
 
 /**
@@ -225,13 +257,6 @@ function applyDeadZone(value: number, deadZone: number): number {
  */
 function clamp(value: number, min: number = -1, max: number = 1): number {
   return Math.max(min, Math.min(max, value));
-}
-
-/**
- * Smooth interpolation (exponential moving average)
- */
-function lerp(current: number, target: number, factor: number): number {
-  return current + (target - current) * (1 - factor);
 }
 
 /**
@@ -257,22 +282,193 @@ function calculateArmAngle(
 
 /**
  * Previous values for smoothing (module-level state)
+ * Single-stage smoothing for responsive 1:1 control
  */
 let prevPitch = 0;
 let prevBank = 0;
-let prevOutputPitch = 0;
-let prevOutputBank = 0;
 let prevBoostAmount = 0;
 let boostDebounceFrames = 0;
+
+/**
+ * Reusable output object to avoid GC pressure
+ * We mutate this object each frame instead of creating new ones
+ */
+const outputBuffer: PoseFlightInput = {
+  pitch: 0,
+  bank: 0,
+  boost: false,
+  confidence: 0,
+  raw: {
+    shoulderTilt: 0,
+    avgArmAngle: 0,
+    handsForwardZ: 0,
+    handsAtChestLevel: false,
+    handsCloseToTorso: false,
+    boostAmount: 0,
+  },
+};
+
+/**
+ * Calibration state for adaptive dead zones
+ * Measures jitter during first ~1 second to set appropriate dead zones
+ */
+interface CalibrationState {
+  isCalibrating: boolean;
+  isCalibrated: boolean;
+  frameCount: number;
+  maxFrames: number; // ~30 frames at 30fps = 1 second
+  
+  // Samples for measuring noise
+  bankSamples: number[];
+  pitchSamples: number[];
+  
+  // Calculated adaptive dead zones (in degrees)
+  adaptiveBankDeadZone: number;
+  adaptivePitchDeadZone: number;
+  
+  // Baseline values (user's natural "neutral" position)
+  baselineBank: number;
+  baselinePitch: number;
+}
+
+let calibration: CalibrationState = {
+  isCalibrating: false,
+  isCalibrated: false,
+  frameCount: 0,
+  maxFrames: 30,
+  bankSamples: [],
+  pitchSamples: [],
+  adaptiveBankDeadZone: 5,
+  adaptivePitchDeadZone: 5,
+  baselineBank: 0,
+  baselinePitch: 0,
+};
+
+/**
+ * Start calibration process
+ * Call this when pose control is activated
+ */
+export function startCalibration(): void {
+  calibration = {
+    isCalibrating: true,
+    isCalibrated: false,
+    frameCount: 0,
+    maxFrames: 30,
+    bankSamples: [],
+    pitchSamples: [],
+    adaptiveBankDeadZone: 5,
+    adaptivePitchDeadZone: 5,
+    baselineBank: 0,
+    baselinePitch: 0,
+  };
+}
+
+/**
+ * Reusable calibration status object to avoid GC pressure
+ */
+const calibrationStatusBuffer = {
+  isCalibrating: false,
+  isCalibrated: false,
+  progress: 0,
+  adaptiveDeadZones: { bank: 5, pitch: 5 },
+};
+
+/**
+ * Get current calibration status
+ * Returns a cached object - only values are updated, not the reference
+ */
+export function getCalibrationStatus(): {
+  isCalibrating: boolean;
+  isCalibrated: boolean;
+  progress: number;
+  adaptiveDeadZones: { bank: number; pitch: number };
+} {
+  calibrationStatusBuffer.isCalibrating = calibration.isCalibrating;
+  calibrationStatusBuffer.isCalibrated = calibration.isCalibrated;
+  calibrationStatusBuffer.progress = calibration.frameCount / calibration.maxFrames;
+  calibrationStatusBuffer.adaptiveDeadZones.bank = calibration.adaptiveBankDeadZone;
+  calibrationStatusBuffer.adaptiveDeadZones.pitch = calibration.adaptivePitchDeadZone;
+  return calibrationStatusBuffer;
+}
+
+/**
+ * Calculate standard deviation using Welford's online algorithm
+ * Single-pass, no intermediate arrays, numerically stable
+ */
+function standardDeviation(values: number[]): number {
+  const n = values.length;
+  if (n < 2) return 0;
+  
+  let mean = 0;
+  let m2 = 0;
+  
+  for (let i = 0; i < n; i++) {
+    const delta = values[i] - mean;
+    mean += delta / (i + 1);
+    const delta2 = values[i] - mean;
+    m2 += delta * delta2;
+  }
+  
+  return Math.sqrt(m2 / n);
+}
+
+/**
+ * Process calibration frame
+ * Returns true if still calibrating, false when done
+ */
+function processCalibration(rawBankAngle: number, rawPitchAngle: number, config: PoseFlightConfig): boolean {
+  if (!calibration.isCalibrating) return false;
+  
+  calibration.bankSamples.push(rawBankAngle);
+  calibration.pitchSamples.push(rawPitchAngle);
+  calibration.frameCount++;
+  
+  if (calibration.frameCount >= calibration.maxFrames) {
+    // Calibration complete - calculate adaptive dead zones
+    
+    // Calculate baseline (average position = user's neutral)
+    calibration.baselineBank = calibration.bankSamples.reduce((a, b) => a + b, 0) / calibration.bankSamples.length;
+    calibration.baselinePitch = calibration.pitchSamples.reduce((a, b) => a + b, 0) / calibration.pitchSamples.length;
+    
+    // Calculate noise as standard deviation
+    const bankNoise = standardDeviation(calibration.bankSamples);
+    const pitchNoise = standardDeviation(calibration.pitchSamples);
+    
+    // Set dead zone to 2.5x the noise level (covers ~99% of jitter)
+    // But enforce minimum from config and maximum reasonable value
+    const minDeadZone = 3; // At least 3° to feel stable
+    const maxDeadZone = 15; // Cap at 15° to stay responsive
+    
+    calibration.adaptiveBankDeadZone = Math.min(
+      maxDeadZone,
+      Math.max(minDeadZone, config.bankDeadZone, bankNoise * 2.5)
+    );
+    calibration.adaptivePitchDeadZone = Math.min(
+      maxDeadZone,
+      Math.max(minDeadZone, config.pitchDeadZone, pitchNoise * 2.5)
+    );
+    
+    calibration.isCalibrating = false;
+    calibration.isCalibrated = true;
+    
+    console.log(`[Pose Calibration] Complete:
+  Bank noise: ${bankNoise.toFixed(1)}° → dead zone: ${calibration.adaptiveBankDeadZone.toFixed(1)}°
+  Pitch noise: ${pitchNoise.toFixed(1)}° → dead zone: ${calibration.adaptivePitchDeadZone.toFixed(1)}°
+  Baseline bank: ${calibration.baselineBank.toFixed(1)}°, pitch: ${calibration.baselinePitch.toFixed(1)}°`);
+    
+    return false;
+  }
+  
+  return true;
+}
 
 /**
  * Calculate flight control input from pose landmarks
  *
  * Control scheme:
- * - Arms UP (Y pose) → Pitch UP (climb)
- * - Arms DOWN (inverted Y) → Pitch DOWN (dive)
- * - Shoulder tilt left/right → Bank left/right
- * - Both hands FORWARD → Boost
+ * - BANK = angle of wrist-to-wrist line (tilt arms or lean torso)
+ * - PITCH = average arm angle (both arms up = climb, both down = dive)
+ * - BOOST = hands forward at chest level
  *
  * @param landmarks - Array of 33 pose landmarks from MediaPipe
  * @param config - Configuration for control mapping
@@ -282,19 +478,24 @@ export function calculatePoseFlightInput(
   landmarks: NormalizedLandmark[],
   config: PoseFlightConfig = DEFAULT_POSE_FLIGHT_CONFIG
 ): PoseFlightInput {
-  // Default output for invalid input
-  const defaultOutput: PoseFlightInput = {
-    pitch: prevOutputPitch * 0.9, // Gradually return to neutral
-    bank: prevOutputBank * 0.9,
-    boost: false,
-    confidence: 0,
-    raw: { shoulderTilt: 0, avgArmAngle: 0, handsForwardZ: 0, handsAtChestLevel: false, handsCloseToTorso: false, boostAmount: 0 },
-  };
-
+  // Reuse output buffer - mutate instead of creating new objects
+  const out = outputBuffer;
+  
+  // Default output for invalid input - gradually return to neutral
   if (!landmarks || landmarks.length < 33) {
-    prevOutputPitch *= 0.9;
-    prevOutputBank *= 0.9;
-    return defaultOutput;
+    prevPitch *= 0.9;
+    prevBank *= 0.9;
+    out.pitch = prevPitch;
+    out.bank = prevBank;
+    out.boost = false;
+    out.confidence = 0;
+    out.raw.shoulderTilt = 0;
+    out.raw.avgArmAngle = 0;
+    out.raw.handsForwardZ = 0;
+    out.raw.handsAtChestLevel = false;
+    out.raw.handsCloseToTorso = false;
+    out.raw.boostAmount = 0;
+    return out;
   }
 
   // Get key landmarks
@@ -309,36 +510,51 @@ export function calculatePoseFlightInput(
 
   // Need at least shoulders for basic controls
   if (!leftShoulder || !rightShoulder) {
-    prevOutputPitch *= 0.9;
-    prevOutputBank *= 0.9;
-    return defaultOutput;
+    prevPitch *= 0.9;
+    prevBank *= 0.9;
+    out.pitch = prevPitch;
+    out.bank = prevBank;
+    out.boost = false;
+    out.confidence = 0;
+    out.raw.shoulderTilt = 0;
+    out.raw.avgArmAngle = 0;
+    out.raw.handsForwardZ = 0;
+    out.raw.handsAtChestLevel = false;
+    out.raw.handsCloseToTorso = false;
+    out.raw.boostAmount = 0;
+    return out;
   }
 
   // Calculate confidence as average visibility of key landmarks
-  const keyLandmarks = [
-    leftShoulder, rightShoulder,
-    leftElbow, rightElbow,
-    leftWrist, rightWrist,
-    leftHip, rightHip,
-  ].filter(Boolean) as NormalizedLandmark[];
+  // Inline calculation to avoid array allocation
+  let visibilitySum = 0;
+  let landmarkCount = 0;
   
-  const confidence =
-    keyLandmarks.reduce((sum, l) => sum + (l.visibility ?? 1), 0) / keyLandmarks.length;
+  if (leftShoulder) { visibilitySum += leftShoulder.visibility ?? 1; landmarkCount++; }
+  if (rightShoulder) { visibilitySum += rightShoulder.visibility ?? 1; landmarkCount++; }
+  if (leftElbow) { visibilitySum += leftElbow.visibility ?? 1; landmarkCount++; }
+  if (rightElbow) { visibilitySum += rightElbow.visibility ?? 1; landmarkCount++; }
+  if (leftWrist) { visibilitySum += leftWrist.visibility ?? 1; landmarkCount++; }
+  if (rightWrist) { visibilitySum += rightWrist.visibility ?? 1; landmarkCount++; }
+  if (leftHip) { visibilitySum += leftHip.visibility ?? 1; landmarkCount++; }
+  if (rightHip) { visibilitySum += rightHip.visibility ?? 1; landmarkCount++; }
+  
+  const confidence = landmarkCount > 0 ? visibilitySum / landmarkCount : 0;
 
   // === BOOST DETECTION (Hands Forward, Close to Torso, at Chest Level) ===
   // Detect this FIRST because it affects pitch sensitivity
   // T-pose (arms out) should be NEUTRAL - no boost
   // Boost only when hands are brought IN FRONT of body, close together
   const shoulderWidth = getDistance2D(leftShoulder, rightShoulder);
-  const shoulderAvgX = (leftShoulder.x + rightShoulder.x) / 2; // Center of torso
+  const shoulderAvgX = (leftShoulder.x + rightShoulder.x) / 2;
   const shoulderAvgY = (leftShoulder.y + rightShoulder.y) / 2;
   const shoulderAvgZ = (leftShoulder.z + rightShoulder.z) / 2;
   
   let handsForwardZ = 0;
   let handsAtChestLevel = false;
   let handsCloseToTorso = false;
-  let boostAmount = 0; // 0-1, smooth boost factor
-  let boost = false;
+  let boostAmount = 0;
+  let boostDetected = false;
 
   if (leftWrist && rightWrist) {
     const leftWristVis = leftWrist.visibility ?? 0;
@@ -353,131 +569,183 @@ export function calculatePoseFlightInput(
       handsForwardZ = shoulderAvgZ - wristAvgZ;
       
       // Check if hands are at chest/shoulder level (not raised up or down)
-      // Allow hands to be anywhere from shoulder level to slightly below (chest)
-      const verticalOffset = wristAvgY - shoulderAvgY; // Positive = hands below shoulders
+      const verticalOffset = wristAvgY - shoulderAvgY;
       handsAtChestLevel = verticalOffset > -0.05 && verticalOffset < shoulderWidth * 0.5;
       
       // Check if hands are close together horizontally (NOT spread out like T-pose)
-      // Wrists should be within ~60% of shoulder width of each other
       const wristDistance = Math.abs(leftWrist.x - rightWrist.x);
-      const handsCloseTogether = wristDistance < shoulderWidth * 0.7;
+      const handsCloseTogether = wristDistance < shoulderWidth * 0.5; // Hands within half shoulder width
       
-      // Check if hands are near the center of torso (not out to the sides)
-      // Wrist center should be close to shoulder center
+      // Check if hands are near the center of torso
       const horizontalOffsetFromCenter = Math.abs(wristAvgX - shoulderAvgX);
-      const handsNearCenter = horizontalOffsetFromCenter < shoulderWidth * 0.3;
+      const handsNearCenter = horizontalOffsetFromCenter < shoulderWidth * 0.35;
       
-      // Combined check: hands must be close together AND near body center
       handsCloseToTorso = handsCloseTogether && handsNearCenter;
       
-      // Boost when:
-      // 1. Hands are forward (Z threshold)
-      // 2. Hands are at chest/shoulder level (not raised for pitch control)
-      // 3. Hands are close to torso center (not spread out like T-pose)
+      // Boost when all conditions met
       const forwardEnough = handsForwardZ > config.boostZThreshold;
-      const boostDetected = forwardEnough && handsAtChestLevel && handsCloseToTorso;
-      
-      // Smooth boost amount for gradual pitch damping
-      if (boostDetected) {
-        // Calculate how much boost based on how far forward
-        const forwardRatio = Math.min(1, (handsForwardZ - config.boostZThreshold) / 0.1);
-        boostAmount = Math.min(1, prevBoostAmount + 0.15); // Ramp up
-        boostAmount = Math.max(boostAmount, forwardRatio * 0.5); // At least proportional to forward
-      } else {
-        boostAmount = Math.max(0, prevBoostAmount - 0.1); // Ramp down
-      }
-      
-      // Debounce boost boolean to prevent flickering
-      if (boostDetected) {
-        boostDebounceFrames = Math.min(boostDebounceFrames + 1, 5);
-      } else {
-        boostDebounceFrames = Math.max(boostDebounceFrames - 1, 0);
-      }
-      
-      boost = boostDebounceFrames >= 2; // Need 2 consecutive frames
+      boostDetected = forwardEnough && handsAtChestLevel && handsCloseToTorso;
     }
   }
   
-  // Store for next frame
+  // Debounce and smoothing ALWAYS runs (even if wrists not visible)
+  // This ensures boost turns OFF when hands move away
+  if (boostDetected) {
+    const forwardRatio = Math.min(1, (handsForwardZ - config.boostZThreshold) / 0.1);
+    boostAmount = Math.min(1, prevBoostAmount + 0.15);
+    boostAmount = Math.max(boostAmount, forwardRatio * 0.5);
+    boostDebounceFrames = Math.min(boostDebounceFrames + 1, 5);
+  } else {
+    boostAmount = Math.max(0, prevBoostAmount - 0.1);
+    boostDebounceFrames = Math.max(boostDebounceFrames - 1, 0);
+  }
+  
+  const boost = boostDebounceFrames >= 2;
   prevBoostAmount = boostAmount;
 
-  // === BANK (Shoulder Tilt) ===
-  // Positive tilt = right shoulder lower = bank right
-  // Use bankMaxTilt to scale - need significant lean for full bank
-  const shoulderTilt = (rightShoulder.y - leftShoulder.y) / Math.max(shoulderWidth, 0.1);
+  // === BANK (Wrist-to-Wrist Line Angle) ===
+  // Draw a line from left wrist to right wrist and measure its angle from horizontal.
+  // This captures BOTH arm tilt AND torso lean in one simple measurement.
+  // 
+  // User expectation (with mirrored video):
+  // - Left arm DOWN, right arm UP = bank RIGHT (positive)
+  // - Left arm UP, right arm DOWN = bank LEFT (negative)
+  let rawBank = 0;
+  let wristLineAngle = 0; // For debugging
   
-  // Scale by max tilt - so tilt of bankMaxTilt = full bank
-  let rawBank = (shoulderTilt / config.bankMaxTilt) * config.bankSensitivity;
-  rawBank = applyDeadZone(rawBank, config.bankDeadZone);
+  if (leftWrist && rightWrist) {
+    // leftWrist.y - rightWrist.y: positive when right wrist is higher (right arm up)
+    // Right arm up = bank RIGHT (positive) ✓
+    const wristDy = leftWrist.y - rightWrist.y;
+    const wristDx = Math.abs(leftWrist.x - rightWrist.x);
+    
+    // Avoid division issues if wrists are very close horizontally
+    if (wristDx > 0.01) {
+      const angleRad = Math.atan2(wristDy, wristDx);
+      wristLineAngle = angleRad * (180 / Math.PI);
+    }
+  }
+
+  // === PITCH (Average Arm Angle) ===
+  // Calculate individual arm angles, then average them
+  let leftArmAngle = 0;
+  let rightArmAngle = 0;
+  let hasLeftArm = false;
+  let hasRightArm = false;
+
+  if (leftShoulder && leftElbow && leftWrist) {
+    leftArmAngle = calculateArmAngle(leftShoulder, leftElbow, leftWrist);
+    hasLeftArm = true;
+  }
+
+  if (rightShoulder && rightElbow && rightWrist) {
+    rightArmAngle = calculateArmAngle(rightShoulder, rightElbow, rightWrist);
+    hasRightArm = true;
+  }
+
+  let avgArmAngle = 0;
+  if (hasLeftArm && hasRightArm) {
+    avgArmAngle = (leftArmAngle + rightArmAngle) / 2;
+  } else if (hasLeftArm) {
+    avgArmAngle = leftArmAngle;
+  } else if (hasRightArm) {
+    avgArmAngle = rightArmAngle;
+  }
+
+  // === CALIBRATION ===
+  // During calibration, collect samples to measure noise and baseline
+  const stillCalibrating = processCalibration(wristLineAngle, avgArmAngle, config);
+  
+  // Use adaptive dead zones if calibrated, otherwise use config defaults
+  const effectiveBankDeadZone = calibration.isCalibrated 
+    ? calibration.adaptiveBankDeadZone 
+    : config.bankDeadZone;
+  const effectivePitchDeadZone = calibration.isCalibrated 
+    ? calibration.adaptivePitchDeadZone 
+    : config.pitchDeadZone;
+  
+  // Apply baseline offset for BANK only (user's natural stance may not be perfectly level)
+  // PITCH baseline is NOT applied - arms horizontal (T-pose) is ALWAYS neutral pitch
+  // This is more intuitive: T-pose = level flight, arms up = climb, arms down = dive
+  const adjustedBankAngle = calibration.isCalibrated 
+    ? wristLineAngle - calibration.baselineBank 
+    : wristLineAngle;
+  const adjustedPitchAngle = avgArmAngle; // No baseline adjustment - 0° (horizontal) = neutral
+  
+  // Store for debugging (repurposing shoulderTilt to show wrist line angle)
+  const shoulderTilt = wristLineAngle;
+  
+  // During calibration, output neutral controls
+  if (stillCalibrating) {
+    // Still calibrating - return neutral with calibration progress indicator
+    const smoothedPitch = prevPitch * 0.9;
+    const smoothedBank = prevBank * 0.9;
+    prevPitch = smoothedPitch;
+    prevBank = smoothedBank;
+    
+    out.pitch = smoothedPitch;
+    out.bank = smoothedBank;
+    out.boost = false;
+    out.confidence = confidence;
+    out.raw.shoulderTilt = shoulderTilt;
+    out.raw.avgArmAngle = avgArmAngle;
+    out.raw.handsForwardZ = handsForwardZ;
+    out.raw.handsAtChestLevel = handsAtChestLevel;
+    out.raw.handsCloseToTorso = handsCloseToTorso;
+    out.raw.boostAmount = calibration.frameCount / calibration.maxFrames; // Show calibration progress
+    return out;
+  }
+
+  // === APPLY DEAD ZONES AND MAPPING ===
+  // Apply dead zone and linear mapping for bank
+  rawBank = applyDeadZoneLinear(
+    adjustedBankAngle,
+    effectiveBankDeadZone,
+    config.bankMaxAngle
+  ) * config.bankSensitivity;
+  
   rawBank = clamp(rawBank);
   if (config.invertBank) rawBank = -rawBank;
 
-  // === PITCH (Arm Angle - Y pose / Inverted Y) ===
-  let avgArmAngle = 0;
-  let armCount = 0;
-
-  // Calculate left arm angle
-  if (leftShoulder && leftElbow && leftWrist) {
-    const leftAngle = calculateArmAngle(leftShoulder, leftElbow, leftWrist);
-    avgArmAngle += leftAngle;
-    armCount++;
-  }
-
-  // Calculate right arm angle
-  if (rightShoulder && rightElbow && rightWrist) {
-    const rightAngle = calculateArmAngle(rightShoulder, rightElbow, rightWrist);
-    avgArmAngle += rightAngle;
-    armCount++;
-  }
-
-  if (armCount > 0) {
-    avgArmAngle /= armCount;
-  }
-
-  // Convert arm angle to pitch (-1 to 1)
-  // At pitchMaxAngle degrees up = full pitch up (+1)
-  // At pitchMaxAngle degrees down = full pitch down (-1)
-  let rawPitch = (avgArmAngle / config.pitchMaxAngle) * config.pitchSensitivity;
-  rawPitch = applyDeadZone(rawPitch, config.pitchDeadZone);
+  // Apply dead zone and map to -1..1 with linear response for pitch
+  let rawPitch = applyDeadZoneLinear(
+    adjustedPitchAngle,
+    effectivePitchDeadZone,
+    config.pitchMaxAngle
+  ) * config.pitchSensitivity;
+  
   rawPitch = clamp(rawPitch);
   if (config.invertPitch) rawPitch = -rawPitch;
   
-  // When boosting (hands forward at chest), greatly reduce pitch sensitivity
-  // This prevents the twitchy pitch when trying to boost
+  // Reduce pitch sensitivity when boosting to prevent twitchiness
   if (boostAmount > 0) {
-    const pitchDamping = 1 - (boostAmount * (1 - config.boostPitchDamping));
-    rawPitch *= pitchDamping;
+    const dampingMultiplier = 1 - (boostAmount * (1 - config.boostPitchDamping));
+    rawPitch *= dampingMultiplier;
   }
 
-  // === SMOOTHING ===
-  // First stage: smooth the raw input
-  const smoothedPitch = lerp(prevPitch, rawPitch, config.smoothingFactor);
-  const smoothedBank = lerp(prevBank, rawBank, config.smoothingFactor);
+  // === SINGLE-STAGE SMOOTHING ===
+  // For 1:1 responsive control, we use minimal smoothing
+  // smoothingFactor = portion of PREVIOUS value to keep
+  // e.g., 0.3 means 30% old + 70% new = responsive
+  const smoothedPitch = prevPitch * config.smoothingFactor + rawPitch * (1 - config.smoothingFactor);
+  const smoothedBank = prevBank * config.smoothingFactor + rawBank * (1 - config.smoothingFactor);
   
   prevPitch = smoothedPitch;
   prevBank = smoothedBank;
 
-  // Second stage: additional output smoothing for even more gradual response
-  const outputPitch = lerp(prevOutputPitch, smoothedPitch, config.outputSmoothing);
-  const outputBank = lerp(prevOutputBank, smoothedBank, config.outputSmoothing);
+  // Populate reusable output buffer
+  out.pitch = smoothedPitch;
+  out.bank = smoothedBank;
+  out.boost = boost;
+  out.confidence = confidence;
+  out.raw.shoulderTilt = shoulderTilt;
+  out.raw.avgArmAngle = avgArmAngle;
+  out.raw.handsForwardZ = handsForwardZ;
+  out.raw.handsAtChestLevel = handsAtChestLevel;
+  out.raw.handsCloseToTorso = handsCloseToTorso;
+  out.raw.boostAmount = boostAmount;
   
-  prevOutputPitch = outputPitch;
-  prevOutputBank = outputBank;
-
-  return {
-    pitch: outputPitch,
-    bank: outputBank,
-    boost,
-    confidence,
-    raw: {
-      shoulderTilt,
-      avgArmAngle,
-      handsForwardZ,
-      handsAtChestLevel,
-      handsCloseToTorso,
-      boostAmount,
-    },
-  };
+  return out;
 }
 
 /**
@@ -486,8 +754,20 @@ export function calculatePoseFlightInput(
 export function resetPoseSmoothing(): void {
   prevPitch = 0;
   prevBank = 0;
-  prevOutputPitch = 0;
-  prevOutputBank = 0;
   prevBoostAmount = 0;
   boostDebounceFrames = 0;
+  
+  // Also reset calibration state
+  calibration = {
+    isCalibrating: false,
+    isCalibrated: false,
+    frameCount: 0,
+    maxFrames: 30,
+    bankSamples: [],
+    pitchSamples: [],
+    adaptiveBankDeadZone: 5,
+    adaptivePitchDeadZone: 5,
+    baselineBank: 0,
+    baselinePitch: 0,
+  };
 }
