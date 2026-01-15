@@ -27,6 +27,8 @@ import {
   calculatePoseFlightInput,
   createPoseFlightConfig,
   resetPoseSmoothing,
+  startCalibration,
+  getCalibrationStatus,
   POSE_MODEL_URLS,
 } from "@/lib/pose-to-flight";
 
@@ -43,6 +45,13 @@ export interface UseMediaPipePoseOptions {
   onFlightInput?: (input: PoseFlightInput) => void;
 }
 
+export interface CalibrationStatus {
+  isCalibrating: boolean;
+  isCalibrated: boolean;
+  progress: number;
+  adaptiveDeadZones: { bank: number; pitch: number };
+}
+
 export interface UseMediaPipePoseReturn {
   state: PoseControllerState;
   error: string | null;
@@ -50,6 +59,7 @@ export interface UseMediaPipePoseReturn {
   flightInput: PoseFlightInput | null;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   fps: number;
+  calibrationStatus: CalibrationStatus;
 
   prime: () => Promise<void>;
   activate: () => Promise<void>;
@@ -85,6 +95,12 @@ export function useMediaPipePose(
   const [modelVariant, setModelVariant] = useState<PoseModelVariant>(
     options?.modelVariant ?? "full"
   );
+  const [calibrationStatus, setCalibrationStatus] = useState<CalibrationStatus>({
+    isCalibrating: false,
+    isCalibrated: false,
+    progress: 0,
+    adaptiveDeadZones: { bank: 5, pitch: 5 },
+  });
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const poseLandmarkerRef = useRef<PoseLandmarker | null>(null);
@@ -94,6 +110,7 @@ export function useMediaPipePose(
   const frameCountRef = useRef<number>(0);
   const fpsIntervalRef = useRef<number | null>(null);
   const configRef = useRef(config);
+  const lastCalibrationStateRef = useRef({ isCalibrating: false, isCalibrated: false });
 
   useEffect(() => {
     configRef.current = config;
@@ -167,6 +184,7 @@ export function useMediaPipePose(
 
       setState("active");
       resetPoseSmoothing();
+      startCalibration();
 
       frameCountRef.current = 0;
       fpsIntervalRef.current = window.setInterval(() => {
@@ -203,6 +221,26 @@ export function useMediaPipePose(
               );
               setFlightInput(input);
               onFlightInputRef.current?.(input);
+              
+              const calStatus = getCalibrationStatus();
+              const lastCalState = lastCalibrationStateRef.current;
+              if (calStatus.isCalibrating !== lastCalState.isCalibrating ||
+                  calStatus.isCalibrated !== lastCalState.isCalibrated) {
+                lastCalState.isCalibrating = calStatus.isCalibrating;
+                lastCalState.isCalibrated = calStatus.isCalibrated;
+                setCalibrationStatus({
+                  isCalibrating: calStatus.isCalibrating,
+                  isCalibrated: calStatus.isCalibrated,
+                  progress: calStatus.progress,
+                  adaptiveDeadZones: { ...calStatus.adaptiveDeadZones },
+                });
+              } else if (calStatus.isCalibrating) {
+                setCalibrationStatus(prev => 
+                  Math.abs(prev.progress - calStatus.progress) > 0.05
+                    ? { ...prev, progress: calStatus.progress }
+                    : prev
+                );
+              }
             } else {
               setLandmarks(null);
               setFlightInput(null);
@@ -302,6 +340,7 @@ export function useMediaPipePose(
     flightInput,
     videoRef,
     fps,
+    calibrationStatus,
 
     prime,
     activate,

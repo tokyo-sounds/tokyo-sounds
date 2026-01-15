@@ -552,8 +552,9 @@ export function useFlight({
           rawBankInput += pose.bank;
         }
 
-        if (pose.boost && !keys.boost) {
-          keys.boost = true;
+        const keyboardHoldingBoost = keysRef.current.sprint; // sprint is set by shift key
+        if (!keyboardHoldingBoost) {
+          keys.boost = pose.boost;
         }
 
         rawPitchInput = Math.max(-1, Math.min(1, rawPitchInput));
