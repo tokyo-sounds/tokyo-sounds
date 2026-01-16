@@ -9,7 +9,7 @@
 
 import { useEffect, useRef, useCallback, useMemo } from "react";
 import type { NormalizedLandmark } from "@mediapipe/tasks-vision";
-import { POSE_CONNECTIONS, type PoseFlightInput } from "@/lib/pose-to-flight";
+import { POSE_CONNECTIONS, POSE_LANDMARKS, type PoseFlightInput } from "@/lib/pose-to-flight";
 import { cn } from "@/lib/utils";
 
 interface BodyControlPreviewProps {
@@ -77,7 +77,7 @@ export default function BodyControlPreview({
 
   const setVideoRef = useCallback((element: HTMLVideoElement | null) => {
     if (videoRef) {
-      (videoRef as React.MutableRefObject<HTMLVideoElement | null>).current = element;
+      (videoRef as React.RefObject<HTMLVideoElement | null>).current = element;
     }
   }, [videoRef]);
 
@@ -143,6 +143,74 @@ export default function BodyControlPreview({
       ctx.arc(x, y, 2, 0, 2 * Math.PI);
       ctx.fill();
     }
+
+    const leftShoulder = landmarks[POSE_LANDMARKS.LEFT_SHOULDER];
+    const rightShoulder = landmarks[POSE_LANDMARKS.RIGHT_SHOULDER];
+    const nose = landmarks[POSE_LANDMARKS.NOSE];
+    const leftWrist = landmarks[POSE_LANDMARKS.LEFT_WRIST];
+    const rightWrist = landmarks[POSE_LANDMARKS.RIGHT_WRIST];
+
+    if (leftShoulder && rightShoulder) {
+      const shoulderWidth = Math.abs(rightShoulder.x - leftShoulder.x);
+      const centerX = (leftShoulder.x + rightShoulder.x) / 2;
+      const headY = nose?.y ?? (leftShoulder.y + rightShoulder.y) / 2 - 0.15;
+
+      const boxHalfWidth = shoulderWidth * 0.6;
+      const boxLeft = centerX - boxHalfWidth;
+      const boxRight = centerX + boxHalfWidth;
+      const boxTop = 0;
+      const boxBottom = headY;
+
+      let handsInBox = false;
+      let handsTouching = false;
+      if (leftWrist && rightWrist) {
+        const leftInBox = leftWrist.y < headY && leftWrist.x > boxLeft && leftWrist.x < boxRight;
+        const rightInBox = rightWrist.y < headY && rightWrist.x > boxLeft && rightWrist.x < boxRight;
+        handsInBox = leftInBox && rightInBox;
+
+        if (handsInBox) {
+          const wristDx = leftWrist.x - rightWrist.x;
+          const wristDy = leftWrist.y - rightWrist.y;
+          const wristDistance = Math.sqrt(wristDx * wristDx + wristDy * wristDy);
+          handsTouching = wristDistance < shoulderWidth * 0.5;
+        }
+      }
+
+      const boxLeftPx = boxLeft * canvas.width;
+      const boxRightPx = boxRight * canvas.width;
+      const boxTopPx = boxTop * canvas.height;
+      const boxBottomPx = boxBottom * canvas.height;
+      const boxWidthPx = boxRightPx - boxLeftPx;
+      const boxHeightPx = boxBottomPx - boxTopPx;
+
+      ctx.globalAlpha = 0.3;
+      if (handsTouching) {
+        ctx.fillStyle = "#22c55e";
+        ctx.fillRect(boxLeftPx, boxTopPx, boxWidthPx, boxHeightPx);
+      } else if (handsInBox) {
+        ctx.fillStyle = "#eab308";
+        ctx.fillRect(boxLeftPx, boxTopPx, boxWidthPx, boxHeightPx);
+      }
+
+      ctx.globalAlpha = 0.6;
+      ctx.strokeStyle = handsTouching ? "#22c55e" : handsInBox ? "#eab308" : "#94a3b8";
+      ctx.lineWidth = 2;
+      ctx.setLineDash([5, 5]);
+      ctx.strokeRect(boxLeftPx, boxTopPx, boxWidthPx, boxHeightPx);
+      ctx.setLineDash([]);
+
+      ctx.globalAlpha = 0.8;
+      ctx.fillStyle = handsTouching ? "#22c55e" : handsInBox ? "#eab308" : "#94a3b8";
+      ctx.font = "12px monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(
+        handsTouching ? "FREEZE!" : handsInBox ? "TOUCH HANDS" : "FREEZE ZONE",
+        (boxLeftPx + boxRightPx) / 2,
+        boxBottomPx - 8
+      );
+    }
+
+    ctx.globalAlpha = 1;
   }, [landmarks, videoRef]);
 
   useEffect(() => {
@@ -259,6 +327,22 @@ export default function BodyControlPreview({
                 )}
               >
                 {flightInput.boost ? "ON" : "OFF"}
+              </div>
+            </div>
+
+            <div className="w-12 text-center">
+              <div className="text-muted-foreground text-[10px] mb-0.5">
+                FREEZE
+              </div>
+              <div
+                className={cn(
+                  "h-6 rounded flex items-center justify-center text-[10px] font-bold transition-colors",
+                  flightInput.raw.handsOverhead
+                    ? "bg-green-500 text-white animate-pulse"
+                    : "bg-neutral-700 text-neutral-400"
+                )}
+              >
+                {flightInput.raw.handsOverhead ? "HOLD" : "-"}
               </div>
             </div>
           </div>

@@ -219,7 +219,12 @@ export function useMediaPipePose(
                 detectedLandmarks,
                 configRef.current
               );
-              setFlightInput(input);
+              
+              const inputToStore = input.freezeToggle 
+                ? { ...input, raw: { ...input.raw } }
+                : input;
+              
+              setFlightInput(inputToStore);
               onFlightInputRef.current?.(input);
               
               const calStatus = getCalibrationStatus();

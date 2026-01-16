@@ -121,6 +121,7 @@ export interface PoseFlightInput {
   pitch: number; // -1 to 1 (negative = dive, positive = climb)
   bank: number; // -1 to 1 (negative = left, positive = right)
   boost: boolean; // Hands forward detected
+  freezeToggle: boolean; // TRUE only on the frame when freeze should toggle (edge-triggered event)
   confidence: number; // 0-1, overall detection confidence
   raw: {
     // Raw values before processing (for debugging)
@@ -130,6 +131,7 @@ export interface PoseFlightInput {
     handsAtChestLevel: boolean; // Whether hands are near chest/shoulder height
     handsCloseToTorso: boolean; // Whether hands are close together near body center
     boostAmount: number; // 0-1, how much boost is being applied
+    handsOverhead: boolean; // Whether hands are raised overhead (freeze gesture)
   };
 }
 
@@ -289,6 +291,13 @@ let prevBank = 0;
 let prevBoostAmount = 0;
 let boostDebounceFrames = 0;
 
+// Freeze state (hands overhead toggle - runway marshaller "stop" signal)
+let handsOverheadHoldFrames = 0; // How many consecutive frames hands have been overhead
+let handsNotOverheadFrames = 0; // How many consecutive frames hands have NOT been overhead
+let freezeToggleFired = false; // TRUE after toggle fires, must exit pose to reset
+const FREEZE_HOLD_THRESHOLD = 8; // Require ~0.27s hold at 30fps before triggering
+const FREEZE_EXIT_THRESHOLD = 15; // Require ~0.5s OUT of pose before allowing re-trigger
+
 /**
  * Reusable output object to avoid GC pressure
  * We mutate this object each frame instead of creating new ones
@@ -297,6 +306,7 @@ const outputBuffer: PoseFlightInput = {
   pitch: 0,
   bank: 0,
   boost: false,
+  freezeToggle: false,
   confidence: 0,
   raw: {
     shoulderTilt: 0,
@@ -305,6 +315,7 @@ const outputBuffer: PoseFlightInput = {
     handsAtChestLevel: false,
     handsCloseToTorso: false,
     boostAmount: 0,
+    handsOverhead: false,
   },
 };
 
@@ -488,6 +499,7 @@ export function calculatePoseFlightInput(
     out.pitch = prevPitch;
     out.bank = prevBank;
     out.boost = false;
+    out.freezeToggle = false; // No toggle event when landmarks invalid
     out.confidence = 0;
     out.raw.shoulderTilt = 0;
     out.raw.avgArmAngle = 0;
@@ -495,6 +507,7 @@ export function calculatePoseFlightInput(
     out.raw.handsAtChestLevel = false;
     out.raw.handsCloseToTorso = false;
     out.raw.boostAmount = 0;
+    out.raw.handsOverhead = false;
     return out;
   }
 
@@ -515,6 +528,7 @@ export function calculatePoseFlightInput(
     out.pitch = prevPitch;
     out.bank = prevBank;
     out.boost = false;
+    out.freezeToggle = false; // No toggle event when shoulders not visible
     out.confidence = 0;
     out.raw.shoulderTilt = 0;
     out.raw.avgArmAngle = 0;
@@ -522,6 +536,7 @@ export function calculatePoseFlightInput(
     out.raw.handsAtChestLevel = false;
     out.raw.handsCloseToTorso = false;
     out.raw.boostAmount = 0;
+    out.raw.handsOverhead = false;
     return out;
   }
 
@@ -602,6 +617,87 @@ export function calculatePoseFlightInput(
   
   const boost = boostDebounceFrames >= 2;
   prevBoostAmount = boostAmount;
+
+  // === FREEZE DETECTION (Hands Overhead & Touching - Runway Marshaller "Stop" Signal) ===
+  // Detect when user raises both hands into a small BOX directly above their head
+  // This is a TOGGLE action - holding the pose triggers a flip, not hold-to-freeze
+  // 
+  // The "overhead box" is a spatial region:
+  // - Horizontally: centered on body, about shoulder-width wide
+  // - Vertically: above the head
+  // 
+  // This prevents conflicts with sharp pitch-up gestures where arms are raised
+  // but angled outward - those won't enter the narrow overhead box.
+  let handsOverhead = false;
+  let handsInOverheadZone = false; // TRUE when BOTH hands are inside the overhead box
+  
+  if (leftWrist && rightWrist && leftShoulder && rightShoulder) {
+    const leftWristVis = leftWrist.visibility ?? 0;
+    const rightWristVis = rightWrist.visibility ?? 0;
+    
+    if (leftWristVis >= config.minConfidence && rightWristVis >= config.minConfidence) {
+      // Get reference positions
+      const nose = getLandmark(landmarks, POSE_LANDMARKS.NOSE, config.minConfidence);
+      const headY = nose ? nose.y : (leftShoulder.y + rightShoulder.y) / 2 - 0.15;
+      const centerX = (leftShoulder.x + rightShoulder.x) / 2;
+      
+      // Define the "overhead box" - a rectangular zone directly above the head
+      // X bounds: shoulder-width centered on body (can stretch arms up at angle and miss this)
+      // Y bounds: above the head (wrist.y < headY since Y=0 is top of frame)
+      const boxHalfWidth = shoulderWidth * 0.6; // Slightly wider than shoulders for comfort
+      const boxLeft = centerX - boxHalfWidth;
+      const boxRight = centerX + boxHalfWidth;
+      
+      // Check if each hand is inside the overhead box
+      const leftInBox = leftWrist.y < headY && leftWrist.x > boxLeft && leftWrist.x < boxRight;
+      const rightInBox = rightWrist.y < headY && rightWrist.x > boxLeft && rightWrist.x < boxRight;
+      
+      // Both hands must be in the box to trigger the overhead zone (for pitch suppression)
+      handsInOverheadZone = leftInBox && rightInBox;
+      
+      // For freeze trigger: both hands in box AND close together (touching)
+      if (handsInOverheadZone) {
+        const wristDistance = getDistance2D(leftWrist, rightWrist);
+        // Threshold: hands within 50% of shoulder width (fairly lenient)
+        // This accounts for wrist landmark jitter when hands are together
+        const handsTouching = wristDistance < shoulderWidth * 0.5;
+        
+        handsOverhead = handsTouching;
+      }
+    }
+  }
+  
+  // Toggle freeze using HOLD-TO-TRIGGER approach with HYSTERESIS:
+  // - User must hold hands-overhead-touching pose for FREEZE_HOLD_THRESHOLD frames to trigger
+  // - After toggle fires, user must be OUT of the pose for FREEZE_EXIT_THRESHOLD frames
+  //   before another toggle can occur (prevents flickering from brief detection drops)
+  // - freezeToggle is TRUE only on the exact frame when toggle fires (edge-triggered event)
+  // - Brief detection drops (1-2 frames) don't reset the hold counter - we decay slowly
+  let freezeToggle = false;
+  
+  if (handsOverhead) {
+    handsOverheadHoldFrames++;
+    handsNotOverheadFrames = 0; // Reset exit counter when in pose
+    
+    // Trigger toggle when hold threshold is reached AND we haven't already fired
+    if (handsOverheadHoldFrames >= FREEZE_HOLD_THRESHOLD && !freezeToggleFired) {
+      freezeToggle = true; // Signal to useFlight to toggle its freeze state
+      freezeToggleFired = true; // Prevent re-triggering until pose is exited
+    }
+  } else {
+    // Decay hold counter slowly instead of resetting immediately
+    // This makes the gesture robust to brief detection flickers (1-2 frames)
+    if (handsOverheadHoldFrames > 0) {
+      handsOverheadHoldFrames = Math.max(0, handsOverheadHoldFrames - 2);
+    }
+    handsNotOverheadFrames++;
+    
+    // Only reset the toggle lock after being OUT of the pose for enough frames
+    // This prevents flickering detection from causing rapid re-triggers
+    if (freezeToggleFired && handsNotOverheadFrames >= FREEZE_EXIT_THRESHOLD) {
+      freezeToggleFired = false;
+    }
+  }
 
   // === BANK (Wrist-to-Wrist Line Angle) ===
   // Draw a line from left wrist to right wrist and measure its angle from horizontal.
@@ -686,6 +782,7 @@ export function calculatePoseFlightInput(
     out.pitch = smoothedPitch;
     out.bank = smoothedBank;
     out.boost = false;
+    out.freezeToggle = false; // No toggle event during calibration
     out.confidence = confidence;
     out.raw.shoulderTilt = shoulderTilt;
     out.raw.avgArmAngle = avgArmAngle;
@@ -693,6 +790,7 @@ export function calculatePoseFlightInput(
     out.raw.handsAtChestLevel = handsAtChestLevel;
     out.raw.handsCloseToTorso = handsCloseToTorso;
     out.raw.boostAmount = calibration.frameCount / calibration.maxFrames; // Show calibration progress
+    out.raw.handsOverhead = false;
     return out;
   }
 
@@ -708,14 +806,22 @@ export function calculatePoseFlightInput(
   if (config.invertBank) rawBank = -rawBank;
 
   // Apply dead zone and map to -1..1 with linear response for pitch
-  let rawPitch = applyDeadZoneLinear(
-    adjustedPitchAngle,
-    effectivePitchDeadZone,
-    config.pitchMaxAngle
-  ) * config.pitchSensitivity;
-  
-  rawPitch = clamp(rawPitch);
-  if (config.invertPitch) rawPitch = -rawPitch;
+  // BUT: If hands are in the overhead zone, suppress pitch to neutral
+  // This prevents the plane from pitching up when user is trying to freeze
+  let rawPitch = 0;
+  if (handsInOverheadZone) {
+    // Hands above head = pitch dead zone, smoothly return to neutral
+    rawPitch = 0;
+  } else {
+    rawPitch = applyDeadZoneLinear(
+      adjustedPitchAngle,
+      effectivePitchDeadZone,
+      config.pitchMaxAngle
+    ) * config.pitchSensitivity;
+    
+    rawPitch = clamp(rawPitch);
+    if (config.invertPitch) rawPitch = -rawPitch;
+  }
   
   // Reduce pitch sensitivity when boosting to prevent twitchiness
   if (boostAmount > 0) {
@@ -737,6 +843,7 @@ export function calculatePoseFlightInput(
   out.pitch = smoothedPitch;
   out.bank = smoothedBank;
   out.boost = boost;
+  out.freezeToggle = freezeToggle;
   out.confidence = confidence;
   out.raw.shoulderTilt = shoulderTilt;
   out.raw.avgArmAngle = avgArmAngle;
@@ -744,6 +851,7 @@ export function calculatePoseFlightInput(
   out.raw.handsAtChestLevel = handsAtChestLevel;
   out.raw.handsCloseToTorso = handsCloseToTorso;
   out.raw.boostAmount = boostAmount;
+  out.raw.handsOverhead = handsOverhead;
   
   return out;
 }
@@ -756,6 +864,11 @@ export function resetPoseSmoothing(): void {
   prevBank = 0;
   prevBoostAmount = 0;
   boostDebounceFrames = 0;
+  
+  // Reset freeze state
+  freezeToggleFired = false;
+  handsOverheadHoldFrames = 0;
+  handsNotOverheadFrames = 0;
   
   // Also reset calibration state
   calibration = {

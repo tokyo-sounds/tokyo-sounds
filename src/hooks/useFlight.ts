@@ -113,6 +113,11 @@ export function useFlight({
     sprint: false,
   });
 
+  const autoFrozenRef = useRef(false);
+  const noDetectionFramesRef = useRef(0);
+  const poseControlActiveRef = useRef(false);
+  const NO_DETECTION_FREEZE_THRESHOLD = 15; // ~0.5s at 30fps before auto-freeze
+
   const currentSpeedRef = useRef(config.baseSpeed);
 
   const targetPitchRef = useRef(0);
@@ -484,6 +489,35 @@ export function useFlight({
       if (!camera) return;
 
       const keys = keysRef.current;
+      const pose = poseInputRef.current;
+      const hasGoodPose = pose !== null && pose.confidence > 0.5;
+      
+      if (hasGoodPose) {
+        poseControlActiveRef.current = true;
+      }
+      
+      if (poseControlActiveRef.current) {
+        if (!hasGoodPose) {
+          noDetectionFramesRef.current++;
+          
+          if (noDetectionFramesRef.current >= NO_DETECTION_FREEZE_THRESHOLD && !keys.freeze) {
+            keys.freeze = true;
+            autoFrozenRef.current = true;
+          }
+        } else {
+          noDetectionFramesRef.current = 0;
+          
+          if (autoFrozenRef.current && keys.freeze) {
+            keys.freeze = false;
+            autoFrozenRef.current = false;
+          }
+        }
+      }
+
+      if (hasGoodPose && pose.freezeToggle) {
+        keys.freeze = !keys.freeze;
+        autoFrozenRef.current = false;
+      }
 
       if (keys.freeze) {
         if (lastReportedSpeedRef.current !== 0) {
@@ -540,7 +574,6 @@ export function useFlight({
         rawBankInput = Math.max(-1, Math.min(1, rawBankInput));
       }
 
-      const pose = poseInputRef.current;
       if (pose && pose.confidence > 0.5) {
         const hasKeyboardPitch = keys.pitchUp || keys.pitchDown;
         const hasKeyboardBank = keys.bankLeft || keys.bankRight;
