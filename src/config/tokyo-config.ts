@@ -2143,13 +2143,13 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
     id: "afternoon",
     name: "Afternoon",
     nameJa: "昼",
-    sunElevation: 45,
+    sunElevation: 35, // Lower sun
     sunAzimuth: 220, // Southwest
     sky: {
-      turbidity: 1.2, // Lower turbidity for bluer sky
-      rayleigh: 1.2, // Increased Rayleigh scattering for more blue
-      mieCoefficient: 0.005,
-      mieDirectionalG: 0.8,
+      turbidity: 4.0, // Higher turbidity = smaller white gradient
+      rayleigh: 0.4, // Lower Rayleigh = less white at horizon
+      mieCoefficient: 0.0001, // Very small sun disc
+      mieDirectionalG: 0.9999, // Very tight sun
     },
     ambient: {
       intensity: 0.5,
