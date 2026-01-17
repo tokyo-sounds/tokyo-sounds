@@ -2143,72 +2143,72 @@ export const TIME_OF_DAY_PRESETS: Record<TimeOfDay, TimeOfDayPreset> = {
     id: "afternoon",
     name: "Afternoon",
     nameJa: "昼",
-    sunElevation: 60, // 太陽が地平線より下（真の夜）
-    sunAzimuth: 240, // 西
+    sunElevation: 45,
+    sunAzimuth: 220, // Southwest
     sky: {
-      turbidity: 2.0, // 夜間の大気はより濁っている
-      rayleigh: 0.5, // レイリー散乱を減らして暗く
-      mieCoefficient: 0.0001, // 太陽は見えない
-      mieDirectionalG: 0.9999,
+      turbidity: 1.2, // Lower turbidity for bluer sky
+      rayleigh: 1.2, // Increased Rayleigh scattering for more blue
+      mieCoefficient: 0.005,
+      mieDirectionalG: 0.8,
     },
     ambient: {
-      intensity: 0.1, // 非常に低い環境光（月明かりのみ）
-      color: "#1a1a2e", // 深い青紫
+      intensity: 0.5,
+      color: "#e6f2ff", // Slightly bluish white
     },
     directional: {
-      intensity: 2, // 月明かり程度の弱い指向光
-      color: "#4a5568", // 冷たい青灰色（月の光）
+      intensity: 2.2,
+      color: "#fff8e1", // Slightly warm white
     },
     hemisphere: {
-      skyColor: "#0a0a1a", // 非常に暗い青黒の空
-      groundColor: "#000000", // 真っ黒な地面
-      intensity: 0.1, // 非常に弱い半球光
+      skyColor: "#5B9BE5", // Vibrant, bright blue (not white)
+      groundColor: "#8b7355",
+      intensity: 0.7,
     },
     colorMultiplier: {
-      r: 0.3, // 大幅に暗く、青みがかった色調
-      g: 0.4,
-      b: 0.6, // 青を強調
+      r: 1.0,
+      g: 1.0,
+      b: 1.05, // Slight blue emphasis
     },
     fog: {
-      color: "#1a1a2e", // 深い青紫の霧
-      near: 100,
-      far: 2000,
+      color: "#7DB3E8",
+      near: 1000000,
+      far: 1000000,
     },
   },
   evening: {
     id: "evening",
     name: "Sunset",
     nameJa: "夕方",
-    sunElevation: 3, // Very low sun on horizon for sunset
-    sunAzimuth: 275, // West, slightly north
+    sunElevation: 0, // Sun exactly at horizon - peak sunset
+    sunAzimuth: 270, // Due west
     sky: {
-      turbidity: 2,
-      rayleigh: 1,
-      mieCoefficient: 0.0001, // Very small sun disc
-      mieDirectionalG: 0.9999, // Very tight sun
+      turbidity: 20.0, // Maximum turbidity = deep orange/red atmospheric coloring
+      rayleigh: 0.3, // Very low = less blue, more orange dominance
+      mieCoefficient: 0.0005, // Very low = no white sun disc, just colored glow
+      mieDirectionalG: 0.6, // Low = very broad, soft, fully colored sun
     },
     ambient: {
-      intensity: 0.12, // Very low ambient for dramatic contrast
-      color: "#ff7733",
+      intensity: 0.08,
+      color: "#3a5a8a", // Blue ambient (sky reflection)
     },
     directional: {
-      intensity: 3.5, // Very strong directional for long dramatic shadows
-      color: "#ff4400", // Deep red-orange sunset
+      intensity: 1.2,
+      color: "#ff6030", // Vibrant orange-red from sun at horizon
     },
     hemisphere: {
-      skyColor: "#ff5500",
-      groundColor: "#220800",
-      intensity: 0.25,
+      skyColor: "#1a3a5a", // Deep blue zenith
+      groundColor: "#5a3018", // Warm orange-brown ground reflection
+      intensity: 0.5,
     },
     colorMultiplier: {
-      r: 1.8, // Very strong orange/red bake
-      g: 0.6,
-      b: 0.35,
+      r: 0.65,
+      g: 0.62,
+      b: 0.76,
     },
     fog: {
-      color: "#dd5522",
-      near: 150,
-      far: 2500,
+      color: "#2a3a55",
+      near: 200,
+      far: 4000,
     },
   },
 };

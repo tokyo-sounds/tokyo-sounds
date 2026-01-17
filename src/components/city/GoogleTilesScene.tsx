@@ -6,7 +6,7 @@
  */
 
 import { useRef, useState, useCallback, useEffect } from "react";
-import { useThree } from "@react-three/fiber";
+import { useThree, useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { TilesRenderer, TilesPlugin } from "3d-tiles-renderer/r3f";
 import { WGS84_ELLIPSOID } from "3d-tiles-renderer/three";
@@ -18,6 +18,7 @@ import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { Sky } from "three/examples/jsm/objects/Sky.js";
 import { TOKYO_CENTER, TimeOfDayPreset } from "@/config/tokyo-config";
 import { useTimeOfDayStore } from "@/stores/use-time-of-day-store";
+import Fireworks from "@/components/city/Fireworks";
 
 interface GoogleTilesSceneProps {
   apiKey: string;
@@ -27,6 +28,7 @@ interface GoogleTilesSceneProps {
   showMeshes?: boolean;
   wireframe?: boolean;
   collisionGroupRef?: React.MutableRefObject<THREE.Group | null>;
+  fireworksVolume?: number;
 }
 
 /** getDRACOLoader
@@ -128,6 +130,7 @@ function TilesTransformer({
 /** SkyBox
  *
  * Sky with sun shader - responds to time of day
+ * Optimized for realistic twilight rendering
  * @returns null
  */
 function SkyBox({ preset }: { preset: TimeOfDayPreset }) {
@@ -156,12 +159,39 @@ function SkyBox({ preset }: { preset: TimeOfDayPreset }) {
     uniforms["mieCoefficient"].value = preset.sky.mieCoefficient;
     uniforms["mieDirectionalG"].value = preset.sky.mieDirectionalG;
 
+    // Convert sun elevation/azimuth to spherical coordinates
+    // For twilight (negative elevation), sun is below horizon creating gradient
     const phi = THREE.MathUtils.degToRad(90 - preset.sunElevation);
     const theta = THREE.MathUtils.degToRad(preset.sunAzimuth);
     const sun = new THREE.Vector3();
     sun.setFromSphericalCoords(1, phi, theta);
     uniforms["sunPosition"].value.copy(sun);
   }, [preset]);
+
+  return null;
+}
+
+/**
+ * SceneFog - Dynamic fog that responds to time of day
+ * Creates atmospheric depth and helps blend distant objects
+ */
+function SceneFog({ preset }: { preset: TimeOfDayPreset }) {
+  const { scene } = useThree();
+
+  useEffect(() => {
+    scene.fog = new THREE.Fog(
+      preset.fog.color,
+      preset.fog.near,
+      preset.fog.far
+    );
+
+    scene.background = new THREE.Color(preset.fog.color);
+
+    return () => {
+      scene.fog = null;
+      scene.background = null;
+    };
+  }, [scene, preset.fog.color, preset.fog.near, preset.fog.far]);
 
   return null;
 }
@@ -174,11 +204,42 @@ export function GoogleTilesScene({
   showMeshes = true,
   wireframe = false,
   collisionGroupRef,
+  fireworksVolume,
 }: GoogleTilesSceneProps) {
   const [modelCount, setModelCount] = useState(0);
   const tilesGroupRef = useRef<THREE.Group>(null);
   const wireframeRef = useRef(wireframe);
+  const colorMultiplierRef = useRef({ r: 1, g: 1, b: 1 });
   const preset = useTimeOfDayStore((state) => state.preset);
+
+  useEffect(() => {
+    colorMultiplierRef.current = preset.colorMultiplier;
+  }, [preset.colorMultiplier]);
+
+  useFrame(() => {
+    if (!tilesGroupRef.current) return;
+    
+    const { r, g, b } = colorMultiplierRef.current;
+    
+    tilesGroupRef.current.traverse((obj) => {
+      if (obj instanceof THREE.Mesh && obj.material) {
+        const materials = Array.isArray(obj.material)
+          ? obj.material
+          : [obj.material];
+        materials.forEach((mat) => {
+          if (mat instanceof THREE.MeshStandardMaterial) {
+            if (mat.color.r !== r || mat.color.g !== g || mat.color.b !== b) {
+              mat.color.setRGB(r, g, b);
+            }
+          } else if (mat instanceof THREE.MeshBasicMaterial) {
+            if (mat.color.r !== r || mat.color.g !== g || mat.color.b !== b) {
+              mat.color.setRGB(r, g, b);
+            }
+          }
+        });
+      }
+    });
+  });
 
   useEffect(() => {
     if (collisionGroupRef) {
@@ -251,19 +312,19 @@ export function GoogleTilesScene({
           obj.receiveShadow = true;
           obj.castShadow = true;
           
-          const materials = Array.isArray(obj.material)
-            ? obj.material
-            : [obj.material];
-          materials.forEach((mat) => {
-            if (
-              mat instanceof THREE.MeshStandardMaterial ||
-              mat instanceof THREE.MeshBasicMaterial
-            ) {
-              if (wireframeRef.current) {
+          if (wireframeRef.current) {
+            const materials = Array.isArray(obj.material)
+              ? obj.material
+              : [obj.material];
+            materials.forEach((mat) => {
+              if (
+                mat instanceof THREE.MeshStandardMaterial ||
+                mat instanceof THREE.MeshBasicMaterial
+              ) {
                 mat.wireframe = true;
               }
-            }
-          });
+            });
+          }
         }
       });
     }
@@ -281,6 +342,7 @@ export function GoogleTilesScene({
   return (
     <>
       <SkyBox preset={preset} />
+      <SceneFog preset={preset} />
 
       <TilesTransformer groupRef={tilesGroupRef}>
         <TilesRenderer
@@ -325,6 +387,8 @@ export function GoogleTilesScene({
           preset.hemisphere.intensity,
         ]}
       />
+
+      {preset.id === "evening" && <Fireworks volume={fireworksVolume} />}
     </>
   );
 }
