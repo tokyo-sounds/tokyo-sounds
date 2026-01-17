@@ -210,43 +210,50 @@ export function GoogleTilesScene({
   const tilesGroupRef = useRef<THREE.Group>(null);
   const wireframeRef = useRef(wireframe);
   const colorMultiplierRef = useRef({ r: 1, g: 1, b: 1 });
-  const colorDirtyRef = useRef(true); // Flag to indicate colors need updating
+  const needsUpdateRef = useRef(true); // Flag to indicate tiles need updating
   const preset = useTimeOfDayStore((state) => state.preset);
 
   useEffect(() => {
     colorMultiplierRef.current = preset.colorMultiplier;
-    colorDirtyRef.current = true;
+    needsUpdateRef.current = true;
   }, [preset.colorMultiplier]);
 
   useFrame(() => {
-    if (!tilesGroupRef.current || !colorDirtyRef.current) return;
+    if (!tilesGroupRef.current || !needsUpdateRef.current) return;
     
     const { r, g, b } = colorMultiplierRef.current;
-    let allColorsCorrect = true;
+    const targetWireframe = wireframeRef.current;
+    let allUpdated = true;
     
     tilesGroupRef.current.traverse((obj) => {
       if (obj instanceof THREE.Mesh && obj.material) {
+        if (!obj.receiveShadow || !obj.castShadow) {
+          obj.receiveShadow = true;
+          obj.castShadow = true;
+          allUpdated = false;
+        }
+        
         const materials = Array.isArray(obj.material)
           ? obj.material
           : [obj.material];
-        materials.forEach((mat) => {
-          if (mat instanceof THREE.MeshStandardMaterial) {
+        for (let i = 0; i < materials.length; i++) {
+          const mat = materials[i];
+          if (mat instanceof THREE.MeshStandardMaterial || mat instanceof THREE.MeshBasicMaterial) {
             if (mat.color.r !== r || mat.color.g !== g || mat.color.b !== b) {
               mat.color.setRGB(r, g, b);
-              allColorsCorrect = false;
+              allUpdated = false;
             }
-          } else if (mat instanceof THREE.MeshBasicMaterial) {
-            if (mat.color.r !== r || mat.color.g !== g || mat.color.b !== b) {
-              mat.color.setRGB(r, g, b);
-              allColorsCorrect = false;
+            if (mat.wireframe !== targetWireframe) {
+              mat.wireframe = targetWireframe;
+              allUpdated = false;
             }
           }
-        });
+        }
       }
     });
     
-    if (allColorsCorrect) {
-      colorDirtyRef.current = false;
+    if (allUpdated) {
+      needsUpdateRef.current = false;
     }
   });
 
@@ -284,61 +291,14 @@ export function GoogleTilesScene({
     }
   }, [showMeshes]);
 
-  // toggle wireframe mode
   useEffect(() => {
     wireframeRef.current = wireframe;
-    if (tilesGroupRef.current) {
-      tilesGroupRef.current.traverse((obj) => {
-        if (obj instanceof THREE.Mesh && obj.material) {
-          const materials = Array.isArray(obj.material)
-            ? obj.material
-            : [obj.material];
-          materials.forEach((mat) => {
-            if (
-              mat instanceof THREE.MeshStandardMaterial ||
-              mat instanceof THREE.MeshBasicMaterial
-            ) {
-              mat.wireframe = wireframe;
-            }
-          });
-        }
-      });
-    }
+    needsUpdateRef.current = true;
   }, [wireframe]);
 
   const handleLoadModel = useCallback(() => {
-    setModelCount((c) => {
-      const newCount = c + 1;
-      if (newCount <= 3 || newCount % 50 === 0) {
-        // console.log(`[GoogleTiles] Loaded ${newCount} models`);
-      }
-      return newCount;
-    });
-
-    colorDirtyRef.current = true;
-
-    if (tilesGroupRef.current) {
-      tilesGroupRef.current.traverse((obj) => {
-        if (obj instanceof THREE.Mesh && obj.material) {
-          obj.receiveShadow = true;
-          obj.castShadow = true;
-          
-          if (wireframeRef.current) {
-            const materials = Array.isArray(obj.material)
-              ? obj.material
-              : [obj.material];
-            materials.forEach((mat) => {
-              if (
-                mat instanceof THREE.MeshStandardMaterial ||
-                mat instanceof THREE.MeshBasicMaterial
-              ) {
-                mat.wireframe = true;
-              }
-            });
-          }
-        }
-      });
-    }
+    setModelCount((c) => c + 1);
+    needsUpdateRef.current = true;
   }, []);
 
   if (!apiKey) return null;
