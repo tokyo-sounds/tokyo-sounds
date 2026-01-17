@@ -589,14 +589,6 @@ export default function Fireworks({ volume = 0.6 }: FireworksProps) {
     };
 
     fireworksRef.current.push(firework);
-    console.log(
-      `[Fireworks] Launched at ${location.name}! | Active:`,
-      fireworksRef.current.length,
-      "| Target Y:",
-      targetY.toFixed(0),
-      "| Particles:",
-      particleCount
-    );
   };
 
   // Update fireworks every frame
@@ -617,16 +609,8 @@ export default function Fireworks({ volume = 0.6 }: FireworksProps) {
       const wasInProximity = locState.isInProximity;
       locState.isInProximity = horizontalDistance < CONFIG.proximityRadius;
 
-      // Log proximity changes and trigger immediate launch on entry
+      // Trigger immediate launch on entry
       if (locState.isInProximity !== wasInProximity) {
-        console.log(
-          `[Fireworks] ${location.name} Proximity:`,
-          locState.isInProximity ? "ENTERED" : "LEFT",
-          "| Distance:",
-          horizontalDistance.toFixed(0),
-          "m"
-        );
-
         // Launch immediately when entering proximity
         if (locState.isInProximity) {
           locState.lastLaunchTime = now - CONFIG.launchInterval; // Force immediate launch
@@ -672,13 +656,6 @@ export default function Fireworks({ volume = 0.6 }: FireworksProps) {
           if (audioReady) {
             playExplosionSound(fw.position, camera.position, volume);
           }
-          
-          console.log(
-            "[Fireworks] EXPLODE at Y:",
-            fw.position.y.toFixed(0),
-            "Particles:",
-            fw.particleCount
-          );
         }
       } else {
         // Update explosion particles

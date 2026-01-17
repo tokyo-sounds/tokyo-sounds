@@ -210,16 +210,19 @@ export function GoogleTilesScene({
   const tilesGroupRef = useRef<THREE.Group>(null);
   const wireframeRef = useRef(wireframe);
   const colorMultiplierRef = useRef({ r: 1, g: 1, b: 1 });
+  const colorDirtyRef = useRef(true); // Flag to indicate colors need updating
   const preset = useTimeOfDayStore((state) => state.preset);
 
   useEffect(() => {
     colorMultiplierRef.current = preset.colorMultiplier;
+    colorDirtyRef.current = true;
   }, [preset.colorMultiplier]);
 
   useFrame(() => {
-    if (!tilesGroupRef.current) return;
+    if (!tilesGroupRef.current || !colorDirtyRef.current) return;
     
     const { r, g, b } = colorMultiplierRef.current;
+    let allColorsCorrect = true;
     
     tilesGroupRef.current.traverse((obj) => {
       if (obj instanceof THREE.Mesh && obj.material) {
@@ -230,15 +233,21 @@ export function GoogleTilesScene({
           if (mat instanceof THREE.MeshStandardMaterial) {
             if (mat.color.r !== r || mat.color.g !== g || mat.color.b !== b) {
               mat.color.setRGB(r, g, b);
+              allColorsCorrect = false;
             }
           } else if (mat instanceof THREE.MeshBasicMaterial) {
             if (mat.color.r !== r || mat.color.g !== g || mat.color.b !== b) {
               mat.color.setRGB(r, g, b);
+              allColorsCorrect = false;
             }
           }
         });
       }
     });
+    
+    if (allColorsCorrect) {
+      colorDirtyRef.current = false;
+    }
   });
 
   useEffect(() => {
@@ -305,6 +314,8 @@ export function GoogleTilesScene({
       }
       return newCount;
     });
+
+    colorDirtyRef.current = true;
 
     if (tilesGroupRef.current) {
       tilesGroupRef.current.traverse((obj) => {
