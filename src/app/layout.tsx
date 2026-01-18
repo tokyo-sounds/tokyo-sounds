@@ -5,7 +5,8 @@ import { Toaster } from "@/components/ui/sonner";
 import { StackProvider, StackTheme } from "@stackframe/stack";
 import { stackClientApp } from "../stack/client";
 import { Analytics } from "@vercel/analytics/next";
-import { NextIntlClientProvider } from "next-intl";
+import { Suspense } from "react";
+import { ChatPopup } from "@/components/chat/ChatPopup";
 
 const robotoSans = Roboto({
   variable: "--font-roboto-sans",
@@ -41,6 +42,9 @@ export default function RootLayout({
         <StackProvider app={stackClientApp}>
           <StackTheme>
             {children}
+            <Suspense fallback={null}>
+              <ChatPopup />
+            </Suspense>
           </StackTheme>
           <Toaster />
         </StackProvider>

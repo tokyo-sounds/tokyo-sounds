@@ -39,12 +39,14 @@ import {
   type MovementMode,
   type FlyToTarget,
 } from "@/lib/flight";
+import { type PoseFlightInput } from "@/lib/pose-to-flight";
 
 export interface UseFlightOptions {
   camera: THREE.Camera | null;
   config?: FlightConfig;
   onSpeedChange?: (speed: number) => void;
   onModeChange?: (mode: MovementMode) => void;
+  poseInput?: PoseFlightInput | null; // External pose control input
 }
 
 export interface FlightState {
@@ -82,10 +84,16 @@ export function useFlight({
   config: configOverrides,
   onSpeedChange,
   onModeChange,
+  poseInput,
 }: UseFlightOptions) {
   const config = createFlightConfig(configOverrides);
   const [currentMode, setCurrentMode] = useState<MovementMode>(config.mode);
   const modeRef = useRef<MovementMode>(config.mode);
+  const poseInputRef = useRef<PoseFlightInput | null>(null);
+
+  useEffect(() => {
+    poseInputRef.current = poseInput ?? null;
+  }, [poseInput]);
 
   const keysRef = useRef<FlightKeyState>({
     // Elytra mode keys
@@ -104,6 +112,11 @@ export function useFlight({
     down: false,
     sprint: false,
   });
+
+  const autoFrozenRef = useRef(false);
+  const noDetectionFramesRef = useRef(0);
+  const poseControlActiveRef = useRef(false);
+  const NO_DETECTION_FREEZE_THRESHOLD = 15; // ~0.5s at 30fps before auto-freeze
 
   const currentSpeedRef = useRef(config.baseSpeed);
 
@@ -476,6 +489,35 @@ export function useFlight({
       if (!camera) return;
 
       const keys = keysRef.current;
+      const pose = poseInputRef.current;
+      const hasGoodPose = pose !== null && pose.confidence > 0.5;
+      
+      if (hasGoodPose) {
+        poseControlActiveRef.current = true;
+      }
+      
+      if (poseControlActiveRef.current) {
+        if (!hasGoodPose) {
+          noDetectionFramesRef.current++;
+          
+          if (noDetectionFramesRef.current >= NO_DETECTION_FREEZE_THRESHOLD && !keys.freeze) {
+            keys.freeze = true;
+            autoFrozenRef.current = true;
+          }
+        } else {
+          noDetectionFramesRef.current = 0;
+          
+          if (autoFrozenRef.current && keys.freeze) {
+            keys.freeze = false;
+            autoFrozenRef.current = false;
+          }
+        }
+      }
+
+      if (hasGoodPose && pose.freezeToggle) {
+        keys.freeze = !keys.freeze;
+        autoFrozenRef.current = false;
+      }
 
       if (keys.freeze) {
         if (lastReportedSpeedRef.current !== 0) {
@@ -526,6 +568,26 @@ export function useFlight({
           const bankMultiplier = config.invertGyroYaw ? -1 : 1;
           rawBankInput +=
             normalizedGamma * config.gyroSensitivity * bankMultiplier;
+        }
+
+        rawPitchInput = Math.max(-1, Math.min(1, rawPitchInput));
+        rawBankInput = Math.max(-1, Math.min(1, rawBankInput));
+      }
+
+      if (pose && pose.confidence > 0.5) {
+        const hasKeyboardPitch = keys.pitchUp || keys.pitchDown;
+        const hasKeyboardBank = keys.bankLeft || keys.bankRight;
+
+        if (!hasKeyboardPitch && Math.abs(pose.pitch) > 0.05) {
+          rawPitchInput += pose.pitch;
+        }
+        if (!hasKeyboardBank && Math.abs(pose.bank) > 0.05) {
+          rawBankInput += pose.bank;
+        }
+
+        const keyboardHoldingBoost = keysRef.current.sprint; // sprint is set by shift key
+        if (!keyboardHoldingBoost) {
+          keys.boost = pose.boost;
         }
 
         rawPitchInput = Math.max(-1, Math.min(1, rawPitchInput));

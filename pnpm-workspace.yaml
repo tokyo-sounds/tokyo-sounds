@@ -2,7 +2,9 @@ packages:
   - .
 
 onlyBuiltDependencies:
+  - '@parcel/watcher'
   - '@prisma/engines'
+  - '@swc/core'
   - '@tailwindcss/oxide'
   - esbuild
   - prisma

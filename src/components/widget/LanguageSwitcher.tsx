@@ -18,7 +18,11 @@ const languages = [
   { code: "zh-TW", label: "繁體中文" },
 ] as const;
 
-export default function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  variant?: "light" | "dark";
+}
+
+export default function LanguageSwitcher({ variant = "light" }: LanguageSwitcherProps) {
   const params = useParams();
   const nextPathname = usePathname(); // Actual browser path with locale, e.g., "/zh-TW/about"
   const nextRouter = useRouter();
@@ -38,13 +42,17 @@ export default function LanguageSwitcher() {
     nextRouter.replace(newPath);
   };
 
+  const buttonStyles = variant === "dark"
+    ? "text-gray-700 hover:bg-gray-200/50 hover:text-gray-900"
+    : "text-white/70 hover:bg-black/30 hover:text-white";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button
           size="icon"
           variant="ghost"
-          className="group rounded-full text-white/70 text-shadow-sm hover:bg-black/30 hover:border hover:border-border/50 hover:text-white text-xs font-mono pointer-events-auto z-40 will-change-transform"
+          className={`group rounded-full text-shadow-sm hover:border hover:border-border/50 text-xs font-mono pointer-events-auto z-40 will-change-transform ${buttonStyles}`}
           aria-label="Switch language"
         >
           <Languages className="size-4" />
