@@ -63,20 +63,56 @@
       "titlePrefix": "Built with",
       "titleHighlight": "Modern Tech",
       "technologies": [
-        { "name": "Next.js 16", "category": "Framework" },
-        { "name": "Three.js", "category": "3D Graphics" },
-        { "name": "React Three Fiber", "category": "3D Integration" },
-        { "name": "Google Maps 3D Tiles", "category": "City Data" },
-        { "name": "Gemini Lyria", "category": "AI Music" },
-        { "name": "Tone.js", "category": "Audio Engine" },
-        { "name": "Tailwind CSS", "category": "Styling" },
-        { "name": "Motion", "category": "Animations" }
+        {
+          "name": "Next.js 16",
+          "category": "Framework"
+        },
+        {
+          "name": "Three.js",
+          "category": "3D Graphics"
+        },
+        {
+          "name": "React Three Fiber",
+          "category": "3D Integration"
+        },
+        {
+          "name": "Google Maps 3D Tiles",
+          "category": "City Data"
+        },
+        {
+          "name": "Gemini Lyria",
+          "category": "AI Music"
+        },
+        {
+          "name": "Tone.js",
+          "category": "Audio Engine"
+        },
+        {
+          "name": "Tailwind CSS",
+          "category": "Styling"
+        },
+        {
+          "name": "Motion",
+          "category": "Animations"
+        }
       ],
       "stats": [
-        { "value": "3D", "label": "City Visualization" },
-        { "value": "AI", "label": "Generated Music" },
-        { "value": "Real-time", "label": "Audio Streaming" },
-        { "value": "Multiplayer", "label": "Experience" }
+        {
+          "value": "3D",
+          "label": "City Visualization"
+        },
+        {
+          "value": "AI",
+          "label": "Generated Music"
+        },
+        {
+          "value": "Real-time",
+          "label": "Audio Streaming"
+        },
+        {
+          "value": "Multiplayer",
+          "label": "Experience"
+        }
       ]
     },
     "team": {
