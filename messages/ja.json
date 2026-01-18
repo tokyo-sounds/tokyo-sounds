@@ -63,20 +63,56 @@
       "titlePrefix": "最新技術で",
       "titleHighlight": "構築",
       "technologies": [
-        { "name": "Next.js 16", "category": "フレームワーク" },
-        { "name": "Three.js", "category": "3Dグラフィックス" },
-        { "name": "React Three Fiber", "category": "3D統合" },
-        { "name": "Google Maps 3D Tiles", "category": "都市データ" },
-        { "name": "Gemini Lyria", "category": "AI音楽" },
-        { "name": "Tone.js", "category": "音声エンジン" },
-        { "name": "Tailwind CSS", "category": "スタイリング" },
-        { "name": "Motion", "category": "アニメーション" }
+        {
+          "name": "Next.js 16",
+          "category": "フレームワーク"
+        },
+        {
+          "name": "Three.js",
+          "category": "3Dグラフィックス"
+        },
+        {
+          "name": "React Three Fiber",
+          "category": "3D統合"
+        },
+        {
+          "name": "Google Maps 3D Tiles",
+          "category": "都市データ"
+        },
+        {
+          "name": "Gemini Lyria",
+          "category": "AI音楽"
+        },
+        {
+          "name": "Tone.js",
+          "category": "音声エンジン"
+        },
+        {
+          "name": "Tailwind CSS",
+          "category": "スタイリング"
+        },
+        {
+          "name": "Motion",
+          "category": "アニメーション"
+        }
       ],
       "stats": [
-        { "value": "3D", "label": "都市ビジュアライゼーション" },
-        { "value": "AI", "label": "生成音楽" },
-        { "value": "リアルタイム", "label": "音声ストリーミング" },
-        { "value": "マルチプレイ", "label": "体験" }
+        {
+          "value": "3D",
+          "label": "都市ビジュアライゼーション"
+        },
+        {
+          "value": "AI",
+          "label": "生成音楽"
+        },
+        {
+          "value": "リアルタイム",
+          "label": "音声ストリーミング"
+        },
+        {
+          "value": "マルチプレイ",
+          "label": "体験"
+        }
       ]
     },
     "team": {
@@ -180,7 +216,7 @@
         "name": "ゼブ　カーン",
         "role": "3Dデベロッパー",
         "description": "v1.0 の主要開発者です。3Dシーンの構築やThree.jsを用いた実装、Web上で動く3D空間の表現を主に担当しています。",
-        "profileImage": "/images/members/zeb-khan.jpeg",
+        "profileImage": "/images/members/zeb-khan.jpg",
         "socials": {
           "github": "https://github.com/ths41461"
         }

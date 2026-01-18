@@ -63,20 +63,56 @@
       "titlePrefix": "采用",
       "titleHighlight": "现代技术构建",
       "technologies": [
-        { "name": "Next.js 16", "category": "框架" },
-        { "name": "Three.js", "category": "3D图形" },
-        { "name": "React Three Fiber", "category": "3D集成" },
-        { "name": "Google Maps 3D Tiles", "category": "城市数据" },
-        { "name": "Gemini Lyria", "category": "AI音乐" },
-        { "name": "Tone.js", "category": "音频引擎" },
-        { "name": "Tailwind CSS", "category": "样式" },
-        { "name": "Motion", "category": "动画" }
+        {
+          "name": "Next.js 16",
+          "category": "框架"
+        },
+        {
+          "name": "Three.js",
+          "category": "3D图形"
+        },
+        {
+          "name": "React Three Fiber",
+          "category": "3D集成"
+        },
+        {
+          "name": "Google Maps 3D Tiles",
+          "category": "城市数据"
+        },
+        {
+          "name": "Gemini Lyria",
+          "category": "AI音乐"
+        },
+        {
+          "name": "Tone.js",
+          "category": "音频引擎"
+        },
+        {
+          "name": "Tailwind CSS",
+          "category": "样式"
+        },
+        {
+          "name": "Motion",
+          "category": "动画"
+        }
       ],
       "stats": [
-        { "value": "3D", "label": "城市可视化" },
-        { "value": "AI", "label": "生成音乐" },
-        { "value": "实时", "label": "音频流" },
-        { "value": "多人", "label": "体验" }
+        {
+          "value": "3D",
+          "label": "城市可视化"
+        },
+        {
+          "value": "AI",
+          "label": "生成音乐"
+        },
+        {
+          "value": "实时",
+          "label": "音频流"
+        },
+        {
+          "value": "多人",
+          "label": "体验"
+        }
       ]
     },
     "team": {
@@ -180,7 +216,7 @@
         "name": "泽布 卡恩",
         "role": "3D开发者",
         "description": "v1.0 的主要开发者。主要负责3D场景的构建和使用 Three.js 的实现，以及Web上运行的3D空间的表现。",
-        "profileImage": "/images/members/zeb-khan.jpeg",
+        "profileImage": "/images/members/zeb-khan.jpg",
         "socials": {
           "github": "https://github.com/ths41461"
         }
@@ -190,8 +226,7 @@
         "role": "3D建模师",
         "description": "负责项目中使用的3D模型的制作。",
         "profileImage": "/images/members/zhong-chenghan.jpg",
-        "socials": {
-        }
+        "socials": {}
       },
       {
         "name": "有园 柊哉",
