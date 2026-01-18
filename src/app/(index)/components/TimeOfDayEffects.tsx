@@ -14,15 +14,27 @@ import { BlendFunction } from "postprocessing";
 /** TimeOfDayEffects
  *
  * Post-processing effects that respond to time of day
- * Applies color grading to create sunrise/sunset atmosphere
+ * Applies color grading to create realistic sunrise/sunset/twilight atmosphere
  */
 export default function TimeOfDayEffects() {
   const preset = useTimeOfDayStore((state) => state.preset);
 
   const effects = useMemo(() => {
     const { r, g, b } = preset.colorMultiplier;
-
-    const orangeIntensity = Math.max(0, (r - b) / 1.1); // ~0 for afternoon, ~0.95 for sunset
+    const timeId = preset.id;
+    
+    if (timeId === "evening") {
+      return {
+        sepia: 0.08, // Subtle warmth in shadows
+        hue: 0.05, // Slight blue-purple shift
+        saturation: 0.19, // Vibrant twilight colors
+        brightness: -0.08, // Moderately darker for evening mood
+        contrast: 0.2, // Good contrast for drama
+        vignette: 0.45, // Moderate vignette for atmosphere
+      };
+    }
+    
+    const orangeIntensity = Math.max(0, (r - b) / 1.1);
     const sepiaIntensity = orangeIntensity * 0.6;
     const hueShift = -orangeIntensity * 0.12;
     const saturationBoost = orangeIntensity * 0.35;

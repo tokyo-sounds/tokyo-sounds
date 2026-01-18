@@ -501,6 +501,7 @@ export default function TokyoPage() {
               showMeshes={debugOptions.showMeshes}
               wireframe={debugOptions.wireframe}
               collisionGroupRef={collisionGroupRef}
+              fireworksVolume={ambientVolume}
             />
 
             <PlaneController
