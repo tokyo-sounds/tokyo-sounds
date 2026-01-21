@@ -1391,6 +1391,8 @@ function TeamSectionContent() {
 
 function CTASectionContent({ onStartClick }: { onStartClick?: () => void }) {
   const t = useTranslations("LandingPage");
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-100px" });
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-linear-to-br from-orange-500 to-orange-600">
@@ -1398,7 +1400,24 @@ function CTASectionContent({ onStartClick }: { onStartClick?: () => void }) {
       <div className="absolute bottom-10 right-10 w-60 h-60 border border-white/10 rounded-full" />
       <div className="absolute top-1/2 left-1/4 w-20 h-20 bg-white/10 rounded-full blur-xl" />
 
-      <div className="relative max-w-3xl mx-auto text-center px-6">
+      <div ref={ref} className="relative max-w-3xl mx-auto text-center px-6 flex flex-col items-center">
+        {/* QR Code - fades up from below, hidden on mobile */}
+        <motion.div
+          className="mb-8 hidden sm:block"
+          initial={{ opacity: 0, y: 40 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 1.2, delay: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
+        >
+          <div className="sm:w-72 sm:h-72 md:w-80 md:h-80 bg-white rounded-2xl p-4 shadow-2xl">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img 
+              src="/images/qr.png" 
+              alt="QR Code" 
+              className="w-full h-full object-contain"
+            />
+          </div>
+        </motion.div>
+        
         <RevealText delay={0}>
           <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
             {t("cta.title")}
