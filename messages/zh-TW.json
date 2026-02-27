@@ -120,9 +120,22 @@
       "titlePrefix": "團隊",
       "titleHighlight": "218"
     },
+    "award": {
+      "sectionLabel": "榮譽獎項",
+      "titlePrefix": "Microsoft",
+      "titleHighlight": "IT Award",
+      "description": "Tokyo Sounds在未來創造展2026上獲得認可，展示了AI和沉浸式技術的創新應用，創造了獨特的視聽體驗。",
+      "imageAlt": "Microsoft Award"
+    },
+    "gallery": {
+      "sectionLabel": "畫廊",
+      "titlePrefix": "專案",
+      "titleHighlight": "展示"
+    },
     "cta": {
       "title": "準備好起飛了嗎？",
-      "description": "前所未有的東京體驗。翱翔城市上空，發現各區域獨特的AI生成聲音景觀。"
+      "description": "前所未有的東京體驗。翱翔城市上空，發現各區域獨特的AI生成聲音景觀。",
+      "tryMobile": "手機暢玩"
     },
     "footer": {
       "copyright": "© 2026 Tokyo Sounds. HAL東京.",

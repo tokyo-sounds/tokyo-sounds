@@ -2,7 +2,7 @@
 
 import { useRef, Suspense, useState, useMemo, useEffect, ReactNode, useCallback } from "react";
 import { motion, useScroll, useTransform, useInView, useMotionValueEvent, MotionValue, AnimatePresence } from "motion/react";
-import { ArrowDown, Plane, Music, Map, Sparkles, Users, Volume2, Github, Linkedin, Globe, Menu, X } from "lucide-react";
+import { ArrowDown, Plane, Music, Map, Sparkles, Users, Volume2, Github, Linkedin, Globe, Menu, X, Award, Image as ImageIcon, Play, Smartphone } from "lucide-react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import * as THREE from "three";
@@ -15,24 +15,24 @@ import ChipTab from "@/components/common/ChipTab";
 import FloatingNavbar from "@/components/layout/FloatingNavbar";
 import SiteFooter from "@/components/layout/SiteFooter";
 
-function ScrollableContent({ 
-  children, 
-  className = "" 
-}: { 
-  children: ReactNode; 
+function ScrollableContent({
+  children,
+  className = ""
+}: {
+  children: ReactNode;
   className?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
-  
+
   const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
     if (!isMobile) return;
-    
+
     const container = e.currentTarget;
     const { scrollTop, scrollHeight, clientHeight } = container;
     const isAtTop = scrollTop <= 0;
     const isAtBottom = scrollTop + clientHeight >= scrollHeight - 1;
-    
+
     if (isAtTop || isAtBottom) {
       container.style.overflowY = 'hidden';
       setTimeout(() => {
@@ -40,16 +40,22 @@ function ScrollableContent({
       }, 100);
     }
   }, [isMobile]);
-  
+
+  // On desktop, replace overflow-auto with overflow-hidden so wheel events
+  // propagate to the page scroll (which drives ScrollTrigger progress)
+  const resolvedClassName = !isMobile
+    ? className.replace(/overflow-auto/g, 'overflow-hidden')
+    : className;
+
   return (
-    <div 
+    <div
       ref={containerRef}
-      className={`${className} overscroll-y-contain`}
+      className={`${resolvedClassName} ${isMobile ? 'overscroll-y-contain' : ''}`}
       onScroll={handleScroll}
-      style={{ 
+      style={isMobile ? {
         WebkitOverflowScrolling: 'touch',
         touchAction: 'pan-y',
-      }}
+      } : undefined}
     >
       {children}
     </div>
@@ -1389,10 +1395,343 @@ function TeamSectionContent() {
   );
 }
 
+function AwardSectionContent() {
+  const t = useTranslations("LandingPage");
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+
+  return (
+    <div className="relative w-full h-full overflow-hidden bg-linear-to-br from-gray-50 to-amber-50/30">
+      <div
+        className="absolute inset-0 opacity-20"
+        style={{
+          backgroundImage: `linear-gradient(rgba(217,169,59,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(217,169,59,0.1) 1px, transparent 1px)`,
+          backgroundSize: '50px 50px'
+        }}
+      />
+
+      <div className="relative z-10 flex items-center justify-center h-full px-6 md:px-12 lg:px-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16 max-w-6xl w-full items-center">
+          {/* Left column - Image */}
+          <motion.div
+            className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden shadow-2xl cursor-pointer group"
+            initial={{ opacity: 0, x: -50 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            onClick={() => setIsVideoOpen(true)}
+          >
+            <div className="absolute inset-0 bg-linear-to-br from-amber-500/20 to-yellow-500/20 group-hover:from-amber-500/30 group-hover:to-yellow-500/30 transition-all duration-300" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/images/award.jpg"
+              alt={t("award.imageAlt")}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+                e.currentTarget.parentElement?.classList.add('bg-linear-to-br', 'from-amber-400', 'to-yellow-500');
+              }}
+            />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <motion.div
+                className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Play className="w-10 h-10 text-white ml-1" fill="white" />
+              </motion.div>
+            </div>
+          </motion.div>
+
+          {/* Right column - Text */}
+          <div className="flex flex-col justify-center">
+            <RevealText delay={0}>
+              <span
+                className="text-sm font-semibold tracking-[0.3em] uppercase bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 bg-clip-text text-transparent"
+              >
+                {t("award.sectionLabel")}
+              </span>
+            </RevealText>
+            <RevealText delay={0.1}>
+              <h2 className="relative text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mt-4">
+                {t("award.titlePrefix")}{" "}
+                <span className="relative inline-block">
+                  <span
+                    className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 bg-clip-text text-transparent bg-[length:200%_100%] animate-shimmer"
+                  >
+                    {t("award.titleHighlight")}
+                  </span>
+                  {/* Shimmer particles */}
+                  <motion.span
+                    className="absolute -top-2 -right-2 w-3 h-3 bg-gradient-to-br from-yellow-300 to-amber-400 rounded-full blur-[2px]"
+                    animate={{
+                      opacity: [0.5, 1, 0.5],
+                      scale: [0.8, 1.2, 0.8],
+                    }}
+                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                  />
+                  <motion.span
+                    className="absolute -bottom-1 -left-3 w-2 h-2 bg-gradient-to-br from-amber-300 to-yellow-500 rounded-full blur-[1px]"
+                    animate={{
+                      opacity: [0.3, 0.8, 0.3],
+                      scale: [1, 1.3, 1],
+                    }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  />
+                  <motion.span
+                    className="absolute top-1/2 -right-4 w-2 h-2 bg-gradient-to-br from-yellow-400 to-amber-300 rounded-full blur-[1px]"
+                    animate={{
+                      opacity: [0.4, 1, 0.4],
+                      scale: [0.9, 1.1, 0.9],
+                    }}
+                    transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+                  />
+                </span>
+              </h2>
+            </RevealText>
+            <RevealText delay={0.2}>
+              <p className="text-gray-600 text-lg mt-6 leading-relaxed">
+                {t("award.description")}
+              </p>
+            </RevealText>
+
+            <motion.div
+              className="flex items-center gap-4 mt-8"
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-100 to-yellow-100 rounded-full border border-amber-200/50">
+                <Award className="w-5 h-5 text-amber-600" />
+                <span className="text-amber-700 font-medium text-sm">未来創造展 2026</span>
+              </div>
+            </motion.div>
+          </div>
+        </div>
+      </div>
+
+      {/* Video Modal */}
+      <AnimatePresence>
+        {isVideoOpen && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsVideoOpen(false)}
+          >
+            <motion.div
+              className="relative w-full max-w-4xl mx-4 aspect-video rounded-2xl overflow-hidden shadow-2xl"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <video
+                src="/videos/award.mp4"
+                className="w-full h-full object-cover"
+                controls
+                autoPlay
+              />
+              <button
+                className="absolute top-4 right-4 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
+                onClick={() => setIsVideoOpen(false)}
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Shimmer animation styles */}
+      <style jsx>{`
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+        .animate-shimmer {
+          animation: shimmer 3s ease-in-out infinite;
+        }
+      `}</style>
+    </div>
+  );
+}
+
+const MAX_GALLERY_IMAGES = 6;
+
+function filenameToAlt(path: string): string {
+  const name = path.split("/").pop()?.replace(/\.[^.]+$/, "") ?? "";
+  return name
+    .replace(/[-_]/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
+function GallerySectionContent() {
+  const t = useTranslations("LandingPage");
+  const [images, setImages] = useState<{ src: string; alt: string }[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/gallery")
+      .then((res) => res.json())
+      .then((data: { files: string[] }) => {
+        const items = data.files.slice(0, MAX_GALLERY_IMAGES).map((src) => ({
+          src,
+          alt: filenameToAlt(src),
+        }));
+        setImages(items);
+      })
+      .catch(() => setImages([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  // Shuffle images on mount for randomization
+  const shuffledImages = useMemo(() => {
+    const shuffled = [...images];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  }, [images]);
+
+  if (loading) {
+    return (
+      <div className="relative w-full h-full overflow-hidden bg-white">
+        <div className="flex flex-col items-center justify-center h-full px-6 md:px-12">
+          <div className="text-center mb-8">
+            <span className="text-orange-500 text-sm font-semibold tracking-[0.3em] uppercase">
+              {t("gallery.sectionLabel")}
+            </span>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mt-4">
+              {t("gallery.titlePrefix")} <span className="text-orange-500">{t("gallery.titleHighlight")}</span>
+            </h2>
+          </div>
+          <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-4xl w-full">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="aspect-square rounded-2xl bg-gray-100 animate-pulse" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (images.length === 0) {
+    return null;
+  }
+
+  return (
+    <>
+      <div className="relative w-full h-full overflow-hidden bg-white">
+        <div
+          className="absolute inset-0 opacity-30"
+          style={{
+            backgroundImage: `linear-gradient(rgba(249,115,22,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(249,115,22,0.05) 1px, transparent 1px)`,
+            backgroundSize: '40px 40px'
+          }}
+        />
+
+        <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 md:px-12">
+          <div className="text-center mb-8">
+            <RevealText delay={0}>
+              <span className="text-orange-500 text-sm font-semibold tracking-[0.3em] uppercase">
+                {t("gallery.sectionLabel")}
+              </span>
+            </RevealText>
+            <RevealText delay={0.1}>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-gray-900 mt-4">
+                {t("gallery.titlePrefix")} <span className="text-orange-500">{t("gallery.titleHighlight")}</span>
+              </h2>
+            </RevealText>
+          </div>
+
+          {/* Gallery Grid */}
+          <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-4xl w-full">
+            {shuffledImages.map((image, index) => (
+                <motion.div
+                  key={image.src}
+                  className="relative aspect-square rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-shadow duration-300"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ duration: 0.4, delay: index * 0.08 }}
+                  viewport={{ once: true }}
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 to-orange-500/0 group-hover:from-orange-500/20 group-hover:to-purple-500/20 transition-all duration-300 z-10" />
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={image.src}
+                    alt={image.alt}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center -z-10">
+                    <ImageIcon className="w-8 h-8 text-gray-400" />
+                  </div>
+                </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Image Modal */}
+      <AnimatePresence>
+        {selectedImage && (
+          <motion.div
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+              onClick={() => setSelectedImage(null)}
+            />
+
+            {/* Modal content */}
+            <motion.div
+              className="relative w-full max-w-5xl max-h-[85vh] rounded-2xl shadow-2xl pointer-events-auto"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={selectedImage.src}
+                alt={selectedImage.alt}
+                className="w-full h-full object-contain bg-black rounded-2xl"
+              />
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelectedImage(null);
+                }}
+                className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center shadow-lg cursor-pointer z-50 pointer-events-auto"
+              >
+                <X className="w-5 h-5 text-gray-800" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+
 function CTASectionContent({ onStartClick }: { onStartClick?: () => void }) {
   const t = useTranslations("LandingPage");
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const [isQrOpen, setIsQrOpen] = useState(false);
 
   return (
     <div className="relative w-full h-full flex items-center justify-center overflow-hidden bg-linear-to-br from-orange-500 to-orange-600">
@@ -1400,24 +1739,7 @@ function CTASectionContent({ onStartClick }: { onStartClick?: () => void }) {
       <div className="absolute bottom-10 right-10 w-60 h-60 border border-white/10 rounded-full" />
       <div className="absolute top-1/2 left-1/4 w-20 h-20 bg-white/10 rounded-full blur-xl" />
 
-      <div ref={ref} className="relative max-w-3xl mx-auto text-center px-6 flex flex-col items-center">
-        {/* QR Code - fades up from below, hidden on mobile */}
-        <motion.div
-          className="mb-8 hidden sm:block"
-          initial={{ opacity: 0, y: 40 }}
-          animate={isInView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 1.2, delay: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
-        >
-          <div className="sm:w-72 sm:h-72 md:w-80 md:h-80 bg-white rounded-2xl p-4 shadow-2xl">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img 
-              src="/images/qr.png" 
-              alt="QR Code" 
-              className="w-full h-full object-contain"
-            />
-          </div>
-        </motion.div>
-        
+      <div className="relative max-w-3xl mx-auto text-center px-6 flex flex-col items-center">
         <RevealText delay={0}>
           <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-white mb-6">
             {t("cta.title")}
@@ -1428,25 +1750,81 @@ function CTASectionContent({ onStartClick }: { onStartClick?: () => void }) {
             {t("cta.description")}
           </p>
         </RevealText>
-        
-        <motion.button
-          className="relative flex items-center gap-2.5 px-6 py-3 bg-white text-orange-500 font-semibold rounded-xl shadow-lg shadow-black/10 overflow-hidden group cursor-pointer mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          whileHover={{ scale: 1.03 }}
-          whileTap={{ scale: 0.97 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          viewport={{ once: true }}
-          onClick={onStartClick}
-        >
-          <div className="absolute inset-0 bg-linear-to-r from-transparent via-orange-100 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
-          
-          <div className="absolute inset-0 bg-linear-to-t from-orange-100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          
-          <Plane className="relative z-10 w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
-          <span className="relative z-10">{t("startFlying")}</span>
-        </motion.button>
+
+        <div className="flex items-center gap-3 mx-auto">
+          {/* QR Code Button - outline/inverted style */}
+          <motion.button
+            className="relative flex items-center gap-2.5 px-6 py-3 border-2 border-white text-white font-semibold rounded-xl overflow-hidden group cursor-pointer"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            viewport={{ once: true }}
+            onClick={() => setIsQrOpen(true)}
+          >
+            <div className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors duration-300" />
+            <Smartphone className="relative z-10 w-4 h-4" />
+            <span className="relative z-10">{t("cta.tryMobile")}</span>
+          </motion.button>
+
+          {/* Launch Button - solid style */}
+          <motion.button
+            className="relative flex items-center gap-2.5 px-6 py-3 bg-white text-orange-500 font-semibold rounded-xl shadow-lg shadow-black/10 overflow-hidden group cursor-pointer"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            viewport={{ once: true }}
+            onClick={onStartClick}
+          >
+            <div className="absolute inset-0 bg-linear-to-r from-transparent via-orange-100 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out" />
+
+            <div className="absolute inset-0 bg-linear-to-t from-orange-100 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+            <Plane className="relative z-10 w-4 h-4 group-hover:rotate-12 transition-transform duration-300" />
+            <span className="relative z-10">{t("startFlying")}</span>
+          </motion.button>
+        </div>
       </div>
+
+      {/* QR Code Modal */}
+      <AnimatePresence>
+        {isQrOpen && (
+          <motion.div
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsQrOpen(false)}
+          >
+            <motion.div
+              className="relative"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: "spring", damping: 25, stiffness: 300 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="sm:w-72 sm:h-72 md:w-80 md:h-80 bg-white rounded-2xl p-4 shadow-2xl">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/qr.png"
+                  alt="QR Code"
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              <button
+                className="absolute -top-3 -right-3 w-10 h-10 rounded-full bg-black/50 hover:bg-black/70 flex items-center justify-center transition-colors"
+                onClick={() => setIsQrOpen(false)}
+              >
+                <X className="w-5 h-5 text-white" />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
@@ -1863,6 +2241,8 @@ export default function LandingPage({
   const [aboutProgress, setAboutProgress] = useState<MotionValue<number> | null>(null);
   const [techProgress, setTechProgress] = useState<MotionValue<number> | null>(null);
   const [teamProgress, setTeamProgress] = useState<MotionValue<number> | null>(null);
+  const [awardProgress, setAwardProgress] = useState<MotionValue<number> | null>(null);
+  const [galleryProgress, setGalleryProgress] = useState<MotionValue<number> | null>(null);
   const [ctaProgress, setCtaProgress] = useState<MotionValue<number> | null>(null);
   
   const [isOnColoredSection, setIsOnColoredSection] = useState(false);
@@ -1949,19 +2329,43 @@ export default function LandingPage({
 
           <ScrollTrigger onProgressReady={setTeamProgress}>
             {(progress) => (
-              <FixedCard 
-                index={3} 
+              <FixedCard
+                index={3}
                 scrollYProgress={progress}
-                nextScrollYProgress={ctaProgress ?? undefined}
+                nextScrollYProgress={awardProgress ?? undefined}
               >
                 <TeamSectionContent />
               </FixedCard>
             )}
           </ScrollTrigger>
 
+          <ScrollTrigger onProgressReady={setAwardProgress}>
+            {(progress) => (
+              <FixedCard
+                index={4}
+                scrollYProgress={progress}
+                nextScrollYProgress={galleryProgress ?? undefined}
+              >
+                <AwardSectionContent />
+              </FixedCard>
+            )}
+          </ScrollTrigger>
+
+          <ScrollTrigger onProgressReady={setGalleryProgress}>
+            {(progress) => (
+              <FixedCard
+                index={5}
+                scrollYProgress={progress}
+                nextScrollYProgress={ctaProgress ?? undefined}
+              >
+                <GallerySectionContent />
+              </FixedCard>
+            )}
+          </ScrollTrigger>
+
           <ScrollTrigger onProgressReady={setCtaProgress}>
             {(progress) => (
-              <FixedCard index={4} scrollYProgress={progress}>
+              <FixedCard index={6} scrollYProgress={progress}>
                 <CTASectionContent onStartClick={() => setIsPreflightOpen(true)} />
               </FixedCard>
             )}

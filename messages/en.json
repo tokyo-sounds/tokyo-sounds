@@ -120,9 +120,22 @@
       "titlePrefix": "The",
       "titleHighlight": "218"
     },
+    "award": {
+      "sectionLabel": "Recognition",
+      "titlePrefix": "Microsoft",
+      "titleHighlight": "IT Award",
+      "description": "Tokyo Sounds was recognized at the Future Creation Exhibition 2026, showcasing innovative use of AI and immersive technology to create unique audio-visual experiences.",
+      "imageAlt": "Microsoft Award"
+    },
+    "gallery": {
+      "sectionLabel": "Gallery",
+      "titlePrefix": "Project",
+      "titleHighlight": "Showcase"
+    },
     "cta": {
       "title": "Ready to Take Flight?",
-      "description": "Experience Tokyo like never before. Soar through the city and discover unique AI-generated soundscapes."
+      "description": "Experience Tokyo like never before. Soar through the city and discover unique AI-generated soundscapes.",
+      "tryMobile": "Play on Phone"
     },
     "footer": {
       "copyright": "© 2026 Tokyo Sounds. HAL Tokyo.",

@@ -120,9 +120,22 @@
       "titlePrefix": "チーム",
       "titleHighlight": "218"
     },
+    "award": {
+      "sectionLabel": "受賞歴",
+      "titlePrefix": "Microsoft",
+      "titleHighlight": "IT Award",
+      "description": "Tokyo Soundsは、未来創造展2026において、AIと没入型テクノロジーを革新的に活用し、ユニークなオーディオビジュアル体験を創造したことが評価されました。",
+      "imageAlt": "Microsoft Award"
+    },
+    "gallery": {
+      "sectionLabel": "ギャラリー",
+      "titlePrefix": "プロジェクト",
+      "titleHighlight": "ショーケース"
+    },
     "cta": {
       "title": "飛び立つ準備はできた？",
-      "description": "かつてない東京体験を。都市を飛び回り、各地区ならではのAI生成サウンドスケープを発見しよう。"
+      "description": "かつてない東京体験を。都市を飛び回り、各地区ならではのAI生成サウンドスケープを発見しよう。",
+      "tryMobile": "スマホで飛ぶ"
     },
     "footer": {
       "copyright": "© 2026 Tokyo Sounds. HAL東京.",
