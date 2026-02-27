@@ -99,31 +99,34 @@ type Stat = {
 
 const FEATURE_ICONS = [Map, Music, Volume2, Sparkles];
 
-function FixedCard({ 
-  children, 
-  className = "", 
+function FixedCard({
+  children,
+  className = "",
   index = 0,
   scrollYProgress,
   nextScrollYProgress,
-}: { 
-  children: React.ReactNode; 
+  entryRange = [0, 1],
+}: {
+  children: React.ReactNode;
   className?: string;
   index?: number;
   scrollYProgress: MotionValue<number>;
   nextScrollYProgress?: MotionValue<number>;
+  entryRange?: [number, number];
 }) {
   const isMobile = useIsMobile();
-  
-  const translateY = useTransform(scrollYProgress, [0, 1], ["100vh", "0vh"]);
-  
+
+  const translateY = useTransform(scrollYProgress, entryRange, ["100vh", "0vh"]);
+
+  const insetStart = entryRange[0] + (entryRange[1] - entryRange[0]) * 0.5;
   const inset = useTransform(
-    scrollYProgress, 
-    [0.5, 1], 
+    scrollYProgress,
+    [insetStart, entryRange[1]],
     [40, 0]
   );
   const borderRadius = useTransform(
-    scrollYProgress, 
-    [0.5, 1], 
+    scrollYProgress,
+    [insetStart, entryRange[1]],
     [24, 0]
   );
 
@@ -181,17 +184,19 @@ function DarkeningOverlay({ scrollYProgress, className = "" }: { scrollYProgress
   );
 }
 
-function ScrollTrigger({ 
+function ScrollTrigger({
   id,
   children,
   onProgressReady,
-}: { 
+  sentinelClassName,
+}: {
   id?: string;
   children: (scrollYProgress: MotionValue<number>) => React.ReactNode;
   onProgressReady?: (progress: MotionValue<number>) => void;
+  sentinelClassName?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  
+
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ["start end", "end end"]
@@ -205,7 +210,7 @@ function ScrollTrigger({
 
   return (
     <>
-      <div ref={ref} id={id} className="relative h-screen" />
+      <div ref={ref} id={id} className={sentinelClassName ?? "relative h-screen"} />
       {children(scrollYProgress)}
     </>
   );
@@ -1559,7 +1564,7 @@ function AwardSectionContent() {
   );
 }
 
-const MAX_GALLERY_IMAGES = 6;
+const MAX_GALLERY_IMAGES = 12;
 
 function filenameToAlt(path: string): string {
   const name = path.split("/").pop()?.replace(/\.[^.]+$/, "") ?? "";
@@ -1568,11 +1573,17 @@ function filenameToAlt(path: string): string {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
-function GallerySectionContent() {
+function isVideoFile(src: string): boolean {
+  return /\.(mov|mp4|webm)$/i.test(src);
+}
+
+function GallerySectionContent({ scrollYProgress }: { scrollYProgress: MotionValue<number> }) {
   const t = useTranslations("LandingPage");
-  const [images, setImages] = useState<{ src: string; alt: string }[]>([]);
+  const [media, setMedia] = useState<{ src: string; alt: string }[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedImage, setSelectedImage] = useState<{ src: string; alt: string } | null>(null);
+  const [selectedMedia, setSelectedMedia] = useState<{ src: string; alt: string } | null>(null);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const [stripOffset, setStripOffset] = useState(0);
 
   useEffect(() => {
     fetch("/api/gallery")
@@ -1582,27 +1593,47 @@ function GallerySectionContent() {
           src,
           alt: filenameToAlt(src),
         }));
-        setImages(items);
+        setMedia(items);
       })
-      .catch(() => setImages([]))
+      .catch(() => setMedia([]))
       .finally(() => setLoading(false));
   }, []);
 
-  // Shuffle images on mount for randomization
-  const shuffledImages = useMemo(() => {
-    const shuffled = [...images];
+  const shuffledMedia = useMemo(() => {
+    const shuffled = [...media];
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
     return shuffled;
-  }, [images]);
+  }, [media]);
+
+  // Measure how far the strip needs to scroll so the last item is fully visible
+  useEffect(() => {
+    const el = stripRef.current;
+    if (!el) return;
+    const measure = () => {
+      const overflow = el.scrollWidth - el.parentElement!.clientWidth;
+      setStripOffset(Math.max(0, overflow));
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [shuffledMedia]);
+
+  // Horizontal pan starts after the card entry finishes (progress 0.33)
+  // and runs through the rest of the scroll distance (0.33 → 1)
+  const translateX = useTransform(
+    scrollYProgress,
+    [0.33, 1],
+    [0, -stripOffset]
+  );
 
   if (loading) {
     return (
       <div className="relative w-full h-full overflow-hidden bg-white">
-        <div className="flex flex-col items-center justify-center h-full px-6 md:px-12">
-          <div className="text-center mb-8">
+        <div className="flex flex-col justify-center h-full">
+          <div className="text-center mb-6">
             <span className="text-orange-500 text-sm font-semibold tracking-[0.3em] uppercase">
               {t("gallery.sectionLabel")}
             </span>
@@ -1610,9 +1641,9 @@ function GallerySectionContent() {
               {t("gallery.titlePrefix")} <span className="text-orange-500">{t("gallery.titleHighlight")}</span>
             </h2>
           </div>
-          <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-4xl w-full">
+          <div className="flex gap-6 pl-12 md:pl-20">
             {Array.from({ length: 3 }).map((_, i) => (
-              <div key={i} className="aspect-square rounded-2xl bg-gray-100 animate-pulse" />
+              <div key={i} className="w-[60vh] shrink-0 aspect-[4/3] rounded-2xl bg-gray-100 animate-pulse" />
             ))}
           </div>
         </div>
@@ -1620,7 +1651,7 @@ function GallerySectionContent() {
     );
   }
 
-  if (images.length === 0) {
+  if (media.length === 0) {
     return null;
   }
 
@@ -1635,8 +1666,9 @@ function GallerySectionContent() {
           }}
         />
 
-        <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 md:px-12">
-          <div className="text-center mb-8">
+        <div className="relative z-10 flex flex-col justify-center h-full">
+          {/* Title — centered */}
+          <div className="text-center mb-6 shrink-0">
             <RevealText delay={0}>
               <span className="text-orange-500 text-sm font-semibold tracking-[0.3em] uppercase">
                 {t("gallery.sectionLabel")}
@@ -1649,41 +1681,61 @@ function GallerySectionContent() {
             </RevealText>
           </div>
 
-          {/* Gallery Grid */}
-          <div className="grid grid-cols-3 gap-3 md:gap-4 max-w-4xl w-full">
-            {shuffledImages.map((image, index) => (
+          {/* Horizontal scrolling strip */}
+          <div className="overflow-hidden">
+            <motion.div
+              ref={stripRef}
+              className="flex gap-6 items-center pl-12 md:pl-20 pr-12 md:pr-20"
+              style={{ x: translateX }}
+            >
+              {shuffledMedia.map((item) => (
                 <motion.div
-                  key={image.src}
-                  className="relative aspect-square rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-shadow duration-300"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
+                  key={item.src}
+                  className="relative w-[60vh] shrink-0 aspect-[4/3] rounded-2xl overflow-hidden group cursor-pointer shadow-md hover:shadow-xl transition-shadow duration-300"
                   whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.4, delay: index * 0.08 }}
-                  viewport={{ once: true }}
-                  onClick={() => setSelectedImage(image)}
+                  onClick={() => setSelectedMedia(item)}
                 >
                   <div className="absolute inset-0 bg-gradient-to-br from-orange-500/0 to-orange-500/0 group-hover:from-orange-500/20 group-hover:to-purple-500/20 transition-all duration-300 z-10" />
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={image.src}
-                    alt={image.alt}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                    }}
-                  />
+                  {isVideoFile(item.src) ? (
+                    <video
+                      src={item.src}
+                      muted
+                      playsInline
+                      loop
+                      autoPlay
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={item.src}
+                        alt={item.alt}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                    </>
+                  )}
+                  {isVideoFile(item.src) && (
+                    <div className="absolute bottom-3 left-3 z-20 bg-black/50 backdrop-blur-sm rounded-full p-2">
+                      <Play className="w-4 h-4 text-white fill-white" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center -z-10">
                     <ImageIcon className="w-8 h-8 text-gray-400" />
                   </div>
                 </motion.div>
-            ))}
+              ))}
+            </motion.div>
           </div>
         </div>
       </div>
 
-      {/* Image Modal */}
+      {/* Media Modal */}
       <AnimatePresence>
-        {selectedImage && (
+        {selectedMedia && (
           <motion.div
             className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
             initial={{ opacity: 0 }}
@@ -1691,13 +1743,10 @@ function GallerySectionContent() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Backdrop */}
             <div
               className="absolute inset-0 bg-black/80 backdrop-blur-sm"
-              onClick={() => setSelectedImage(null)}
+              onClick={() => setSelectedMedia(null)}
             />
-
-            {/* Modal content */}
             <motion.div
               className="relative w-full max-w-5xl max-h-[85vh] rounded-2xl shadow-2xl pointer-events-auto"
               initial={{ scale: 0.9, opacity: 0 }}
@@ -1705,17 +1754,29 @@ function GallerySectionContent() {
               exit={{ scale: 0.9, opacity: 0 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={selectedImage.src}
-                alt={selectedImage.alt}
-                className="w-full h-full object-contain bg-black rounded-2xl"
-              />
+              {isVideoFile(selectedMedia.src) ? (
+                <video
+                  src={selectedMedia.src}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full rounded-2xl bg-black"
+                />
+              ) : (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={selectedMedia.src}
+                    alt={selectedMedia.alt}
+                    className="w-full h-full object-contain bg-black rounded-2xl"
+                  />
+                </>
+              )}
               <button
                 type="button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  setSelectedImage(null);
+                  setSelectedMedia(null);
                 }}
                 className="absolute top-3 right-3 w-10 h-10 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center shadow-lg cursor-pointer z-50 pointer-events-auto"
               >
@@ -2351,14 +2412,15 @@ export default function LandingPage({
             )}
           </ScrollTrigger>
 
-          <ScrollTrigger onProgressReady={setGalleryProgress}>
+          <ScrollTrigger onProgressReady={setGalleryProgress} sentinelClassName="relative h-[300vh]">
             {(progress) => (
               <FixedCard
                 index={5}
                 scrollYProgress={progress}
                 nextScrollYProgress={ctaProgress ?? undefined}
+                entryRange={[0, 0.33]}
               >
-                <GallerySectionContent />
+                <GallerySectionContent scrollYProgress={progress} />
               </FixedCard>
             )}
           </ScrollTrigger>

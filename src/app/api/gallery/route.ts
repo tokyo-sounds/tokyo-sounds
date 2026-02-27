@@ -7,15 +7,15 @@ export async function GET() {
     const galleryDir = join(process.cwd(), "public", "images", "gallery");
     const files = await readdir(galleryDir);
 
-    const imageExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif"];
-    const imagePaths = files
+    const mediaExtensions = [".jpg", ".jpeg", ".png", ".webp", ".gif", ".heic", ".mov", ".mp4", ".webm"];
+    const mediaPaths = files
       .filter((file) =>
-        imageExtensions.some((ext) => file.toLowerCase().endsWith(ext))
+        mediaExtensions.some((ext) => file.toLowerCase().endsWith(ext))
       )
       .map((file) => `/images/gallery/${file}`)
       .sort();
 
-    return NextResponse.json({ files: imagePaths });
+    return NextResponse.json({ files: mediaPaths });
   } catch (error) {
     console.error("[API] Error reading gallery images:", error);
     return NextResponse.json({ files: [] });
